@@ -1,0 +1,34 @@
+{
+  "name": "XToolpro",
+  "systemId": "user:xtoolpro-design-system",
+  "source": {
+    "project": "XToolpro 工具箱原型",
+    "context": "context/source-context.md",
+    "prototype": "source_examples/xtoolpro-mobile-prototype.html",
+    "visualBaseline": "brand-spec.md"
+  },
+  "product": {
+    "platform": "Android 优先的手机与平板本地工具箱",
+    "principles": [
+      "本地优先，明确说明文件、权限和任务影响",
+      "天空蓝只承担可执行、已选中、已连接和进行中状态",
+      "连续列表、边界与留白优先于悬浮卡片墙"
+    ]
+  },
+  "theme": {
+    "default": "light",
+    "supported": ["light", "dark"],
+    "selector": "[data-theme]",
+    "sourceNote": "浅色值来自原型 :root；暗色主题保留同一 235 色相与状态语义，作为系统扩展。"
+  },
+  "assets": {
+    "appIcon": "assets/xtoolpro-icon.png",
+    "maintainerAvatar": "assets/maintainer.jpg"
+  },
+  "typography": {
+    "display": "platform system UI",
+    "body": "platform system UI",
+    "mono": "JetBrains Mono, IBM Plex Mono, ui-monospace fallback",
+    "fontFiles": "none captured"
+  }
+}

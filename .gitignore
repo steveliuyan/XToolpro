@@ -1,0 +1,18 @@
+.gradle/
+.idea/
+build/
+**/build/
+local.properties
+.tools/
+*.iml
+captures/
+
+# Local design archives and personal/source-only materials
+Createthisprojecta.zip
+xt图标/
+design/open-design/维护者.jpg
+design/open-design/assets/maintainer.jpg
+design/open-design/drawing-*.png
+design/open-design/screenshot-*.png
+design/open-design/*-preview.png
+design/open-design/xtoolpro图标.png

@@ -1,0 +1,80 @@
+:root {
+  color-scheme: light;
+  /* Source-backed foundation: fallbacks support tooling that cannot parse OKLch. */
+  --bg-fallback: #f7fbfc;
+  --surface-fallback: #ffffff;
+  --fg-fallback: #27343b;
+  --muted-fallback: #69757c;
+  --border-fallback: #dfe7ea;
+  --accent-fallback: #1689b8;
+  --bg: oklch(99% 0.006 235);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(23% 0.026 240);
+  --muted: oklch(49% 0.025 240);
+  --border: oklch(89% 0.014 235);
+  --accent: oklch(52% 0.15 235);
+  --accent-soft: oklch(95% 0.035 235);
+  --accent-hover: oklch(91% 0.06 235);
+  --accent-pressed: oklch(86% 0.085 235);
+  --accent-icon: oklch(93% 0.055 235);
+  --success: oklch(72% 0.19 145);
+  --warn: oklch(70% 0.14 78);
+  --danger: oklch(57% 0.18 28);
+  /* Role tokens: use these in components instead of binding to raw foundations. */
+  --canvas: var(--bg);
+  --surface-raised: var(--surface);
+  --surface-selected: var(--accent-icon);
+  --surface-hover: var(--accent-soft);
+  --text-primary: var(--fg);
+  --text-secondary: var(--muted);
+  --text-on-accent: var(--surface);
+  --border-subtle: var(--border);
+  --border-interactive: color-mix(in oklch, var(--accent) 45%, var(--border));
+  --action-primary: var(--accent);
+  --action-primary-hover: oklch(46% 0.15 235);
+  --action-primary-pressed: oklch(40% 0.14 235);
+  --focus-ring: color-mix(in oklch, var(--accent) 48%, transparent);
+  --status-progress: var(--accent);
+  --status-success: var(--success);
+  --status-warning: var(--warn);
+  --status-danger: var(--danger);
+  --progress-track: color-mix(in oklch, var(--fg) 8%, var(--surface));
+  --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --radius: 8px;
+  --radius-panel: 10px;
+  --shadow: 0 12px 36px color-mix(in oklch, var(--fg) 9%, transparent);
+  --transition-fast: 150ms cubic-bezier(.2, 0, 0, 1);
+  --transition-standard: 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+/* Dark mode keeps source hue relationships and action semantics; it does not invent a second brand palette. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: oklch(19% 0.018 240);
+  --surface: oklch(23% 0.02 240);
+  --fg: oklch(94% 0.012 235);
+  --muted: oklch(74% 0.02 235);
+  --border: oklch(35% 0.022 235);
+  --accent: oklch(70% 0.13 235);
+  --accent-soft: oklch(29% 0.045 235);
+  --accent-hover: oklch(35% 0.07 235);
+  --accent-pressed: oklch(42% 0.09 235);
+  --accent-icon: oklch(31% 0.052 235);
+  --success: oklch(76% 0.16 145);
+  --warn: oklch(78% 0.13 78);
+  --danger: oklch(70% 0.16 28);
+  --action-primary-hover: oklch(76% 0.13 235);
+  --action-primary-pressed: oklch(80% 0.11 235);
+  --progress-track: color-mix(in oklch, var(--fg) 15%, var(--surface));
+  --shadow: 0 12px 36px color-mix(in oklch, black 38%, transparent);
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>主题套件</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--text-primary); font: 14px/1.45 var(--font-body); }
+    main { max-width: 880px; margin: auto; padding: 36px 20px; }
+    h1 { margin: 0; font: 690 30px/1.15 var(--font-display); }
+    p { color: var(--text-secondary); }
+    .themes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+    .theme { padding: 18px; border: 1px solid var(--border-subtle); border-radius: var(--radius); background: var(--canvas); }
+    .theme[data-theme="dark"] { color-scheme: dark; }
+    .sample { margin-top: 16px; padding: 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius); background: var(--surface-raised); }
+    .meta { font: 12px/1.4 var(--font-mono); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--status-success); }
+    button { min-height: 44px; padding: 0 14px; border: 1px solid var(--action-primary); border-radius: var(--radius); background: var(--action-primary); color: var(--text-on-accent); font: 670 13px var(--font-body); }
+    @media (max-width: 560px) { .themes { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main data-od-id="theme-preview">
+    <p class="meta">THEME / ROLE TOKEN REVIEW</p>
+    <h1 data-od-id="theme-title">浅色与深色主题套件</h1>
+    <p>同一角色令牌在两个主题中保持连接、操作、进度与风险状态的含义，不改变任务事实。</p>
+    <section class="themes" data-od-id="theme-comparison">
+      <article class="theme" data-theme="light" data-od-id="light-theme-sample"><strong>浅色 · 默认</strong><div class="sample"><div class="row"><span><i class="dot"></i> VPN 已连接</span><span class="meta">稳定</span></div><div class="row"><span>公开链接媒体下载</span><span class="meta">56%</span></div><div style="height:5px;margin-top:8px;border-radius:99px;background:var(--progress-track)"><i style="display:block;width:56%;height:100%;border-radius:inherit;background:var(--status-progress)"></i></div><div class="row"><button type="button">继续处理</button></div></div></article>
+      <article class="theme" data-theme="dark" data-od-id="dark-theme-sample"><strong>深色 · 补充套件</strong><div class="sample"><div class="row"><span><i class="dot"></i> VPN 已连接</span><span class="meta">稳定</span></div><div class="row"><span>公开链接媒体下载</span><span class="meta">56%</span></div><div style="height:5px;margin-top:8px;border-radius:99px;background:var(--progress-track)"><i style="display:block;width:56%;height:100%;border-radius:inherit;background:var(--status-progress)"></i></div><div class="row"><button type="button">继续处理</button></div></div></article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,368 @@
+{
+  "schema": "open-design.design-manifest.v1",
+  "title": "30ef9dd4-794c-4ea1-858b-927c22960ade",
+  "entryFile": "preview/index.html",
+  "sourceFiles": {
+    "all": [
+      "维护者.jpg",
+      "assets/maintainer.jpg",
+      "assets/xtoolpro-icon.png",
+      "brand-spec.md",
+      "brand.json",
+      "colors_and_type.css",
+      "context/provenance.md",
+      "context/source-context.md",
+      "DESIGN.md",
+      "drawing-2026-09-03T23-46-16-923Z.png",
+      "drawing-2026-09-04T00-06-17-543Z.png",
+      "drawing-2026-09-04T00-52-30-627Z.png",
+      "drawing-2026-09-04T00-56-06-988Z.png",
+      "drawing-2026-09-04T00-59-24-355Z.png",
+      "drawing-2026-09-04T01-09-27-987Z.png",
+      "drawing-2026-09-04T01-10-47-519Z.png",
+      "drawing-2026-09-04T01-13-12-572Z.png",
+      "drawing-2026-09-04T03-05-54-107Z.png",
+      "drawing-2026-09-04T03-52-37-990Z.png",
+      "drawing-2026-09-04T03-53-54-542Z.png",
+      "drawing-2026-09-04T03-57-53-251Z.png",
+      "drawing-2026-09-04T04-01-54-550Z.png",
+      "drawing-2026-09-04T04-07-01-203Z.png",
+      "drawing-2026-09-04T04-08-13-323Z.png",
+      "drawing-2026-09-04T04-10-24-205Z.png",
+      "drawing-2026-09-04T04-15-45-267Z.png",
+      "drawing-2026-09-04T04-21-18-248Z.png",
+      "drawing-2026-09-04T04-36-58-389Z.png",
+      "drawing-2026-09-04T04-45-14-611Z.png",
+      "preview/applied-ui.html",
+      "preview/assets.html",
+      "preview/colors-primary.html",
+      "preview/colors.html",
+      "preview/components-buttons.html",
+      "preview/components.html",
+      "preview/index.html",
+      "preview/manifest.md",
+      "preview/radius-shadows.html",
+      "preview/README.md",
+      "preview/spacing-tokens.html",
+      "preview/surfaces.html",
+      "preview/themes.html",
+      "preview/type-spacing.html",
+      "preview/typography-specimens.html",
+      "README.md",
+      "screenshot-2026-09-04T04-30-41-226Z.png",
+      "SKILL.md",
+      "source_examples/xtoolpro-mobile-prototype.html",
+      "ui_kits/app/components.html",
+      "ui_kits/app/components/behaviors.js",
+      "ui_kits/app/components/kit.css",
+      "ui_kits/app/index.html",
+      "ui_kits/app/README.md",
+      "XToolpro-功能需求文档.md",
+      "xtoolpro-creative-direction-preview.png",
+      "xtoolpro-icon-tone-preview.png",
+      "xtoolpro-mobile-prototype.html",
+      "xtoolpro-polish-preview.png",
+      "xtoolpro图标.png"
+    ],
+    "html": [
+      "preview/applied-ui.html",
+      "preview/assets.html",
+      "preview/colors-primary.html",
+      "preview/colors.html",
+      "preview/components-buttons.html",
+      "preview/components.html",
+      "preview/index.html",
+      "preview/radius-shadows.html",
+      "preview/spacing-tokens.html",
+      "preview/surfaces.html",
+      "preview/themes.html",
+      "preview/type-spacing.html",
+      "preview/typography-specimens.html",
+      "source_examples/xtoolpro-mobile-prototype.html",
+      "ui_kits/app/components.html",
+      "ui_kits/app/index.html",
+      "xtoolpro-mobile-prototype.html"
+    ],
+    "css": [
+      "colors_and_type.css",
+      "ui_kits/app/components/kit.css"
+    ],
+    "scriptsAndComponents": [
+      "ui_kits/app/components/behaviors.js"
+    ],
+    "assets": [
+      "维护者.jpg",
+      "assets/maintainer.jpg",
+      "assets/xtoolpro-icon.png",
+      "brand-spec.md",
+      "brand.json",
+      "context/provenance.md",
+      "context/source-context.md",
+      "DESIGN.md",
+      "drawing-2026-09-03T23-46-16-923Z.png",
+      "drawing-2026-09-04T00-06-17-543Z.png",
+      "drawing-2026-09-04T00-52-30-627Z.png",
+      "drawing-2026-09-04T00-56-06-988Z.png",
+      "drawing-2026-09-04T00-59-24-355Z.png",
+      "drawing-2026-09-04T01-09-27-987Z.png",
+      "drawing-2026-09-04T01-10-47-519Z.png",
+      "drawing-2026-09-04T01-13-12-572Z.png",
+      "drawing-2026-09-04T03-05-54-107Z.png",
+      "drawing-2026-09-04T03-52-37-990Z.png",
+      "drawing-2026-09-04T03-53-54-542Z.png",
+      "drawing-2026-09-04T03-57-53-251Z.png",
+      "drawing-2026-09-04T04-01-54-550Z.png",
+      "drawing-2026-09-04T04-07-01-203Z.png",
+      "drawing-2026-09-04T04-08-13-323Z.png",
+      "drawing-2026-09-04T04-10-24-205Z.png",
+      "drawing-2026-09-04T04-15-45-267Z.png",
+      "drawing-2026-09-04T04-21-18-248Z.png",
+      "drawing-2026-09-04T04-36-58-389Z.png",
+      "drawing-2026-09-04T04-45-14-611Z.png",
+      "preview/manifest.md",
+      "preview/README.md",
+      "README.md",
+      "screenshot-2026-09-04T04-30-41-226Z.png",
+      "SKILL.md",
+      "ui_kits/app/README.md",
+      "XToolpro-功能需求文档.md",
+      "xtoolpro-creative-direction-preview.png",
+      "xtoolpro-icon-tone-preview.png",
+      "xtoolpro-polish-preview.png",
+      "xtoolpro图标.png"
+    ]
+  },
+  "screens": [
+    {
+      "file": "preview/applied-ui.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/assets.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/colors-primary.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/colors.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/components-buttons.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/components.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/index.html",
+      "role": "launcher-overview",
+      "implementationNote": "Use this as the navigation/overview entry only; implement each linked screen file as its own route/surface."
+    },
+    {
+      "file": "preview/radius-shadows.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/spacing-tokens.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/surfaces.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/themes.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/type-spacing.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "preview/typography-specimens.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "source_examples/xtoolpro-mobile-prototype.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "ui_kits/app/components.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "ui_kits/app/index.html",
+      "role": "launcher-overview",
+      "implementationNote": "Use this as the navigation/overview entry only; implement each linked screen file as its own route/surface."
+    },
+    {
+      "file": "xtoolpro-mobile-prototype.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    }
+  ],
+  "screenFilePolicy": {
+    "mode": "screen-file-first",
+    "entryFileRole": "launcher-overview",
+    "rules": [
+      "Each distinct user-facing screen or surface must be delivered and implemented as its own file/route.",
+      "If a landing page is present or requested, keep it in landing.html and do not merge it into the product app screen.",
+      "When multiple HTML screens exist, index.html is a launcher/overview only; it must not be treated as the combined final UI.",
+      "Keep product app screens, landing pages, platform screens, and OS widget surfaces separate in production code."
+    ]
+  },
+  "appModules": [
+    "Identify domain-specific in-app modules from the exported UI; do not reduce them to generic cards.",
+    "For each major module, implement purpose, default/loading/empty/error/success states, and responsive behavior.",
+    "Keep app modules separate from OS home-screen widgets in the production component model."
+  ],
+  "osWidgets": [
+    "If the export includes home-screen, lock-screen, Live Activity, tablet glance, or Android widget surfaces, implement them as platform quick-access surfaces outside the app UI.",
+    "If none are present, do not invent OS widgets unless the product requirements request them."
+  ],
+  "landingPage": {
+    "detection": "Inspect files and screen names for a marketing/landing page surface. If present, keep it separate from product app screens.",
+    "requiredSections": [
+      "hero",
+      "value props",
+      "product proof/screenshots",
+      "feature proof",
+      "CTA"
+    ]
+  },
+  "tokens": {
+    "source": [
+      "colors_and_type.css",
+      "ui_kits/app/components/kit.css"
+    ],
+    "required": [
+      "background",
+      "surface",
+      "foreground",
+      "muted text",
+      "border",
+      "accent",
+      "radius",
+      "shadow",
+      "spacing",
+      "type scale",
+      "motion"
+    ],
+    "note": "Extract/freeze tokens before framework implementation so coding tools do not substitute default theme colors or typography."
+  },
+  "interactions": {
+    "source": [
+      "ui_kits/app/components/behaviors.js"
+    ],
+    "requiredStates": [
+      "default",
+      "hover",
+      "focus",
+      "active",
+      "disabled",
+      "loading",
+      "empty",
+      "error",
+      "success"
+    ],
+    "requiredBehaviors": [
+      "forms/validation where present",
+      "tabs/filters where present",
+      "dialogs/sheets/drawers where present",
+      "copy/generate/share actions where present",
+      "player or quick controls where present"
+    ],
+    "note": "If the prototype is static, derive missing behavior from visible controls and document it before coding."
+  },
+  "responsiveViewports": [
+    {
+      "name": "mobile-compact",
+      "width": 360,
+      "height": 800,
+      "category": "mobile",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "mobile-standard",
+      "width": 390,
+      "height": 844,
+      "category": "mobile",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "mobile-large",
+      "width": 430,
+      "height": 932,
+      "category": "mobile",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "foldable-small-tablet",
+      "width": 600,
+      "height": 960,
+      "category": "foldable-tablet",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "tablet-portrait",
+      "width": 820,
+      "height": 1180,
+      "category": "tablet",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "tablet-landscape",
+      "width": 1024,
+      "height": 768,
+      "category": "tablet",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "laptop",
+      "width": 1366,
+      "height": 768,
+      "category": "desktop",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "category": "desktop",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "wide",
+      "width": 1920,
+      "height": 1080,
+      "category": "wide",
+      "mustAvoidHorizontalScroll": true
+    }
+  ],
+  "implementationChecklist": [
+    "Open entryFile first and map screens, modules, tokens, and interactions.",
+    "Extract tokens before writing framework components.",
+    "Implement app-specific modules with real states instead of generic card grids.",
+    "Preserve or rebuild JS interactions for meaningful UX actions.",
+    "Validate screenshots at desktop/tablet/mobile viewports with no horizontal overflow.",
+    "Keep landing pages, in-app modules, and OS widgets as separate implementation surfaces."
+  ]
+}

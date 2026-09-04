@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XToolpro 应用组件库</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="components/kit.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font-body); }
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid color-mix(in oklch, var(--accent) 40%, transparent); outline-offset: 2px; }
+    .app { width: min(100%, 1120px); min-height: 100vh; margin: auto; background: var(--bg); border-inline: 1px solid var(--border); }
+    .topbar { position: sticky; top: 0; z-index: 5; height: 70px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: color-mix(in oklch, var(--bg) 94%, transparent); }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand img { width: 31px; height: 31px; border-radius: 9px; object-fit: contain; }
+    .icon-button, .task-action { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); cursor: pointer; }
+    .icon-button:hover, .task-action:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .main { padding: 28px 18px 92px; }
+    .view { display: none; animation: enter var(--transition-fast); }
+    .view.active { display: block; }
+    @keyframes enter { from { opacity: .01; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    h1 { margin: 0; font: 690 28px/1.15 var(--font-display); }
+    h2 { margin: 0; font: 670 17px/1.25 var(--font-display); }
+    p { margin: 0; }
+    .meta { color: var(--muted); font: 12px/1.4 var(--font-mono); }
+    .section { margin-top: 28px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .text-button { min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--accent); font-weight: 670; cursor: pointer; }
+    .notice { display: flex; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .status-dot { width: 8px; height: 8px; flex: 0 0 8px; margin-top: 6px; border-radius: 50%; background: var(--success); }
+    .storage { padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .storage-data { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-top: 14px; }
+    .storage-data strong { font: 650 28px/1 var(--font-mono); letter-spacing: 0; }
+    .progress { height: 9px; margin-top: 16px; overflow: hidden; border-radius: 99px; background: color-mix(in oklch, var(--fg) 8%, var(--surface)); }
+    .progress > i { display: block; width: 68%; height: 100%; background: var(--accent); }
+    .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .tool-card { position: relative; min-height: 104px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); text-align: left; cursor: pointer; }
+    .tool-card:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .tool-symbol { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 8px; background: var(--accent-icon); color: var(--accent); font-weight: 700; }
+    .tool-card strong { display: block; margin-top: 12px; }
+    .tool-card small { display: block; margin-top: 2px; color: var(--muted); }
+    .task-list, .settings-list { border-top: 1px solid var(--border); }
+    .task, .setting { display: flex; align-items: center; gap: 13px; min-height: 64px; padding: 12px 2px; border-bottom: 1px solid var(--border); }
+    .task-icon, .setting-icon { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border-radius: 8px; background: var(--accent-icon); color: var(--accent); font-weight: 700; }
+    .task-content, .setting-copy { min-width: 0; flex: 1; }
+    .task-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 670; }
+    .task .progress { height: 5px; margin-top: 8px; }
+    .task .progress > i { width: 56%; transition: width var(--transition-standard); }
+    .task.is-paused .progress > i { background: var(--muted); }
+    .segmented { display: flex; padding: 4px; overflow-x: auto; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
+    .segment { min-height: 40px; flex: 1; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); white-space: nowrap; cursor: pointer; }
+    .segment.active { background: var(--accent-soft); color: var(--fg); font-weight: 670; }
+    .setting { width: 100%; background: transparent; text-align: left; }
+    .setting-button { cursor: pointer; }
+    .setting-button:hover { background: var(--accent-soft); }
+    .switch { position: relative; width: 52px; height: 32px; flex: 0 0 52px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); cursor: pointer; }
+    .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--muted); transition: transform var(--transition-fast), background var(--transition-fast); }
+    .switch.on { border-color: var(--accent); background: var(--accent-soft); }
+    .switch.on::after { transform: translateX(20px); background: var(--accent); }
+    .nav { position: fixed; right: 0; bottom: 0; left: 0; z-index: 6; display: flex; justify-content: center; padding: 8px 18px; border-top: 1px solid var(--border); background: color-mix(in oklch, var(--surface) 94%, transparent); }
+    .nav-inner { display: grid; width: min(100%, 620px); grid-template-columns: repeat(4, 1fr); }
+    .nav-button { min-height: 52px; border: 0; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
+    .nav-button.active { color: var(--accent); font-weight: 700; }
+    .dialog-backdrop { position: fixed; inset: 0; z-index: 10; display: none; align-items: end; justify-content: center; padding: 18px; background: color-mix(in oklch, var(--fg) 32%, transparent); }
+    .dialog-backdrop.open { display: flex; }
+    .dialog { width: min(100%, 480px); padding: 20px; border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+    .dialog p { margin-top: 10px; color: var(--muted); }
+    .dialog-actions { display: flex; justify-content: end; gap: 10px; margin-top: 20px; }
+    .button { min-height: 44px; padding: 0 16px; border-radius: var(--radius); font-weight: 670; cursor: pointer; }
+    .button.secondary { border: 1px solid var(--border); background: var(--surface); color: var(--fg); }
+    .button.primary { border: 1px solid var(--accent); background: var(--accent); color: var(--surface); }
+    .button.primary:hover { background: var(--accent-pressed); color: var(--fg); }
+    .toast { position: fixed; bottom: 84px; left: 50%; z-index: 12; width: max-content; max-width: calc(100% - 36px); padding: 10px 12px; transform: translateX(-50%); border-radius: var(--radius); background: var(--fg); color: var(--surface); font-size: 13px; opacity: 0; pointer-events: none; transition: opacity var(--transition-fast); }
+    .toast.show { opacity: 1; }
+    @media (min-width: 720px) { .main { padding: 32px 28px 96px; } .topbar { padding-inline: 28px; } .tool-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 10ms !important; transition-duration: 10ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="app" data-od-id="app-kit">
+    <header class="topbar" data-od-id="topbar"><div class="brand"><img src="../../assets/xtoolpro-icon.png" alt="XToolpro 图标"><span>XToolpro</span></div><div style="display:flex;gap:8px"><button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">深色</button><button class="icon-button" type="button" data-toast="搜索入口为组件示例" aria-label="搜索工具">搜</button></div></header>
+    <main class="main">
+      <section class="view active" id="home" data-od-id="home-view"><p class="meta">HOME / COMPONENT EXAMPLE</p><h1>本地工具，一处完成</h1><div class="section notice"><span class="status-dot" aria-hidden="true"></span><div><strong>VPN 已连接</strong><p class="meta">连接状态由系统服务提供。</p></div></div><section class="section storage" data-od-id="storage-overview"><div class="section-head"><h2>设备存储</h2><span class="meta">已使用</span></div><div class="storage-data"><strong>68%</strong><span class="meta">81.4 GB / 120 GB</span></div><div class="progress"><i></i></div></section><section class="section"><div class="section-head"><h2>快速工具</h2><button class="text-button" type="button" data-nav="tools">全部工具</button></div><div class="tool-grid"><button class="tool-card" type="button" data-toast="代理连接组件"><span class="tool-symbol">网</span><strong>代理连接</strong><small>配置与连接状态</small></button><button class="tool-card" type="button" data-toast="垃圾扫描组件"><span class="tool-symbol">清</span><strong>垃圾扫描</strong><small>清理前展示预览</small></button><button class="tool-card" type="button" data-toast="媒体提取组件"><span class="tool-symbol">媒</span><strong>媒体提取</strong><small>解析公开链接</small></button><button class="tool-card" type="button" data-toast="图片批处理组件"><span class="tool-symbol">图</span><strong>图片批处理</strong><small>转换与本地导出</small></button></div></section></section>
+      <section class="view" id="tools" data-od-id="tools-view"><p class="meta">TOOLS / GRID</p><h1>工具箱</h1><section class="section"><div class="segmented" aria-label="工具筛选"><button class="segment active" type="button">全部 12</button><button class="segment" type="button">收藏 4</button><button class="segment" type="button">最近使用</button></div></section><section class="section"><div class="section-head"><h2>设备维护</h2><button class="text-button" type="button" data-toast="分组展开状态为组件示例">查看全部</button></div><div class="tool-grid"><button class="tool-card" type="button"><span class="tool-symbol">清</span><strong>垃圾扫描</strong><small>缓存与文件预览</small></button><button class="tool-card" type="button"><span class="tool-symbol">件</span><strong>文件分析</strong><small>查看大文件</small></button></div></section></section>
+      <section class="view" id="tasks" data-od-id="tasks-view"><p class="meta">TASKS / STATES</p><h1>任务</h1><section class="section"><div class="segmented" data-od-id="task-filter"><button class="segment active" type="button" data-filter="running">进行中 1</button><button class="segment" type="button" data-filter="complete">已完成 1</button><button class="segment" type="button" data-filter="failed">失败 1</button></div></section><div class="section task-list" data-od-id="task-list"><article class="task" data-state="running"><span class="task-icon">下</span><div class="task-content"><p class="task-name">公开链接媒体下载</p><p class="meta" id="download-meta">下载中 · 720p MP4 · 56%</p><div class="progress"><i id="download-progress"></i></div></div><button class="task-action" id="pause-task" type="button" aria-label="暂停下载">停</button></article><article class="task" data-state="complete" hidden><span class="task-icon">清</span><div class="task-content"><p class="task-name">设备垃圾扫描</p><p class="meta">已完成 · 可释放空间待确认</p></div><button class="task-action" type="button" data-toast="清理前展示完整预览" aria-label="查看扫描结果">看</button></article><article class="task" data-state="failed" hidden><span class="task-icon">重</span><div class="task-content"><p class="task-name">媒体信息解析</p><p class="meta">失败 · 网络连接已中断</p></div><button class="task-action" type="button" data-toast="已请求重试解析" aria-label="重试解析">试</button></article></div></section>
+      <section class="view" id="settings" data-od-id="settings-view"><p class="meta">SETTINGS / LIST</p><h1>设置</h1><section class="section settings-list"><button class="setting setting-button" type="button" data-toast="输出目录将使用系统文件选择器"><span class="setting-icon">夹</span><span class="setting-copy"><strong>输出目录</strong><small class="meta">下载 / XToolpro · 使用 SAF 选择</small></span><span aria-hidden="true">›</span></button><div class="setting"><span class="setting-icon">铃</span><span class="setting-copy"><strong>后台任务通知</strong><small class="meta">显示下载、扫描和导出进度</small></span><button class="switch on" type="button" role="switch" aria-checked="true" aria-label="切换后台任务通知"></button></div><button class="setting setting-button" type="button" id="reset-layout"><span class="setting-icon">重</span><span class="setting-copy"><strong>恢复默认工具布局</strong><small class="meta">保留收藏状态，恢复分组与卡片尺寸</small></span><span aria-hidden="true">›</span></button></section></section>
+    </main>
+  </div>
+  <nav class="nav" aria-label="主导航" data-od-id="bottom-navigation"><div class="nav-inner"><button class="nav-button active" type="button" data-nav="home">首页</button><button class="nav-button" type="button" data-nav="tools">工具</button><button class="nav-button" type="button" data-nav="tasks">任务</button><button class="nav-button" type="button" data-nav="settings">设置</button></div></nav>
+  <div class="dialog-backdrop" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><h2 id="dialog-title">恢复默认工具布局？</h2><p>将恢复默认分组、顺序和卡片尺寸。收藏状态会保留。</p><div class="dialog-actions"><button class="button secondary" type="button" id="cancel-reset">取消</button><button class="button primary" type="button" id="confirm-reset">恢复默认</button></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="components/behaviors.js"></script>
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+    let toastTimer;
+    function toast(message) { const node = $('#toast'); node.textContent = message; node.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => node.classList.remove('show'), 1800); }
+    function showView(name) { $$('.view').forEach((view) => view.classList.toggle('active', view.id === name)); $$('.nav-button').forEach((button) => button.classList.toggle('active', button.dataset.nav === name)); }
+    $$('[data-nav]').forEach((button) => button.addEventListener('click', () => showView(button.dataset.nav)));
+    $$('[data-toast]').forEach((button) => button.addEventListener('click', () => toast(button.dataset.toast)));
+    $$('.switch').forEach((button) => button.addEventListener('click', () => { const active = button.classList.toggle('on'); button.setAttribute('aria-checked', active); toast(active ? '后台任务通知已开启' : '后台任务通知已关闭'); }));
+    $$('[data-filter]').forEach((button) => button.addEventListener('click', () => { const filter = button.dataset.filter; $$('[data-filter]').forEach((item) => item.classList.toggle('active', item === button)); $$('[data-state]').forEach((task) => task.hidden = task.dataset.state !== filter); }));
+    let paused = false;
+    $('#pause-task').addEventListener('click', () => { paused = !paused; const task = $('[data-state="running"]'); task.classList.toggle('is-paused', paused); $('#download-meta').textContent = paused ? '已暂停 · 720p MP4 · 56%' : '下载中 · 720p MP4 · 56%'; $('#pause-task').textContent = paused ? '继' : '停'; $('#pause-task').setAttribute('aria-label', paused ? '继续下载' : '暂停下载'); toast(paused ? '下载已暂停' : '下载已恢复'); });
+    $('#reset-layout').addEventListener('click', () => $('#dialog').classList.add('open'));
+    function closeDialog() { $('#dialog').classList.remove('open'); }
+    $('#cancel-reset').addEventListener('click', closeDialog);
+    $('#confirm-reset').addEventListener('click', () => { closeDialog(); toast('已恢复默认布局'); });
+    $('#dialog').addEventListener('click', (event) => { if (event.target === event.currentTarget) closeDialog(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeDialog(); });
+    XToolproKit.restoreTheme();
+    $('[data-theme-toggle]').addEventListener('click', () => XToolproKit.setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+  </script>
+</body>
+</html>

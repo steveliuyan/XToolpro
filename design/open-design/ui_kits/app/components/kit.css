@@ -1,0 +1,30 @@
+/* Applied kit modules consume role tokens defined in ../../colors_and_type.css. */
+.kit-module { min-width: 0; }
+.kit-module[data-state="selected"] { border-color: var(--border-interactive); background: var(--surface-selected); }
+.kit-module[data-state="disabled"] { cursor: not-allowed; opacity: .58; }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 670;
+  cursor: pointer;
+}
+
+.theme-toggle:hover { border-color: var(--border-interactive); background: var(--surface-hover); }
+.theme-toggle:active { background: var(--accent-hover); }
+.theme-toggle:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Shared semantic surface hooks for derived kit pages. */
+.kit-surface { background: var(--surface-raised); border-color: var(--border-subtle); color: var(--text-primary); }
+.kit-interactive:hover { background: var(--surface-hover); border-color: var(--border-interactive); }
+.kit-progress { background: var(--progress-track); }
+.kit-progress > * { background: var(--status-progress); }
