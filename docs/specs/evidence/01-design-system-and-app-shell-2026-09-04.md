@@ -40,9 +40,16 @@
 | Kotlin compilation | `:app-shell:compileDebugKotlin` | Passed |
 | Android static analysis | `:app-shell:lintDebug` | `No issues found.` |
 | Debug package | `:app-shell:assembleDebug` | Passed: `app-shell/build/outputs/apk/debug/app-shell-debug.apk` |
+| Navigation test compilation | `:app-shell:compileDebugAndroidTestKotlin` | Passed: `ShellNavigationTest` covers Toolbox, Tasks, and Settings navigation outcomes. |
+
+## Device Test Blocker
+
+- `:app-shell:connectedDebugAndroidTest` built the application and test APKs but did not run a test because the connected Xiaomi device rejected installation of `com.steveliuyan.xtoolpro.dev.test` with `INSTALL_FAILED_USER_RESTRICTED: Install canceled by user`.
+- The generated test manifest targets only `com.steveliuyan.xtoolpro.dev`; it does not target the base package on the device.
+- The device display overrides used during viewport investigation were reset. Its original `1080x2340` size and `440dpi` density are restored.
 
 ## Remaining Gates
 
 - Screenshot comparisons at the six required viewports (360x800 through 1024x768) are still pending; the connected device evidence above covers its 1080x2340 viewport.
-- A full automated accessibility scan and navigation UI tests are still pending; the device hierarchy dump is evidence only and is not claimed as a substitute.
+- A full automated accessibility scan is still pending. Navigation UI tests are compiled but blocked from running on device until USB test-APK installation is allowed; the device hierarchy dump is evidence only and is not claimed as a substitute.
 - Phase 01 must remain in progress until those visual and device checks have fresh evidence.
