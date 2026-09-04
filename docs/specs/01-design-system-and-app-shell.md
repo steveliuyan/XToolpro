@@ -1,6 +1,6 @@
 # Phase 01: Design System And App Shell
 
-**Status:** planned
+**Status:** in progress
 **Depends on:** Phase 00
 **Requirement IDs:** `HOM-*`, `BOX-*`, global UI requirements
 
@@ -40,3 +40,5 @@ Port the Open Design visual system into a reusable Android Compose design layer 
 ## Evidence
 
 Provide screenshot comparisons, accessibility scan output, and UI test results for navigation and semantic states.
+
+Current implementation evidence: `docs/specs/evidence/01-design-system-and-app-shell-2026-09-04.md`.
