@@ -17,20 +17,19 @@
 - No proxy, cleaner, media, image, connection, storage, or task result is fabricated.
 - Unicode glyph placeholders were replaced with Compose Material vector icons for navigation, tools, settings, empty state, info, and chevron actions. Stable-frame visual checks after the replacement are saved as `artifacts/phase01/icons-light-home.png` and `artifacts/phase01/icons-dark-home.png`.
 
-## Verified On Device
+## 真机手动验证
 
-- Stable-frame screenshots were captured for Home, Toolbox, Tasks, and Settings in both system light and dark mode:
-  - `artifacts/phase01/light-home-device.png`
-  - `artifacts/phase01/light-toolbox-device.png`
-  - `artifacts/phase01/light-tasks-device.png`
-  - `artifacts/phase01/light-settings-device.png`
-  - `artifacts/phase01/dark-home.png`
-  - `artifacts/phase01/dark-toolbox.png`
-  - `artifacts/phase01/dark-tasks.png`
-  - `artifacts/phase01/dark-settings.png`
-- All four destinations reached the expected resumed Activity; no app process crash was observed.
-- UI Automator hierarchy completed successfully and was saved as `artifacts/phase01/device-ui.xml`. The Xiaomi framework emitted a missing `theme_compatibility.xml` warning, but the dump and accessibility nodes were produced.
-- An earlier black/partial capture was reproduced only during the launcher-to-Activity transition. Re-running with an explicit Activity start and waiting for a stable frame produced complete content in both themes; no application code change was warranted.
+- 设备：Xiaomi M2102J2SC（`bf353dda`）。
+- 验证对象：仅直接启动 `com.steveliuyan.xtoolpro.dev/com.steveliuyan.xtoolpro.MainActivity`；未运行测试 APK，未改变设备显示规格。
+- 通过底部导航实际打开首页、工具箱、任务和设置。每次操作后 `mCurrentFocus` 都保持为 XToolpro 的 `MainActivity`，未跳转到测试或其他应用。
+- 有效截图：
+  - `artifacts/phase01/manual-dev-home-reverified.png`
+  - `artifacts/phase01/manual-dev-toolbox-reverified.png`
+  - `artifacts/phase01/manual-dev-tasks-reverified.png`
+  - `artifacts/phase01/manual-dev-settings-reverified.png`
+- 从首页快速入口进入工具箱，并点按“网络代理”；入口停留在应用内并显示“该功能将在引擎集成完成后开放。”：`artifacts/phase01/manual-dev-toolbox-unavailable.png`。
+- 点按“语言”设置项同样停留在应用内并显示明确的未开放提示：`artifacts/phase01/manual-dev-settings-unavailable.png`。
+- 首页当前层级已保存为 `artifacts/phase01/manual-dev-home-reverified.xml`。Xiaomi 的 UI Automator 会输出缺失 `theme_compatibility.xml` 的系统警告，但层级文件可正常生成；该警告不来自 XToolpro。
 
 ## Verified Locally
 
@@ -41,15 +40,16 @@
 | Android static analysis | `:app-shell:lintDebug` | `No issues found.` |
 | Debug package | `:app-shell:assembleDebug` | Passed: `app-shell/build/outputs/apk/debug/app-shell-debug.apk` |
 | Navigation test compilation | `:app-shell:compileDebugAndroidTestKotlin` | Passed: `ShellNavigationTest` covers Toolbox, Tasks, and Settings navigation outcomes. |
+| Connected navigation tests | `:app-shell:connectedDebugAndroidTest` | Passed: 3 tests, 0 failures, 0 errors. Result XML: `app-shell/build/outputs/androidTest-results/connected/debug/TEST-M2102J2SC - 13-_app-shell-.xml`. |
 
-## Device Test Blocker
+## 自动化测试边界
 
-- `:app-shell:connectedDebugAndroidTest` built the application and test APKs but did not run a test because the connected Xiaomi device rejected installation of `com.steveliuyan.xtoolpro.dev.test` with `INSTALL_FAILED_USER_RESTRICTED: Install canceled by user`.
-- The generated test manifest targets only `com.steveliuyan.xtoolpro.dev`; it does not target the base package on the device.
-- The device display overrides used during viewport investigation were reset. Its original `1080x2340` size and `440dpi` density are restored.
+- `connectedDebugAndroidTest` 会安装和管理 `com.steveliuyan.xtoolpro.dev.test` 测试包，因此它不能替代用户可见的真机手动验收。
+- 后续该任务仅在独立模拟器或 CI 中执行；用户连接的手机只安装、启动并操作 `com.steveliuyan.xtoolpro.dev` 本体。
+- 设备显示规格保持为原始 `1080x2340`、`440dpi`；不再为视口验证修改它。
 
 ## Remaining Gates
 
-- Screenshot comparisons at the six required viewports (360x800 through 1024x768) are still pending; the connected device evidence above covers its 1080x2340 viewport.
-- A full automated accessibility scan is still pending. Navigation UI tests are compiled but blocked from running on device until USB test-APK installation is allowed; the device hierarchy dump is evidence only and is not claimed as a substitute.
+- 360x800、390x844、430x932、600x960、820x1180、1024x768 的截图比较仍待在独立模拟器完成；当前工作站没有已配置的独立 Android 虚拟设备，不能将用户手机的显示覆盖当作替代方案。
+- 完整自动化无障碍扫描仍待补齐。导航测试已通过，但它不替代 TalkBack 与目标规格下的人工视觉验收。
 - Phase 01 must remain in progress until those visual and device checks have fresh evidence.
