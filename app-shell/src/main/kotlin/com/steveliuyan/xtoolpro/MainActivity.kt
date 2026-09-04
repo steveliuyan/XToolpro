@@ -35,9 +35,23 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -59,6 +73,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -88,26 +103,26 @@ class MainActivity : ComponentActivity() {
 private enum class ShellDestination(
     val route: String,
     val label: Int,
-    val glyph: String,
+    val icon: ImageVector,
 ) {
-    HOME("home", R.string.nav_home, "⌂"),
-    TOOLBOX("toolbox", R.string.nav_toolbox, "◇"),
-    TASKS("tasks", R.string.nav_tasks, "✓"),
-    SETTINGS("settings", R.string.nav_settings, "⚙"),
+    HOME("home", R.string.nav_home, Icons.Outlined.Home),
+    TOOLBOX("toolbox", R.string.nav_toolbox, Icons.Outlined.Build),
+    TASKS("tasks", R.string.nav_tasks, Icons.Outlined.Check),
+    SETTINGS("settings", R.string.nav_settings, Icons.Outlined.Settings),
 }
 
 private data class ToolPreview(
     val title: Int,
     val description: Int,
-    val glyph: String,
+    val icon: ImageVector,
 )
 
 private val toolPreviews =
     listOf(
-        ToolPreview(R.string.tool_proxy, R.string.tool_proxy_description, "↯"),
-        ToolPreview(R.string.tool_cleaner, R.string.tool_cleaner_description, "⌫"),
-        ToolPreview(R.string.tool_media, R.string.tool_media_description, "▶"),
-        ToolPreview(R.string.tool_image, R.string.tool_image_description, "▧"),
+        ToolPreview(R.string.tool_proxy, R.string.tool_proxy_description, Icons.Outlined.Bolt),
+        ToolPreview(R.string.tool_cleaner, R.string.tool_cleaner_description, Icons.Outlined.DeleteSweep),
+        ToolPreview(R.string.tool_media, R.string.tool_media_description, Icons.Outlined.PlayArrow),
+        ToolPreview(R.string.tool_image, R.string.tool_image_description, Icons.Outlined.Image),
     )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,8 +159,8 @@ private fun XToolproApp() {
                         selected = item == destination,
                         onClick = { route = item.route },
                         icon = {
-                            Glyph(
-                                value = item.glyph,
+                            AppIcon(
+                                image = item.icon,
                                 contentDescription = stringResource(item.label),
                                 emphasized = item == destination,
                             )
@@ -214,7 +229,7 @@ private fun ShellTopBar(
                 onClick = onInfo,
                 modifier = Modifier.size(48.dp).focusable().semantics { role = Role.Button },
             ) {
-                Glyph("ⓘ", stringResource(R.string.action_more_information))
+                AppIcon(Icons.Outlined.Info, stringResource(R.string.action_more_information))
             }
         }
     }
@@ -325,7 +340,7 @@ private fun ToolboxScreen(onUnavailable: (Int) -> Unit) {
 @Composable
 private fun TasksScreen() {
     EmptyState(
-        glyph = "✓",
+        icon = Icons.Outlined.Check,
         title = stringResource(R.string.tasks_empty_title),
         message = stringResource(R.string.tasks_empty_message),
     )
@@ -354,14 +369,14 @@ private fun SettingsScreen(onUnavailable: (Int) -> Unit) {
         item { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) }
         items(
             listOf(
-                R.string.settings_language to "文",
-                R.string.settings_theme to "◐",
-                R.string.settings_about to "ⓘ",
+                R.string.settings_language to Icons.Outlined.Language,
+                R.string.settings_theme to Icons.Outlined.DarkMode,
+                R.string.settings_about to Icons.Outlined.Info,
             ),
-        ) { (label, glyph) ->
+        ) { (label, icon) ->
             SettingsRow(
                 label = stringResource(label),
-                glyph = glyph,
+                icon = icon,
                 onClick = { onUnavailable(R.string.settings_unavailable) },
             )
         }
@@ -394,11 +409,11 @@ private fun ToolCard(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.secondaryContainer),
             ) {
-                Text(
-                    text = tool.glyph,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+                Icon(
+                    imageVector = tool.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
                 )
             }
             Column {
@@ -450,13 +465,18 @@ private fun StatusNotice(
 
 @Composable
 private fun EmptyState(
-    glyph: String,
+    icon: ImageVector,
     title: String,
     message: String,
 ) {
     Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text(text = glyph, color = MaterialTheme.colorScheme.primary, fontSize = 42.sp)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(48.dp),
+            )
             Spacer(Modifier.height(12.dp))
             Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(6.dp))
@@ -474,7 +494,7 @@ private fun EmptyState(
 @Composable
 private fun SettingsRow(
     label: String,
-    glyph: String,
+    icon: ImageVector,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -490,10 +510,22 @@ private fun SettingsRow(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(35.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.secondaryContainer),
-            ) { Text(text = glyph, color = MaterialTheme.colorScheme.primary, fontSize = 18.sp) }
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
             Spacer(Modifier.width(12.dp))
             Text(text = label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Text(text = "›", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 24.sp)
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(28.dp),
+            )
         }
     }
 }
@@ -522,18 +554,17 @@ private fun OutlinedAction(
 }
 
 @Composable
-private fun Glyph(
-    value: String,
+private fun AppIcon(
+    image: ImageVector,
     contentDescription: String?,
     emphasized: Boolean = false,
 ) {
-    Text(
-        text = value,
-        color = if (emphasized) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-        fontSize = 21.sp,
-        fontWeight = if (emphasized) FontWeight.Bold else FontWeight.Normal,
+    Icon(
+        imageVector = image,
+        contentDescription = contentDescription,
+        tint = if (emphasized) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         modifier =
-            Modifier.semantics {
+            Modifier.size(24.dp).semantics {
                 if (contentDescription != null) this.contentDescription = contentDescription
             },
     )

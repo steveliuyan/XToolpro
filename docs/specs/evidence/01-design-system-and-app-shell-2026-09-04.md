@@ -15,6 +15,7 @@
 - 150-220ms interruptible destination fades with a system transition-scale reduced-motion path.
 - Chinese default strings and English resources; all new user-visible copy is resource-backed.
 - No proxy, cleaner, media, image, connection, storage, or task result is fabricated.
+- Unicode glyph placeholders were replaced with Compose Material vector icons for navigation, tools, settings, empty state, info, and chevron actions. Stable-frame visual checks after the replacement are saved as `artifacts/phase01/icons-light-home.png` and `artifacts/phase01/icons-dark-home.png`.
 
 ## Verified On Device
 
