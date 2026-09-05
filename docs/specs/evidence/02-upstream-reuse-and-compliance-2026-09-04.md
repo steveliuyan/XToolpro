@@ -175,11 +175,11 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 
 ## 后续门禁
 
-### GitHub 检查点状态（2026-09-05）
+### GitHub 检查点状态（2026-09-05，已复核）
 
 - 本地检查点提交：`16becda`（`docs(phase02): back up upstream proof checkpoint`），内容仅包括 `AGENTS.md` 的 GitHub 检查点规则、本证据文件和 `scripts/phase02-central-mirror.init.gradle`；未包含 SDK、缓存、上游归档、设备截图、构建输出、凭据或其他混合工作树变更。
-- 已对 `origin`（`https://github.com/steveliuyan/XToolpro.git`）执行 `git push origin main`。当前网络在约 21 秒后失败：`Failed to connect to github.com:443`。因此该提交及上述三个路径目前只有本地 Git 备份，**未完成 GitHub 远程备份**。
-- 重试条件：恢复到 GitHub 的 HTTPS 连通性后，从相同工作树执行 `git push origin main`，并以远程分支包含该提交为完成证据。在此之前，Phase 02 继续保持进行中，不能将本检查点标记为远程已备份。
+- 此前直接使用 Windows Schannel 的推送曾因 `Failed to connect to github.com:443` 失败；本次通过仓库已配置的 Karing 代理并以 Git 的 OpenSSL TLS 后端执行 `git -c http.sslBackend=openssl ls-remote origin refs/heads/main`，远端返回 `85a1a79c9f92fec10a25d7a667f200bbb11f9735`。
+- 因此，`16becda` 检查点及其后记录失败原因的 `85a1a79` 均已确认存在于 GitHub `origin/main`；本节此前的“未完成 GitHub 远程备份”状态已解除。该复核不代表 Phase 02 或任何 engine 已批准。
 
 ### 2026-09-05 Phase 02 preflight
 
@@ -192,6 +192,15 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 在固定 FlClash 提交与已 checkout 的 Clash.Meta gitlink 上，通过上游 Windows 入口 `plugins/setup/buildkit/run_build_tool.cmd android --arch arm64 --force` 启动 arm64 proof。`run_build_tool.cmd` 已完成其 build-tool 的 `pub get` 和 kernel 编译，随后真实调用 `go list -deps -tags=with_gvisor` 收集 Clash.Meta 依赖图；这是上游 `go_builder.dart` 在实际 `go build -buildmode=c-shared` 之前的固有步骤，而不是 XToolpro 自定义替代链路。
 
 本轮没有生成 `libclash.so`：2026-09-05 09:28 UTC，`go.exe` 对 `142.250.73.81:443`（Go module 代理路径）维持多条 `SYN_SENT`，项目隔离 `GOMODCACHE` 未得到有效模块文件。该现象将 proof 阻塞在上游远程依赖连接前，不能解读为 native core 构建失败或代理能力已验证。为避免无进展网络等待占用资源，已停止本次 proof 的根进程；固定源码、已验证工具链和隔离缓存均保留。网络连通恢复后从相同命令继续，且只有产生 `libclash.so`、JNI header、ABI/哈希与 Android bridge 证据后才能改变 Proxy 状态。
+
+### FlClash arm64 core 与 Android bridge proof（2026-09-05）
+
+- 通过 Karing 代理在进程级设置 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY=http://127.0.0.1:3067`，并使用隔离 `GOMODCACHE`、`GOCACHE`、Flutter telemetry 目录和 Android SDK；未写入用户凭据、Cookie 或生产模块。固定源码仍为 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72`，Clash.Meta gitlink 仍为 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`。
+- 上游入口 `plugins/setup/buildkit/run_build_tool.cmd android --arch arm64 --force` 已完成 build tool 的 `pub get`、kernel 编译和 `go list -deps -tags=with_gvisor`。在 Windows 上它随后因把 NDK r28c 的 Unix 风格无扩展 clang wrapper 交给 Dart `Process.runSync` 而失败；其编译器输出还触发了 Dart UTF-8 解码异常。没有修改 SDK 或上游归档。
+- 在同一固定 `core/`、同一 `with_gvisor`、`-buildmode=c-shared` 和 `-ldflags=-w -s` 参数下，使用 NDK r28c 原生 `.cmd` clang wrapper 执行等价的上游 Go 编译成功。`libclash.so` 为 `59,369,072` 字节，SHA-256 为 `63AB20BA293921883701B72DA1F6D604042C1195FEEF87769A01EB66AB4134D0`；生成的 `libclash.h` 为 `2,485` 字节，SHA-256 为 `2ECF4B027C536023ECC000A551EDFF35AEB39DCDD02BA775BC3F041B35EFDDD6`。库文件头为 ELF64 little-endian、`EM_AARCH64 (0x00B7)`。
+- 按上游 `go_builder.dart` 的 `_adjustAndroidOutput` 布局，将上述库和 `bride.h` 放入 proof 工作树的 `android/core/src/main/jniLibs/arm64-v8a` 与 `cpp/includes/arm64-v8a`；没有进入 XToolpro 生产模块。随后通过短路径 junction `D:\xtoolpro\fc`，使用隔离 Gradle `9.7.1`、Phase 02 proof-only Maven init script 和 `:core:assembleDebug --no-daemon --no-configuration-cache --no-parallel --max-workers=2` 编译上游 Android core bridge，结果为 `BUILD SUCCESSFUL`，`37 actionable tasks: 33 executed, 4 up-to-date`，耗时约 2 分 6 秒。CMake 明确输出 `Found libclash.so and headers for ABI arm64-v8a`。
+- AAR 产物位于 Git 忽略的本地构建输出 `D:\xtoolpro\build\core\outputs\aar\core-debug.aar`，大小 `19,459,205` 字节，SHA-256 为 `0E004AA7B29750724BC15B75DD9BEE8829AF983650C5F25EE204FAC62056E5FE`。AAR 内 `jni/arm64-v8a/libclash.so` 为 `59,369,064` 字节、SHA-256 `859D6BA4E32FE719D417410811D31176E2E18297A26B3D67200A6049ED9EE29F`，`jni/arm64-v8a/libcore.so` 为 `265,728` 字节、SHA-256 `F6B4B2E89C62802478CFAABFAFD8D44165756974AE4F41EB6C3548A8A2F37935`；两者均核验为 `EM_AARCH64 (0x00B7)`。其余 ABI 只生成上游 bridge 的无 core 变体，不能被误报为已完成多 ABI core proof。
+- 本 proof 证明固定 Clash.Meta core、JNI bridge 和 arm64 AAR 打包链路可在当前 Windows/Karing 环境完成；它仍未验证 VPN/TUN 设备流量、配置/节点/代理组、规则/DNS/IPv6、测速、日志、更新、备份或完整 capability-parity matrix。Proxy 台账继续保持 `Investigating`，不得进入 `Approved`。
 
 ### Cleaner 与 ImageToolbox Gradle 依赖解析取证（2026-09-05）
 
