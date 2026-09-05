@@ -136,7 +136,7 @@ GitHub CLI 在当前工作站不可用，因此本次只读复核使用官方 RE
 
 | 域 | 真实能力 proof | 当前证据 | 状态 |
 | --- | --- | --- | --- |
-| Proxy | 未启动 | 固定源码归档、GPL 文本、Android 模块边界和 Flutter packaging 路径已验证；真实 core/bridge 仍未启动 | Pending |
+| Proxy | arm64 core/bridge 已完成；设备验证未启动 | 固定源码归档、GPL 文本、Android 模块边界和 Flutter packaging 路径已验证；arm64 Clash.Meta core、JNI bridge 和 Android service AAR 已完成真实构建 | Pending |
 | Cleaner | 未完成 | 固定源码归档、GPL 文本、Gradle 9.7.1 wrapper 与 CorpseFinder 模块闭包已验证；已启动 `:app-tool-corpsefinder:assembleDebug`，但在 `buildSrc` 的外部构件下载读取阶段阻塞，真实 scanner 仍未启动 | Pending |
 | Media | 未启动 | 固定源码归档、README 的 yt-dlp 适配声明、Gradle 8.13 构建、五个 ABI APK 及 Python/FFmpeg/Aria2c/JS/Termux 原生闭包已验证；真实 parse/download、授权 session 和设备测试仍未启动 | Pending |
 | Image | 未完成 | 固定源码、模块图、归档哈希与 Gradle 9.7.1 已验证；已启动 `:lib:image:assembleDebug`，但在外部依赖解析/下载阶段阻塞，真实图像处理器仍未启动 | Pending external dependency connectivity |
@@ -201,6 +201,13 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 - 按上游 `go_builder.dart` 的 `_adjustAndroidOutput` 布局，将上述库和 `bride.h` 放入 proof 工作树的 `android/core/src/main/jniLibs/arm64-v8a` 与 `cpp/includes/arm64-v8a`；没有进入 XToolpro 生产模块。随后通过短路径 junction `D:\xtoolpro\fc`，使用隔离 Gradle `9.7.1`、Phase 02 proof-only Maven init script 和 `:core:assembleDebug --no-daemon --no-configuration-cache --no-parallel --max-workers=2` 编译上游 Android core bridge，结果为 `BUILD SUCCESSFUL`，`37 actionable tasks: 33 executed, 4 up-to-date`，耗时约 2 分 6 秒。CMake 明确输出 `Found libclash.so and headers for ABI arm64-v8a`。
 - AAR 产物位于 Git 忽略的本地构建输出 `D:\xtoolpro\build\core\outputs\aar\core-debug.aar`，大小 `19,459,205` 字节，SHA-256 为 `0E004AA7B29750724BC15B75DD9BEE8829AF983650C5F25EE204FAC62056E5FE`。AAR 内 `jni/arm64-v8a/libclash.so` 为 `59,369,064` 字节、SHA-256 `859D6BA4E32FE719D417410811D31176E2E18297A26B3D67200A6049ED9EE29F`，`jni/arm64-v8a/libcore.so` 为 `265,728` 字节、SHA-256 `F6B4B2E89C62802478CFAABFAFD8D44165756974AE4F41EB6C3548A8A2F37935`；两者均核验为 `EM_AARCH64 (0x00B7)`。其余 ABI 只生成上游 bridge 的无 core 变体，不能被误报为已完成多 ABI core proof。
 - 本 proof 证明固定 Clash.Meta core、JNI bridge 和 arm64 AAR 打包链路可在当前 Windows/Karing 环境完成；它仍未验证 VPN/TUN 设备流量、配置/节点/代理组、规则/DNS/IPv6、测速、日志、更新、备份或完整 capability-parity matrix。Proxy 台账继续保持 `Investigating`，不得进入 `Approved`。
+
+### FlClash Android service/VPN bridge proof（2026-09-05）
+
+- 在已验证的 arm64 core/JNI bridge proof 工作树中，使用同一隔离 Gradle `9.7.1`、Karing JVM 代理、Phase 02 proof-only Maven init script 和短路径 junction，执行上游原生命令 `:service:assembleDebug --no-daemon --no-configuration-cache --no-parallel --max-workers=2`。结果为 `BUILD SUCCESSFUL in 1m 4s`，`45 actionable tasks: 33 executed, 12 up-to-date`；Kotlin daemon 的用户目录权限警告触发了 Gradle fallback compiler，但没有导致构建失败。
+- service AAR 位于 Git 忽略的本地构建输出 `D:\xtoolpro\build\service\outputs\aar\service-debug.aar`，大小 `88,426` 字节，SHA-256 为 `387D6DD64EDF1B325E2DD6CFFC0B2DDC8D5C21E48245736939EAA1F22B336E6F`。AAR 的 `classes.jar` 为 `93,765` 字节，包含 `com/follow/clash/service/VpnService.class`、`ProxyService.class`、`FilesProvider.class` 及其 service modules/models。
+- AAR manifest 保留上游 VPN/service 边界：`VpnService` 使用 `android.permission.BIND_VPN_SERVICE`、`android.net.VpnService` intent-filter 和 `specialUse`/`vpn` 前台服务声明；`ProxyService` 保留 `specialUse`/`proxy` 声明；`FilesProvider` 保留 `MANAGE_DOCUMENTS` 权限和 `${applicationId}.files` authority。固定上游 `VpnService.kt` 的真实源码路径还调用 `Core.startTun`、`Core.stopTun`，证明 service 与已生成 JNI core 的调用链存在。
+- 该 proof 证明固定 FlClash Android service/VPN bridge 的编译闭包和 manifest/class 产物存在；它没有启动 Android `VpnService`、请求用户 VPN 授权、建立真实 TUN、验证代理流量/通知/停止恢复或运行完整 capability-parity matrix。Proxy 台账继续保持 `Investigating`，不得将 AAR 构建误报为设备 VPN 通过。
 
 ### Cleaner 与 ImageToolbox Gradle 依赖解析取证（2026-09-05）
 
