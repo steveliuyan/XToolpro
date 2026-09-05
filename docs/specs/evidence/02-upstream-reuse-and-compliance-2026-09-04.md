@@ -209,6 +209,13 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 - AAR manifest 保留上游 VPN/service 边界：`VpnService` 使用 `android.permission.BIND_VPN_SERVICE`、`android.net.VpnService` intent-filter 和 `specialUse`/`vpn` 前台服务声明；`ProxyService` 保留 `specialUse`/`proxy` 声明；`FilesProvider` 保留 `MANAGE_DOCUMENTS` 权限和 `${applicationId}.files` authority。固定上游 `VpnService.kt` 的真实源码路径还调用 `Core.startTun`、`Core.stopTun`，证明 service 与已生成 JNI core 的调用链存在。
 - 该 proof 证明固定 FlClash Android service/VPN bridge 的编译闭包和 manifest/class 产物存在；它没有启动 Android `VpnService`、请求用户 VPN 授权、建立真实 TUN、验证代理流量/通知/停止恢复或运行完整 capability-parity matrix。Proxy 台账继续保持 `Investigating`，不得将 AAR 构建误报为设备 VPN 通过。
 
+### FlClash Flutter arm64 APK proof（2026-09-05）
+
+- 使用固定 FlClash 提交、同一已 checkout 的 Clash.Meta gitlink、项目隔离 `GRADLE_USER_HOME`、本地 Android SDK/NDK、Flutter `3.44.4` 和 Karing `HTTP_PROXY`/`HTTPS_PROXY`，执行上游 Flutter 构建命令 `flutter build apk --debug --target-platform android-arm64 --no-pub`。构建实际进入 Gradle `assembleDebug`，并通过 SDK manager 安装了缺失的 Android SDK Platform 34；这一步没有修改上游源码或 XToolpro 生产模块。
+- 构建运行 `18m 58s` 后失败，退出码为 `1`。失败任务为 `:setup:buildGoCore`：上游 `build_tool_runner` 在执行其固有的 `go version` 检查时收到 Windows `ProcessException: 系统找不到指定的文件`，随后 Gradle 报告 `Process 'command 'cmd'' finished with non-zero exit value 1`。本次 Flutter 子进程没有继承可执行的 Go 路径；该结果是构建环境入口问题，不是 APK、Flutter UI 或 Clash.Meta core proof 的成功证据。
+- 未生成 `app-debug.apk`；在固定 FlClash proof 工作树递归检查没有发现 APK 产物。因此不能声称 Flutter packaging、arm64 APK 内的 `libclash.so`/`libcore.so`、Android manifest 合并或安装运行已通过。既有独立 arm64 core/JNI bridge/service AAR proof 仍有效，但 Proxy 台账继续保持 `Investigating`。
+- 该失败日志来自本次真实命令的标准输出；下一次重试必须显式把已校验的 Go `1.26.4` 加入 Flutter/Gradle 子进程 `PATH`，并继续使用同一隔离缓存和 Karing 代理。只有产生并检查 arm64 APK，且后续在授权设备上完成 VPN/TUN 流量与恢复测试，才可推进对应门禁。
+
 ### Cleaner 与 ImageToolbox Gradle 依赖解析取证（2026-09-05）
 
 - 使用已校验的本地 Gradle `9.7.1` 启动固定 sdmaid-se 源码的 `:app-tool-corpsefinder:assembleDebug --stacktrace`。日志进入 `:buildSrc:compileKotlin`，但没有产生 APK 或 scanner 产物。17:14 本地时间取得的 daemon 线程转储显示 buildSrc 的 classpath/artifact resolution 正在 HTTPS TLS socket 读取和 `DownloadAction` 中等待；对应转储保存在 `artifacts/phase02/sdmaid-se-gradle-daemon-thread-dump.txt`。
