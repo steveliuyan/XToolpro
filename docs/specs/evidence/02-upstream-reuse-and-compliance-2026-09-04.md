@@ -175,6 +175,12 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 
 ## 后续门禁
 
+### GitHub 检查点状态（2026-09-05）
+
+- 本地检查点提交：`16becda`（`docs(phase02): back up upstream proof checkpoint`），内容仅包括 `AGENTS.md` 的 GitHub 检查点规则、本证据文件和 `scripts/phase02-central-mirror.init.gradle`；未包含 SDK、缓存、上游归档、设备截图、构建输出、凭据或其他混合工作树变更。
+- 已对 `origin`（`https://github.com/steveliuyan/XToolpro.git`）执行 `git push origin main`。当前网络在约 21 秒后失败：`Failed to connect to github.com:443`。因此该提交及上述三个路径目前只有本地 Git 备份，**未完成 GitHub 远程备份**。
+- 重试条件：恢复到 GitHub 的 HTTPS 连通性后，从相同工作树执行 `git push origin main`，并以远程分支包含该提交为完成证据。在此之前，Phase 02 继续保持进行中，不能将本检查点标记为远程已备份。
+
 ### 2026-09-05 Phase 02 preflight
 
 2026-09-05 09:13 UTC 通过 `scripts/phase02-preflight.ps1 -Domain all` 重新检查当前工作站，结果为 10 项通过、2 项阻断；完整 JSON 记录见 `artifacts/phase02/preflight-report.json`。已确认 JDK、Git、ADB、本地 Android SDK、固定的 `core/Clash.Meta` 子模块、Go `1.26.4`、Android NDK `r28c`、Gradle `9.7.1`（cleaner/image）和已校验的 Gradle `8.13`（media）可用。Go 归档的 SHA-256 为 `3CA8FB4630B07C419CBDD51F754E31363CFCFB83B3A5354D9E895C90BE2CC345`，Gradle 9.7.1 的 SHA-256 为 `ACD53F1EDAF02F1A8FF99879F8A34B302661A057D9B063AE9E35B552F804D20A`；NDK `source.properties` 复核为 `Pkg.ReleaseName = r28c`。剩余阻断仅为 Flutter/Dart `3.44.4` 尚在官方 BITS 下载与 SHA-1 校验流程中。脚本以非零退出码结束，未启动任何上游功能、下载媒体、使用 Cookie 或操作设备。
