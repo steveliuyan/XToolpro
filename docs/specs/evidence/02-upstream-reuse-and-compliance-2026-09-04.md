@@ -215,6 +215,8 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 - 构建运行 `18m 58s` 后失败，退出码为 `1`。失败任务为 `:setup:buildGoCore`：上游 `build_tool_runner` 在执行其固有的 `go version` 检查时收到 Windows `ProcessException: 系统找不到指定的文件`，随后 Gradle 报告 `Process 'command 'cmd'' finished with non-zero exit value 1`。本次 Flutter 子进程没有继承可执行的 Go 路径；该结果是构建环境入口问题，不是 APK、Flutter UI 或 Clash.Meta core proof 的成功证据。
 - 未生成 `app-debug.apk`；在固定 FlClash proof 工作树递归检查没有发现 APK 产物。因此不能声称 Flutter packaging、arm64 APK 内的 `libclash.so`/`libcore.so`、Android manifest 合并或安装运行已通过。既有独立 arm64 core/JNI bridge/service AAR proof 仍有效，但 Proxy 台账继续保持 `Investigating`。
 - 该失败日志来自本次真实命令的标准输出；下一次重试必须显式把已校验的 Go `1.26.4` 加入 Flutter/Gradle 子进程 `PATH`，并继续使用同一隔离缓存和 Karing 代理。只有产生并检查 arm64 APK，且后续在授权设备上完成 VPN/TUN 流量与恢复测试，才可推进对应门禁。
+- 2026-09-05 随后复用已完成的 Go core 输出，使用 `android\gradlew.bat assembleDebug --no-daemon --no-configuration-cache --no-parallel --max-workers=2 -x :setup:buildGoCore -Ptarget-platform=android-arm64` 进行原生 packaging。该轮已显式设置 `FLUTTER_SUPPRESS_ANALYTICS=true`，成功完成 `:app:compileFlutterBuildDebug`、arm64 CMake 配置并确认 `Found libclash.so and headers for ABI arm64-v8a`；但在 `:app_links:checkDebugAarMetadata` 阶段因 Java 无法通过直连下载 AndroidX/Google Maven 构件失败，典型构件为 `androidx.profileinstaller:profileinstaller:1.3.1` 和 `androidx.core:core-ktx:1.13.1`，错误为 `Permission denied: getsockopt`，共报告 44 个同类失败。该命令退出码为 `1`，没有产生可验证 APK。
+- 失败发生在依赖解析而非 Go core、JNI、CMake 或 Flutter Dart 资源编译；未将 `scripts/phase02-central-mirror.init.gradle` 的镜像规则偷偷写入上游源码。下一轮应显式加载该 proof-only init script，并核对镜像构件校验和后再重试；仅有部分 task 成功仍不能改变 Proxy 台账的 `Investigating` 状态。
 
 ### Cleaner 与 ImageToolbox Gradle 依赖解析取证（2026-09-05）
 
