@@ -1,0 +1,22 @@
+// Phase 02 proof-only network workaround. Do not apply this to production builds.
+// It changes only the Maven Central and Google Maven endpoints; JitPack remains unchanged.
+def centralUrl = 'https://repo.maven.apache.org/maven2/'
+def centralMirrorUrl = 'https://maven.aliyun.com/repository/central'
+def googleUrl = 'https://dl.google.com/dl/android/maven2/'
+def googleMirrorUrl = 'https://maven.aliyun.com/repository/google'
+
+allprojects {
+    repositories.all { repository ->
+        if (repository instanceof MavenArtifactRepository && repository.url.toString() == centralUrl) {
+            repository.url = uri(centralMirrorUrl)
+        }
+        if (repository instanceof MavenArtifactRepository && repository.url.toString() == googleUrl) {
+            repository.url = uri(googleMirrorUrl)
+            repository.content {
+                includeGroupByRegex 'androidx(\\..*)?'
+                includeGroupByRegex 'com\\.android(\\..*)?'
+                includeGroupByRegex 'com\\.google(\\..*)?'
+            }
+        }
+    }
+}

@@ -76,3 +76,10 @@ Feature modules must never read another feature's internals, database tables, ro
 - Use explicit loading, empty, success, unavailable, and error states. Never fabricate device, connection, task, or storage facts.
 - Keep documentation in Chinese when it describes product decisions; technical identifiers and code remain English.
 - Preserve user changes and unrelated files. Do not reset, delete, or overwrite content outside the active task.
+
+## GitHub Checkpoints
+
+- A phase does not need to be complete before its work is backed up. At every coherent, reviewable checkpoint and before ending a work session with material changes, create a focused Git commit and push it to the configured GitHub remote.
+- Stage only reviewed source, specifications, ADRs, tests, and intentionally retained evidence. Never include SDKs, Gradle caches, upstream source archives, local build outputs, device screenshots/logs, credentials, cookies, subscription URLs, or other sensitive/ephemeral files unless an active phase spec explicitly requires a sanitized artifact.
+- Verify the remote and push result after each checkpoint. If a commit or push cannot be performed, record the reason and the exact unbacked paths in the active phase evidence; do not describe the checkpoint as remotely backed up.
+- Do not combine unrelated user changes into a checkpoint. When the worktree contains mixed ownership, identify the task-owned files and use a focused commit; leave unrelated changes untouched.
