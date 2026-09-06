@@ -266,6 +266,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 第三次运行在命令行加入 `--no-configuration-cache --no-parallel --max-workers=2`，未改写固定上游 `gradle.properties`。该路径通过 build-logic 并进入 `:lib:gesture:compileFossDebugKotlin`、`lib:image` 的资源和依赖任务；`lib:gesture` 首次 Kotlin 编译超过十分钟仍未完成，主 JVM CPU 增长已趋于极低，故结束会话并保留缓存、SDK、源码和输出。没有产生 `lib:image` AAR。
 - 结论：Image 台账继续保持 `Investigating`。目前已排除 Maven 下载和 build-logic 无法编译两种结论，但需要在可长时间持续执行的环境中完成 `lib:gesture` 与 `lib:image` 的 Kotlin 编译、记录 AAR 哈希，之后才能进入完整能力对照验证。
 
+### FlClash Android plugin registrant 与小米 10S 初始化 proof（2026-09-06）
+
+- 根因复核确认：Flutter `3.44.4` 的 `FlutterCommand.verifyThenRunCommand` 仅在 `shouldRunPub=true` 时调用 `regeneratePlatformSpecificTooling`；使用 `--no-pub` 会跳过 `injectPlugins(androidPlatform=true)`，因此不会生成 `android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java`。固定 FlClash 工程的 `.flutter-plugins-dependencies` 已包含 `device_info_plus`，所以此前缺失属于构建流程入口问题，不是插件元数据缺失。
+- 在不改动 XToolpro 生产模块和固定上游归档的前提下，使用已缓存依赖完成 Flutter 平台工具注入，生成的 registrant 明确包含 `dev.fluttercommunity.plus.device_info.DeviceInfoPlusPlugin`。随后以隔离 SDK/NDK、Gradle `9.7.1`、proof-only Maven init script、`-x :setup:buildGoCore` 和 `-Ptarget-platform=android-arm64` 执行 `assembleDebug`，结果为 `BUILD SUCCESSFUL in 6m 16s`，`652 actionable tasks: 642 executed, 10 up-to-date`。
+- 新 APK 位于固定 FlClash proof 工作树的 `build/app/outputs/apk/debug/app-debug.apk`，大小 `124,124,104` 字节，SHA-256 为 `4F374C68570EB4837B94D7026D594237035E18A97B84B27AAEEEBA4FAD7355EC`。APK dex 已核验包含 `io.flutter.plugins.GeneratedPluginRegistrant`、`DeviceInfoPlusPlugin` 和 `dev.fluttercommunity.plus/device_info`；arm64 `libclash.so` 为 `59,369,064` 字节、SHA-256 `859D6BA4E32FE719D417410811D31176E2E18297A26B3D67200A6049ED9EE29F`，`libcore.so` 为 `265,728` 字节、SHA-256 `D3520A46D3A8DA72306A1B18F4415B1AAA588FE0C3C6EB5F470D7901F17663FC`。
+- 小米 10S（`M2102J2SC`、Android API `33`、`arm64-v8a`）上，旧测试包因签名不同无法覆盖安装；仅卸载包名 `com.follow.clash.dev` 的旧 proof 包后重新安装，ADB 返回 `Success`，`pm path` 和版本 `0.8.96`/`versionCode=2026081701` 均复核通过。启动后的前台 Activity 为 `com.follow.clash.MainActivity`，UI dump 显示真实“仪表盘”页面及配置/工具标签，不再出现 `Init Failed` 或 `MissingPluginException`；相关 logcat 未再出现 `GeneratedPluginRegistrant`/`device_info` 初始化错误。UI dump 同时产生了 MIUI 缺失 `/data/system/theme_config/theme_compatibility.xml` 的系统警告，但 dump 成功且不属于应用崩溃。
+- 本检查点只证明 Flutter 原生插件注册、APK 安装和应用初始化已通过；尚未请求 VPN 用户授权、启动/停止 TUN、验证代理流量或恢复流程。Proxy 台账继续保持 `Investigating`，不可将初始化 proof 宣称为 VPN/代理 capability parity 通过。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
