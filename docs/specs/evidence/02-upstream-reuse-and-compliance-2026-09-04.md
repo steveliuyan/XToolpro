@@ -336,6 +336,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定源码 `lib/common/request.dart` 将该动作限定为读取 FlClash Release 元数据并比较 `packageInfo.version`；本轮没有把应用更新结果外推为内核更新能力。
 - 关闭结果对话框后，应用程序页的 9 个开关中“自动检查更新”对应末项仍为 `checked=true`，与检查前一致。结束时 `tun0` 和系统 `VPN CONNECTED` 行数均为 0；未修改更新设置、设备配置或本地文件。
 
+### FlClash 小米 10S 本地备份导出 proof（2026-09-06）
+
+- 在 VPN 停止态打开“备份与恢复”，远程区域显示未绑定 WebDAV；本轮只点击本地“备份”，没有输入远程地址、用户名或密码，也没有调用 WebDAV 路径。
+- 固定源码 `lib/views/backup_and_restore.dart` 的本地流程先调用 `backupActionProvider.backup()` 生成应用私有 ZIP，再通过 SAF `saveFileWithPath` 保存。系统 `CREATE_DOCUMENT` 页面出现后保留不含配置内容的默认文件名并提交，FlClash 随后显示“备份成功”。
+- ADB shell 和 MediaStore 未获得该 MIUI 文档提供者的直接文件路径，因此没有绕过权限读取文件大小或 ZIP 内容。随后只读打开系统 ZIP 选择器，FlClash 备份文件名语义计数为 2，证明该文件在文档提供者中可见；未选择或打开文件。
+- 恢复会读取 ZIP 并写回配置/数据库，本轮为避免覆盖真实设备配置而未执行。测试备份保留在设备文档提供者中，未上传或复制到主机；结束时 `tun0` 和系统 `VPN CONNECTED` 行数均为 0。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
