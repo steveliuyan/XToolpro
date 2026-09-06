@@ -222,6 +222,14 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 - 使用 Android build-tools `36.0.0` 的 `aapt` 检查 APK manifest：保留 `com.follow.clash.service.VpnService`、`android.permission.BIND_VPN_SERVICE`、`android.net.VpnService` intent-filter、`specialUse`/`vpn` 前台服务声明，以及 `com.follow.clash.service.ProxyService` 的 `specialUse`/`proxy` 声明；同时包含 `android.permission.INTERNET` 和 `android.permission.FOREGROUND_SERVICE`。这证明固定 FlClash 的 arm64 Flutter packaging 与 Android service manifest 闭包已形成真实 APK，但不证明设备安装、VPN 用户授权、TUN 建立、代理流量、停止恢复或完整 capability-parity matrix。
 - 因当前 ADB 设备仍为 `bf353dda unauthorized`，本轮没有安装 APK、请求 VPN 授权或触发任何设备状态改变。Proxy 台账继续保持 `Investigating`；设备授权后下一道安全任务是对该 APK 做安装前校验、VPN/TUN start-stop、恢复和最小真实流量测试，并保存脱敏结果。
 
+### FlClash arm64 APK 小米 10S 真机启动 proof（2026-09-06）
+
+- 真机经用户明确授权后显示为 `bf353dda device`：`Xiaomi M2102J2SC`（device `thyme`）、Android API `33`、支持 ABI `arm64-v8a,armeabi-v7a,armeabi`。因此该设备与 APK 的 arm64 目标兼容；本节所有 ADB 操作使用项目隔离 Android SDK 的 platform-tools `37.0.1`。
+- 对已校验 SHA-256 `E388D9C06924F79D15E5A40CD6FBCFF8F062AF172C4162565BE526EF8923DC77` 的上游 `app-debug.apk` 执行 `adb install -r`，结果为 `Success`。设备侧 `pm path com.follow.clash.dev` 返回安装路径，`dumpsys package` 复核版本 `0.8.96`、`versionCode=2026081701`、`minSdk=24`、`targetSdk=36`。没有通过 ADB 授予额外运行时权限。
+- 使用 `adb shell monkey -p com.follow.clash.dev 1` 启动后，`com.follow.clash.MainActivity` 成为可见、已聚焦 Activity，系统报告 `Displayed` 和 `Fully drawn`。但 UI automation 随后读取到上游错误页 `Init Failed`：`MissingPluginException(No implementation found for method getDeviceInfo on channel dev.fluttercommunity.plus/device_info)`。对应 stack trace 在 `System.init` 调用 `device_info_plus` 时终止；logcat 同时记录 `ClassNotFoundException: Didn't find class "io.flutter.plugins.GeneratedPluginRegistrant"`。
+- APK 解包和固定 proof 工作树均未找到 Android `GeneratedPluginRegistrant` 源；仅存在 Dart registrant 和桌面平台 registrant。由此可确认本次由 Flutter `3.44.4` / 固定 FlClash 组合生成的 Android debug APK 未打入该原生插件注册器。该真机结果证明安装、arm64 装载和 Activity 绘制可行，但**不**证明上游 Flutter 初始化、配置导入、VPN 授权、TUN、代理流量或停止恢复可用。
+- 不为使 proof 通过而在固定上游归档中手改 registrant，亦未自动点击 VPN 授权或启动任何代理。Proxy 保持 `Investigating`；下一步需要以可审计的上游兼容性修复/版本选择记录解决 Android 插件注册闭包，再从相同真机重跑启动和 VPN/TUN 门禁。
+
 ### Cleaner 与 ImageToolbox Gradle 依赖解析取证（2026-09-05）
 
 - 使用已校验的本地 Gradle `9.7.1` 启动固定 sdmaid-se 源码的 `:app-tool-corpsefinder:assembleDebug --stacktrace`。日志进入 `:buildSrc:compileKotlin`，但没有产生 APK 或 scanner 产物。17:14 本地时间取得的 daemon 线程转储显示 buildSrc 的 classpath/artifact resolution 正在 HTTPS TLS socket 读取和 `DownloadAction` 中等待；对应转储保存在 `artifacts/phase02/sdmaid-se-gradle-daemon-thread-dump.txt`。
