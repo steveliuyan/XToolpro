@@ -343,6 +343,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - ADB shell 和 MediaStore 未获得该 MIUI 文档提供者的直接文件路径，因此没有绕过权限读取文件大小或 ZIP 内容。随后只读打开系统 ZIP 选择器，FlClash 备份文件名语义计数为 2，证明该文件在文档提供者中可见；未选择或打开文件。
 - 恢复会读取 ZIP 并写回配置/数据库，本轮为避免覆盖真实设备配置而未执行。测试备份保留在设备文档提供者中，未上传或复制到主机；结束时 `tun0` 和系统 `VPN CONNECTED` 行数均为 0。
 
+### FlClash 小米 10S 配置文件导出 proof（2026-09-06）
+
+- 在同一固定 proof 包和 VPN 停止态，从当前文件配置的菜单进入“更多 -> 导出文件”。固定源码 `lib/views/profiles/profiles.dart` 的 `_handleExportFile` 读取该配置私有文件字节并调用 `picker.saveFile(profile.realLabel, bytes)`；`lib/common/picker.dart` 在 Android 上将字节交给 `FilePicker.saveFile`，因此真实提交边界是系统 SAF `CREATE_DOCUMENT`。
+- 系统保存页位于“下载内容”，保留应用给出的默认文件名并点击“保存”，随后返回 FlClash 配置页。为避免在主机输出配置名，ADB UI hierarchy 只在进程内比较配置卡片候选标签与系统文件选择器的可见文件名：配置卡片候选数为 1、精确匹配数为 1，`corresponding_export_visible=true`。
+- 随后的文件选择器复核没有选择、打开、读取或复制导出文件，也没有输出配置名、节点、URL、凭据或文件内容。一次用于测试非敏感文件名输入的第二次保存页调用因 ADB 文本输入未生效而返回取消，不计入通过且未生成第二个测试文件。
+- 导出文件保留在设备文档提供者中；本轮未重新导入、恢复、删除或修改当前配置。结束时应用已回到仪表盘，`tun0` 行数为 0、系统 `VPN CONNECTED` 行数为 0。矩阵对应合并行仍为 `Partial`，因为备份恢复和独立剪贴板入口尚未验证；Proxy 台账继续保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
