@@ -25,7 +25,7 @@
 | 节点协议、地区、标签筛选 | `core/`、Clash.Meta provider | 筛选、排序和可用性标记 | Partial：固定 Clash.Meta provider 源码存在 `filter`/`exclude-filter` 正则字段；真机代理页未出现独立协议、地区或标签筛选控件，当前仅能确认上游内部字段，未验证用户可见筛选行为 |
 | 单节点与批量测速 | `core/`、服务层 | 测速任务、结果和失败原因 | Verified：单节点返回 `103 ms`；当前组批量测速显示 10 个结果节点和 9 个不同延迟值 |
 | Android VPN 启停与竞争 VPN 处理 | `android/service`、`android/core` | `VpnService` 生命周期和权限流程 | Partial：真机多次完成启动、停止和恢复；未验证竞争 VPN、首次授权拒绝或撤销 |
-| 始终开启、断线阻止 | Android VPN bridge、系统能力 | 能力检测、系统设置入口和明确 unavailable 状态 | Pending：真机系统当前未将 FlClash 设为始终开启，断线阻止值未配置；未验证上游设置入口或行为 |
+| 始终开启、断线阻止 | Android VPN bridge、系统能力 | 能力检测、系统设置入口和明确 unavailable 状态 | Partial：ADB 可打开 Android `Settings$VpnSettingsActivity`；secure settings 显示始终开启 VPN 未配置、lockdown 未启用；未验证 FlClash 设置入口的写入行为或断线阻止实际效果 |
 | TUN、系统代理、局域网共享 | `core/`、Android bridge | 运行模式和局域网开关 | Partial：`tun0` 与真实 HTTPS 流量已验证；真机确认系统代理和局域网代理配置入口，但未改变其开关 |
 | IPv6、DNS、Fake-IP/Host、流量嗅探 | `core/Clash.Meta` | DNS/IPv6/嗅探配置和诊断 | Partial：真机确认 IPv6、系统 DNS、DNS 劫持和 DNS 进阶入口；未改变配置或验证 Fake-IP/Host/嗅探行为 |
 | 按应用代理/绕过 | `core/`、Android package bridge | 应用选择与路由策略 | Partial：真机进入访问控制应用列表，并确认“允许应用绕过 VPN”入口；未改变应用选择或验证路由结果 |

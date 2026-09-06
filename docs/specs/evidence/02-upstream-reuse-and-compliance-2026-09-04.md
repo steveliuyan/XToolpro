@@ -303,6 +303,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 对当前代理页的可访问文本和 content-desc 做精确关键词统计，没有出现独立的“筛选”“过滤”“协议”“地区”控件；此前命中的“标签”来自底部导航的“第 N 个标签”语义或卡片描述，不构成筛选入口。
 - 固定 Clash.Meta 的 `adapter/provider/provider.go` 仍可见 `filter` 与 `exclude-filter` provider 正则字段。这证明内核/provider 配置层存在过滤能力，但不证明 FlClash Android 当前 UI 暴露了协议、地区或标签筛选行为；矩阵对应行因此由 `Pending` 调整为 `Partial`，不升级为 `Verified`。
 
+### FlClash 小米 10S Android VPN 系统设置入口复核（2026-09-06）
+
+- 在 FlClash 停止态通过 ADB 只读启动 Android `Settings$VpnSettingsActivity`，证明系统 VPN 设置入口可达；未选择任何 VPN、未修改系统设置，也未读取或输出其他 VPN 的名称和配置。
+- 通过 `settings get secure` 读取布尔状态：始终开启 VPN 未配置，VPN lockdown/断线阻止未启用。该状态与当前 FlClash 停止态一致；本轮没有尝试写入设置、触发断线或启动竞争 VPN。
+- 系统设置页面的 MIUI UI hierarchy 未返回可解析控件文本，因此不把页面渲染内容推断为功能行为。矩阵中的“始终开启、断线阻止”由 `Pending` 调整为 `Partial`，仍缺 FlClash 设置写入、断线阻止效果、竞争 VPN 和首次授权拒绝/撤销验证。
+
 ### FlClash 小米 10S 直连与日志补充 proof（2026-09-06）
 
 - 在同一固定来源 proof 包和真机上将模式切换为直连，强停并重启后 UI 单选序列仍为 `false,false,true`，证明直连模式持久化。直连运行态的 `tun0` 和 FlClash `VpnService` 均存在，活动通知记录为 1；设备侧公开 HTTPS 请求返回 `200`，请求前后 `tun0` 接收增加 `8,693` 字节、发送增加 `8,677` 字节。
