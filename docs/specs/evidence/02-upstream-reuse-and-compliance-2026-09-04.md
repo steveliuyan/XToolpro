@@ -330,6 +330,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 Android `android/core/src/main/cpp/CMakeLists.txt` 从 ABI 对应的 `jniLibs` 链接 `libclash.so`；Flutter 运行时源码未找到 `updateCore`、`coreUpdate`、`rollbackCore` 或 `coreRollback` 路径。数据库写入失败回滚 helper 不属于内核二进制回滚。
 - 因此矩阵中的“内核版本、更新和回滚”在固定 Android 包上由 `Pending` 调整为 `Unavailable`：内核更新必须作为受审计的 engine/APK 新版本完成校验、发布和回滚，不能把应用更新检查或外部源码链接误记为运行时内核更新。结束时 `tun0` 和系统 `VPN CONNECTED` 行数均为 0，设备设置未改变。
 
+### FlClash 小米 10S 应用更新检查 proof（2026-09-06）
+
+- 在关于页点击一次手动“检查更新”，等待元数据请求完成后，对话框显示“当前应用已经是最新版了”；“发现新版本”和“前往下载”语义计数均为 0，因此未进入下载、安装或外部跳转分支。
+- 固定源码 `lib/common/request.dart` 将该动作限定为读取 FlClash Release 元数据并比较 `packageInfo.version`；本轮没有把应用更新结果外推为内核更新能力。
+- 关闭结果对话框后，应用程序页的 9 个开关中“自动检查更新”对应末项仍为 `checked=true`，与检查前一致。结束时 `tun0` 和系统 `VPN CONNECTED` 行数均为 0；未修改更新设置、设备配置或本地文件。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
