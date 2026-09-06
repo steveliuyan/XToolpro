@@ -437,6 +437,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机初始开关为 `checked=true`。在 VPN 停止态临时关闭后执行 `am force-stop --user 0 com.follow.clash.dev` 并重新启动，基本配置页中的子 `Switch` 仍为 `checked=false`，证明关闭值可跨进程重建保持；本轮没有启动 VPN，复核时系统 `VPN CONNECTED` 计数为 0。
 - 随后将开关恢复为 `checked=true`，再次强停重启后仍为开启；最终复核 `tcp_concurrent=true`，随后停止应用，`VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 只证明开关映射和持久化，不证明 Clash.Meta 实际并发连接行为或性能变化。没有读取或输出配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 统一延迟开关 proof（2026-09-07）
+
+- 固定源码 `lib/views/config/general.dart` 的 `UnifiedDelayItem` 读取并更新 `patchClashConfigProvider` 的 `state.unifiedDelay`；`lib/providers/state.dart` 将该值传入 `UpdateParams.unifiedDelay`，`lib/models/clash_config.dart` 和 `lib/models/core.dart` 分别以 `unified-delay` 保持配置/核心参数映射。本轮只复核源码路径和设备侧开关状态，没有读取配置正文或测速日志。
+- 真机初始开关为 `checked=true`。在 VPN 停止态临时关闭后执行 `am force-stop --user 0 com.follow.clash.dev` 并重新启动，基本配置页中的子 `Switch` 仍为 `checked=false`，证明关闭值可跨进程重建保持；本轮没有启动 VPN，复核时系统 `VPN CONNECTED` 计数为 0。
+- 随后将开关恢复为 `checked=true`，再次强停重启后仍为开启；最终复核 `unified_delay=true`，随后停止应用，`VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 只证明开关映射和持久化，不证明测速结果实际去除握手等额外延迟。没有读取或输出配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
