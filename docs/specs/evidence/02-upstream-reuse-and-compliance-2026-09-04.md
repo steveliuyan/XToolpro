@@ -323,6 +323,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 请求页当时仍可见 6 个 `DIRECT` 路由语义节点，但无法证明这些记录来自本次失败请求；未读取或输出请求地址、应用、节点、规则或日志正文，因此不把该观察计入通过证据，矩阵状态保持不变。
 - 随后从 FlClash 仪表盘执行停止，复核 `tun0` 地址行数为 0、系统 `VPN CONNECTED` 行数为 0；本次重测未改变模式、日志捕获、系统 VPN 或其他设备配置。
 
+### FlClash 小米 10S 内核更新能力边界（2026-09-06）
+
+- 在停止态打开固定 proof 包的工具、应用程序和关于页面，只统计允许的控件语义。关于页有 1 个版本样式节点，以及各 1 个可点击的“检查更新”和“内核”入口；“更新内核”“核心版本”和“回滚”控件计数均为 0。本轮未点击更新或外部链接，未发起下载。
+- 固定源码 `lib/views/about.dart` 明确将该版本节点绑定到 `packageInfo.version`；`lib/common/request.dart` 的“检查更新”请求 FlClash 应用 Release，并以应用包版本比较。关于页的“内核”动作仅打开固定 Clash.Meta 源码链接，不返回或管理设备上的内核版本。
+- 固定 Android `android/core/src/main/cpp/CMakeLists.txt` 从 ABI 对应的 `jniLibs` 链接 `libclash.so`；Flutter 运行时源码未找到 `updateCore`、`coreUpdate`、`rollbackCore` 或 `coreRollback` 路径。数据库写入失败回滚 helper 不属于内核二进制回滚。
+- 因此矩阵中的“内核版本、更新和回滚”在固定 Android 包上由 `Pending` 调整为 `Unavailable`：内核更新必须作为受审计的 engine/APK 新版本完成校验、发布和回滚，不能把应用更新检查或外部源码链接误记为运行时内核更新。结束时 `tun0` 和系统 `VPN CONNECTED` 行数均为 0，设备设置未改变。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
