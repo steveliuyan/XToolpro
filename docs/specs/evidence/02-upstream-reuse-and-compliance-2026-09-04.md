@@ -365,6 +365,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定配置菜单和 action provider 未发现复制或克隆配置动作；`Profile.checkAndUpdateAndCopy` 只在本地配置文件缺失时调用订阅更新以补齐文件，不是用户可见的配置克隆。因此“复制链接”不能替代需求中的配置复制，固定 Android 包的配置克隆记为 `Unavailable`；订阅更新、重命名、删除和持久化行为仍待可回滚的测试配置验证。
 - 退出后应用回到仪表盘，`tun0` 和系统 `VPN CONNECTED` 行数均为 0；没有修改当前配置、订阅 URL、自动更新、剪贴板、配置选择或 VPN 状态。矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 自动运行 proof（2026-09-06）
+
+- 固定源码 `lib/providers/actions/setup.dart` 在初始化时以既有运行状态或 `appSettingProvider.autoRun` 计算 `shouldRun`，命中后调用 `setRunning(true, initialize: true)`；`lib/views/application_setting.dart` 将“自动运行”开关持久化为 `autoRun`。该能力语义是应用打开时启动连接，不是系统开机自启动。
+- 验证前“自动运行”对应 Switch 为 `checked=false`，`tun0` 和系统 `VPN CONNECTED` 行数均为 0。临时开启开关并强停应用后，`tun0` 仍为 0；重新打开应用并等待 8 秒，`tun0` 地址行数为 2、系统 `VPN CONNECTED` 行数为 1，系统服务状态存在 FlClash `VpnService`，证明启动来自应用重新初始化而非强停前残留。
+- 随后将“自动运行”恢复为 `checked=false` 并强停应用，`tun0` 行数恢复为 0；再次打开并等待 8 秒后，`tun0` 和系统 `VPN CONNECTED` 行数仍均为 0，应用回到仪表盘且底部仪表盘标签为 `selected=true`。设备上的临时 UI hierarchy 已删除。
+- 本轮只改变并恢复“自动运行”开关，没有读取或输出配置名、节点名、订阅 URL、凭据、Cookie、请求地址或日志正文，也没有修改配置、节点选择、自动更新、系统 VPN 设置或其他应用设置。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。

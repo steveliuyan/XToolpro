@@ -33,7 +33,7 @@
 | 实时上下行速率、会话流量、连接列表 | `core/`、service bridge | 实时状态、历史摘要和任务事件 | Verified：运行态显示实时/累计流量；公开 HTTPS 流量后连接页显示 10 个可见记录 |
 | 请求、规则、内核日志与崩溃诊断 | `core/`、service bridge | 脱敏诊断导出 | Partial：直连公开 HTTPS 流量后请求页显示 10 个可见记录，其中 6 个 accessibility 节点带 `DIRECT` 路由语义；临时启用 `info` 和日志捕获后日志页显示 6 条可见/部分可见 `info` 记录，随后恢复原设置；规则模式重测返回 HTTP `000`，未形成可归因的新记录；未读取正文，仍未验证规则命中日志或崩溃诊断 |
 | 内核版本、更新和回滚 | `lib/views/about.dart`、`lib/common/request.dart`、`android/core/src/main/cpp/CMakeLists.txt` | 组件管理、校验和、回滚 | Unavailable（固定 Android 包）：真机关于页仅显示应用版本；“检查更新”检查 FlClash 应用 Release，“内核”只打开上游源码链接；未提供运行时内核版本、内核更新或内核回滚控件，`libclash.so` 在构建期链接，更新需随受审计的 engine/APK 发布 |
-| 启动连接、自动更新、快捷方式/小组件 | `android/`、平台集成 | 后台入口和设备能力开关 | Partial：真机确认自动运行和自动检查更新开关；手动更新检查完成 Release 元数据查询并返回当前应用已是最新版，未进入下载/安装分支；固定 Android 包未声明静态快捷方式或 AppWidget，相关能力为 Unavailable |
+| 启动连接、自动更新、快捷方式/小组件 | `android/`、平台集成 | 后台入口和设备能力开关 | Partial：真机临时开启“自动运行”后，应用强停再打开会自动建立 `VpnService`、`tun0` 和系统 VPN；恢复关闭后再次强停再打开保持停止，确认开关行为和持久化；自动检查更新开关可见，手动更新检查完成 Release 元数据查询并返回当前应用已是最新版，未进入下载/安装分支；固定 Android 包未声明静态快捷方式或 AppWidget，相关能力为 Unavailable |
 
 ## sdmaid-se：设备维护能力
 
