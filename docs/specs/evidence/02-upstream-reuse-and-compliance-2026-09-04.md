@@ -295,7 +295,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 应用设置页确认自动运行、选项卡动画、日志捕获、自动关闭连接、仅统计代理、崩溃分析和自动检查更新开关；Android 页面不显示桌面端自启动项。对已安装包的只读 manifest/package 状态检查未发现 `android.app.shortcuts`、`APPWIDGET_UPDATE`/`AppWidgetProvider` 或 `BOOT_COMPLETED` 声明，因此固定 Android proof 包的静态快捷方式、小组件和开机广播路径记为 `Unavailable`，不能用应用打开后的“自动运行”替代。
 - 运行态复核：从停止态启动后，系统列出 `com.follow.clash.dev/com.follow.clash.service.VpnService`，`tun0` 为 `UP`，并存在 1 条该包的活动通知。Android 系统当前未把 FlClash 配置为始终开启 VPN，断线阻止值为未配置；本轮没有改变系统 VPN 设置。结合上一节设备侧 HTTPS `HTTP 200` 和 TUN 字节增长证据，本轮再打开公开 HTTPS 地址后，请求页与连接页各显示 10 个可见记录；只记录计数，不记录目标地址、应用或规则内容。
 - 结束状态复核：停止后 `tun0` 不存在，FlClash `VpnService` 不再运行，活动通知记录为 0，规则模式保持选中。一次节点切换用于验证持久状态变更，但原节点无法在不暴露设备私有名称的前提下识别，因此不声明节点选择已恢复。除该已披露的节点选择外，本轮未改变配置、访问控制、DNS、系统代理、局域网、自动运行、更新、备份或系统 VPN 设置。
-- 判定已同步到 [上游完整能力对照矩阵](../../architecture/upstream-capability-parity-matrix.md)。当时完整通过仅包括单节点/批量测速，以及实时/累计流量与连接列表两个合并行；其余已观察能力保持 `Partial` 或 `Pending`。仍缺节点筛选、订阅更新、导出提交、备份/恢复提交、竞争 VPN、首次授权拒绝/撤销、始终开启/断线阻止、DNS/Fake-IP/Host/嗅探行为、规则命中/日志、更新/回滚、异常崩溃和对应契约测试。Proxy 台账继续保持 `Investigating`，不得进入正式 engine 集成。
+- 判定已同步到 [上游完整能力对照矩阵](../../architecture/upstream-capability-parity-matrix.md)。当时完整通过仅包括单节点/批量测速，以及实时/累计流量与连接列表两个合并行；其余已观察能力保持 `Partial` 或 `Pending`。仍缺用户可见节点筛选行为、订阅更新、导出提交、备份/恢复提交、竞争 VPN、首次授权拒绝/撤销、始终开启/断线阻止、DNS/Fake-IP/Host/嗅探行为、规则命中/日志、更新/回滚、异常崩溃和对应契约测试。Proxy 台账继续保持 `Investigating`，不得进入正式 engine 集成。
+
+### FlClash 小米 10S 代理组与筛选入口补充复核（2026-09-06）
+
+- 在同一设备和固定 proof 包上仅打开代理页并读取 ADB UI hierarchy；摘要包含 66 个节点、33 个可点击控件，且“自动选择”“故障转移”各有 2 个可访问语义节点。未选择节点、未切换组、未修改配置或 VPN 状态。
+- 对当前代理页的可访问文本和 content-desc 做精确关键词统计，没有出现独立的“筛选”“过滤”“协议”“地区”控件；此前命中的“标签”来自底部导航的“第 N 个标签”语义或卡片描述，不构成筛选入口。
+- 固定 Clash.Meta 的 `adapter/provider/provider.go` 仍可见 `filter` 与 `exclude-filter` provider 正则字段。这证明内核/provider 配置层存在过滤能力，但不证明 FlClash Android 当前 UI 暴露了协议、地区或标签筛选行为；矩阵对应行因此由 `Pending` 调整为 `Partial`，不升级为 `Verified`。
 
 ### FlClash 小米 10S 直连与日志补充 proof（2026-09-06）
 
