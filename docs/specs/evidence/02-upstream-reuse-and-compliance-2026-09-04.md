@@ -357,6 +357,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机添加配置页通过 ADB 确认恰有二维码、文件、URL 三个可点击入口。打开“从URL导入”后存在 1 个空 `EditText`；长按输入框后“粘贴”动作计数仍为 0，输入值保持为空。本轮没有执行粘贴或提交，没有读取、输出或改写设备剪贴板内容。
 - 因此独立配置剪贴板导入在固定 Android 包中记为 `Unavailable`；普通 `TextFormField` 在剪贴板含文本时是否暴露系统标准粘贴仍未验证，不能从 Flutter 控件类型推断为真机通过。退出对话框后应用回到仪表盘，`tun0` 和系统 `VPN CONNECTED` 行数均为 0；矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S URL 配置生命周期入口边界（2026-09-06）
+
+- 本轮当前配置菜单出现 1 个“同步”入口；固定源码 `lib/views/profiles/profiles.dart` 只在 `profile.type == ProfileType.url` 时构造该入口，因此当前真机状态已具备 URL 配置的菜单分支。该观察取代此前“当前仅有文件配置”的设备现状，但不改写早先证据发生时的历史状态。
+- “更多”子菜单中“复制链接”为 1，“复制”和“重命名”独立菜单项均为 0。编辑页显示 3 个非空 `EditText`、1 个“自动更新”项和 1 个“保存”动作；ADB 只记录控件计数，没有读取或输出配置名、订阅 URL、更新间隔或其他字段值，随后通过返回键退出且未保存。
+- 固定源码 `lib/views/profiles/edit.dart` 将这三个字段对应为名称、URL 和启用时的自动更新间隔，只有 `_handleConfirm` 才会写回或因 URL 变化触发更新。`lib/views/profiles/profiles.dart` 的“复制链接”会把真实订阅 URL 写入剪贴板；为避免泄露或改写剪贴板，本轮未点击。“同步”会发起真实订阅请求并更新配置，本轮也未点击。
+- 固定配置菜单和 action provider 未发现复制或克隆配置动作；`Profile.checkAndUpdateAndCopy` 只在本地配置文件缺失时调用订阅更新以补齐文件，不是用户可见的配置克隆。因此“复制链接”不能替代需求中的配置复制，固定 Android 包的配置克隆记为 `Unavailable`；订阅更新、重命名、删除和持久化行为仍待可回滚的测试配置验证。
+- 退出后应用回到仪表盘，`tun0` 和系统 `VPN CONNECTED` 行数均为 0；没有修改当前配置、订阅 URL、自动更新、剪贴板、配置选择或 VPN 状态。矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
