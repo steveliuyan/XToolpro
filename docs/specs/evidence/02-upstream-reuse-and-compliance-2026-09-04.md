@@ -317,6 +317,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 用户观察到直连模式下底部没有“代理”选项。固定上游 `lib/providers/state.dart` 的 `currentGroupsState` 在 `Mode.direct` 下返回空组，`lib/common/navigation.dart` 又仅在 `hasProxies` 时显示代理页，因此该现象是上游模式语义而非配置丢失。切回规则模式并强停重启后，单选序列为 `true,false,false`，“代理”入口恢复，代理页再次显示“自动选择”和“故障转移”组入口。
 - 验证结束后已恢复原设备设置：核心日志等级为 `error`，“日志捕获”关闭且工具页日志入口消失，模式为规则；`tun0` 不存在，FlClash `VpnService` 不再运行，活动通知记录为 0。未更改配置内容、节点选择、订阅 URL、凭据、Cookie、访问控制、DNS、系统代理或系统 VPN 设置。
 
+### FlClash 小米 10S 规则模式重测边界（2026-09-06）
+
+- 在已恢复的规则模式停止态再次启动固定 proof 包，VPN 图标和仪表盘运行态出现；设备侧公开 HTTPS 请求返回 `000`，未形成成功响应或可归因的新增请求记录。
+- 请求页当时仍可见 6 个 `DIRECT` 路由语义节点，但无法证明这些记录来自本次失败请求；未读取或输出请求地址、应用、节点、规则或日志正文，因此不把该观察计入通过证据，矩阵状态保持不变。
+- 随后从 FlClash 仪表盘执行停止，复核 `tun0` 地址行数为 0、系统 `VPN CONNECTED` 行数为 0；本次重测未改变模式、日志捕获、系统 VPN 或其他设备配置。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
