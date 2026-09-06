@@ -68,8 +68,8 @@ GitHub CLI 在当前工作站不可用，因此本次只读复核使用官方 RE
 
 当前工作站的最小启动复核结果如下：
 
-- `Get-Command flutter,dart,go` 没有返回任何命令。FlClash 的 `.gitmodules` 声明 `core/Clash.Meta`，而 GitHub ZIP 归档不会包含该 submodule。2026-09-05 已通过官方 contents API 将该 gitlink 锁定到 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`，但本机尚未 checkout 该固定子模块。因此在未安装 Flutter/Go、取得该精确子模块和 native core 前，不能诚实地声称已调用其真实代理能力。
-- 2026-09-05 已从 `https://github.com/chen08209/Clash.Meta.git` 克隆到 Git 忽略的隔离 proof 工作树，并 detach checkout `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`；`git rev-parse HEAD` 返回相同值，`LICENSE` 为 GPL-3.0。此操作只补齐上游源码，不引入任何 XToolpro 生产模块，也没有启动构建或设备操作。
+- `Get-Command flutter,dart,go` 没有返回任何命令。FlClash 的 `.gitmodules` 声明 `core/Clash.Meta`，而 GitHub ZIP 归档不会包含该 submodule。2026-09-05 已通过官方 contents API 将该 gitlink 锁定到 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`；在未安装 Flutter/Go、取得该精确子模块和 native core 前，不能诚实地声称已调用其真实代理能力。
+- 2026-09-05 已从 `https://github.com/chen08209/Clash.Meta.git` 克隆到 Git 忽略的隔离 proof 工作树，并 detach checkout `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`；`git rev-parse HEAD` 返回相同值，工作树干净，`LICENSE` 为 GPL-3.0。此操作只补齐上游源码，不引入任何 XToolpro 生产模块，也没有启动构建或设备操作。
 - 在固定 sdmaid-se 源码目录执行 `gradlew.bat --no-daemon --version`，其 Gradle 9.7.1 Wrapper 在 `org.gradle.wrapper.Download.download` 报 `java.net.SocketException: Permission denied: getsockopt`。因此尚未进入上游项目配置或 CorpseFinder 扫描阶段。
 - 对 `downloads.gradle.org` 的只读请求会重定向到官方 GitHub Release；在本机该 Release 连接被重置或在 15 秒内超时。没有使用第三方镜像规避来源、校验和或供应链审查。
 
@@ -312,6 +312,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 该证据将 Android `engine-proxy` 路径的三个未声明许可插件标记为已验证排除项；它不解除桌面/full-capability 路径的许可阻塞，也不替代 Flutter/Gradle resolved dependency tree、Clash.Meta 子模块、native/传递依赖的许可证审查。后续 Android 构建必须保留依赖裁剪检查。
 - `plugins/rust_api/rust/Cargo.lock` 的固定文件 SHA-256 为 `B258BC0B66CBC29884BA75746090B7F5B82FFA5303BB06F68F5228B21A60B843`，记录 87 个 Cargo 包；该锁文件不含完整许可证字段，桌面候选传递依赖仍需独立许可证解析。
 - 已同步更新 [许可审计](../../compliance/upstream-license-source-audit.md)、[直接依赖盘点](../../compliance/upstream-dependency-inventory.md)、[第三方声明底稿](../../compliance/THIRD_PARTY_NOTICES.md) 和 [上游复用台账](../../architecture/upstream-reuse-ledger.md)。Proxy 台账仍为 `Investigating`，未进入正式 engine 集成。
+
+### Clash.Meta 固定源码许可与依赖清单复核（2026-09-06）
+
+- 隔离 proof checkout 的 `git rev-parse HEAD` 为 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`，工作树无未提交修改；该 checkout 路径仍位于 Git 忽略的 `.tools/upstream-proofs/`，没有进入 XToolpro 生产模块、SDK、缓存或构建产物。
+- 根 `LICENSE` 的 SHA-256 为 `230184F60BAE2FEAF244F10A8BAC053C8FF33A183BCC365B4D8B876D2B7F4809`，文本为 GPL-3.0；`go.mod` 的 SHA-256 为 `BAC10AEE76B477784CA48BEF18C00379DE54B6A2D803F90E9E1352D9F0D73686`；`go.sum` 的 SHA-256 为 `7982069B99FC64C5A45A40055228BB3E188EC5EC4268FA22B1748018CCFEBC90`。
+- `go.mod` 约含 138 条带版本 `require` 记录。当前只完成固定来源、根许可和 Go manifest/校验锁定复核；第三方 Go 传递依赖许可证、native 闭包和 notices 仍待逐项解析，不能据此把 Proxy 台账改为 `Approved`。
 
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。

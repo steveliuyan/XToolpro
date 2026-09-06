@@ -8,12 +8,14 @@
 
 | 域 | 组件 | 固定来源 | 许可证 | 发布前必须补齐 |
 | --- | --- | --- | --- | --- |
-| Proxy | FlClash full-capability engine 候选 | `chen08209/FlClash@62addf738a76b1a492e19af2dbabdb6d572b9e72` | GPL-3.0 root；Android proof 排除了候选 plugin，但其许可仍未声明 | 对应完整源代码、构建说明、补丁序列、Clash.Meta submodule、native core 和传递依赖清单；Android engine 必须保留对 `plugins/proxy`、`rust_api`、`window_ext` 的排除检查，任何桌面/full-capability 路径仍须先解决 `TODO` 许可占位。 |
+| Proxy | FlClash + Clash.Meta full-capability engine 候选 | `chen08209/FlClash@62addf738a76b1a492e19af2dbabdb6d572b9e72`；`chen08209/Clash.Meta@0f7f05adff5e2c49775a112dcfe05a6aa36fda0c` | 两个固定根源码均为 GPL-3.0；Clash.Meta `LICENSE`、`go.mod`、`go.sum` 哈希已复核；Android proof 排除了候选 plugin，但其许可仍未声明 | 对应完整源代码、构建说明、补丁序列、native core、Go 传递依赖和 notices 清单；Android engine 必须保留对 `plugins/proxy`、`rust_api`、`window_ext` 的排除检查，任何桌面/full-capability 路径仍须先解决 `TODO` 许可占位和传递依赖审查。 |
 | Cleaner | sdmaid-se full-capability maintenance 候选 | `d4rken-org/sdmaid-se@b9b01ee0af648fa6af25d388bb39bacde8d5b7a9` | GPL-3.0 | 对应全部 `app-tool-*` 与 `app-common-*` 源代码、构建说明、传递依赖清单与许可证。 |
 | Media | ytdlnis full-capability workflow 候选 | `deniscerri/ytdlnis@13320bb64f35c8d04f01bebfa782d7947758fb66` | GPL-3.0 | 对应完整源代码、构建说明、Cookie/session 路径、yt-dlp、Python/JS runtime、FFmpeg、Aria2c 和每个二进制的版本、校验和与许可证。 |
 | Image | ImageToolbox full-capability processing 候选 | `T8RIN/ImageToolbox@cb73d7a2e3094fb49e4d32cb07ad2903b62f8ac0` | Apache-2.0；固定源码根目录无 NOTICE | Apache-2.0 许可与适用版权归属、完整非 UI 处理闭包的依赖树、native codec、AI model 与图片解码依赖清单；实际解析出的 NOTICE 逐项纳入。 |
 
 ## 不可带入的材料
+
+Clash.Meta 固定源码的可复核许可证据如下：根 `LICENSE` SHA-256 为 `230184F60BAE2FEAF244F10A8BAC053C8FF33A183BCC365B4D8B876D2B7F4809`；`go.mod` SHA-256 为 `BAC10AEE76B477784CA48BEF18C00379DE54B6A2D803F90E9E1352D9F0D73686`；`go.sum` SHA-256 为 `7982069B99FC64C5A45A40055228BB3E188EC5EC4268FA22B1748018CCFEBC90`。`go.mod` 约含 138 条带版本依赖记录，第三方 Go 传递依赖的许可证、native 产物和 notices 尚未逐项解析；这些内容不得在完整 SBOM 完成前写成已批准声明。
 
 - 不复用 FlClash、sdmaid-se、ytdlnis 或 ImageToolbox 的产品名称、图标、UI、演示数据、营销素材或翻译。
 - sdmaid-se 的图标、logo、市场材料、文档和翻译不在其 GPL 代码许可范围内。

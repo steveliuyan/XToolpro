@@ -6,11 +6,11 @@
 
 **需求追踪：** `PRO-*`、`CLN-*`、`MED-*`、`IMG-*`
 
-**审计日期：** 2026-09-05
+**审计日期：** 2026-09-06（含 2026-09-05 基线复核）
 
 ## 审计范围与方法
 
-本记录只核对 `.tools/upstream-proofs/` 中四个固定 GitHub 源码归档内可读到的根 `LICENSE`、`NOTICE`、插件许可文件和 README 明示限制。归档哈希与提交锁定见 [Phase 02 证据](../specs/evidence/02-upstream-reuse-and-compliance-2026-09-04.md)，直接依赖范围见 [上游直接依赖盘点](upstream-dependency-inventory.md)。
+本记录只核对 `.tools/upstream-proofs/` 中四个固定 GitHub 源码归档及 FlClash 固定 Clash.Meta submodule checkout 内可读到的根 `LICENSE`、`NOTICE`、插件许可文件和 README 明示限制。归档哈希与提交锁定见 [Phase 02 证据](../specs/evidence/02-upstream-reuse-and-compliance-2026-09-04.md)，直接依赖范围见 [上游直接依赖盘点](upstream-dependency-inventory.md)。
 
 本记录不会推定下列尚未解析项目的许可：Gradle 传递依赖、Maven/JitPack 解析物、AAR/JAR/SO 内容、Git submodule、yt-dlp/FFmpeg/Aria2c 插件、AI 模型或网络下载资源。它们只能在真实 proof 产生可验证的 resolved dependency tree 和二进制清单后进入最终 SBOM。
 
@@ -18,7 +18,7 @@
 
 | 域 | 固定源码中的根许可 | 可验证的附加边界 | 当前门禁 |
 | --- | --- | --- | --- |
-| Proxy / FlClash | GPL-3.0 | 候选 plugin 的三个 `LICENSE` 文件是 `TODO` 占位；另有 MIT 子组件。 | 未解决 placeholder 许可前，不得把对应 plugin 源码或二进制带入 XToolpro。 |
+| Proxy / FlClash + Clash.Meta | GPL-3.0（两个固定根源码） | Clash.Meta 已固定到 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`，根 `LICENSE`、`go.mod`、`go.sum` 哈希已复核；候选 plugin 的三个 `LICENSE` 文件仍是 `TODO` 占位。 | Clash.Meta 的 Go 传递依赖、native 闭包和桌面 plugin 许可仍未完成；未解决 placeholder 或传递依赖前不得批准对应路径。 |
 | Cleaner / sdmaid-se | GPL-3.0 | README 明确排除图标、logo、吉祥物、营销材料、assets、文档和翻译。 | 完整审查所有支持的代码闭包；所有被排除材料一律不移植。 |
 | Media / ytdlnis | GPL-3.0 | README 禁止衍生下载器使用 `YTDLnis` 名称；上游功能含 Cookie、私有/不可用和高级格式流程。 | 采用 XToolpro 名称和自有界面；完整保留用户授权的会话能力；仅排除 DRM/访问控制绕过。 |
 | Image / ImageToolbox | Apache-2.0 | 固定归档存在根 `LICENSE`，但没有根 `NOTICE`；可选功能涉及 native codec、OCR 与可下载模型。 | 分发时保留 Apache 许可和所选代码的版权归属；每个解析出的第三方/模型另审。 |
@@ -34,9 +34,15 @@
 | `plugins/window_ext/LICENSE` | 内容为 `TODO: Add your license here.` | 许可未声明；该 plugin 不在 Android engine 的默认候选范围，仍不得带入。 |
 | `plugins/rust_api/cargokit/LICENSE` | MIT，版权声明为 Matej Knopp（2022） | 只有在实际闭包包含该代码时，才将完整 MIT 声明纳入 NOTICE。 |
 | `plugins/wifi_ssid/LICENSE` | MIT，版权声明为 FlClash（2025） | 只有在实际闭包包含该代码时，才将完整 MIT 声明纳入 NOTICE。 |
-| `core/Clash.Meta` | `.gitmodules` 声明外部子模块，固定归档不含其内容 | 在取得固定子模块提交、根许可、第三方 notices 和 native 依赖前，不得构建或分发 core。 |
+| `core/Clash.Meta` | 已在隔离 proof 工作树 detach checkout 到 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`；根 `LICENSE` 为 GPL-3.0，SHA-256 `230184F60BAE2FEAF244F10A8BAC053C8FF33A183BCC365B4D8B876D2B7F4809`；`go.mod` SHA-256 `BAC10AEE76B477784CA48BEF18C00379DE54B6A2D803F90E9E1352D9F0D73686`；`go.sum` SHA-256 `7982069B99FC64C5A45A40055228BB3E188EC5EC4268FA22B1748018CCFEBC90` | 根许可和固定来源已可复核；约 138 条 Go `require` 记录及其传递依赖许可证、native 闭包和 notices 仍待逐项解析，不得据此批准 core 分发。 |
 
 这不是“FlClash 根 GPL 覆盖全部嵌套代码”的推断。针对具有 `TODO` 占位许可的组件，必须先从上游版权方取得明确许可声明或证明 engine route 完全不包含该组件，才能进入 `Approved`。
+
+### Clash.Meta 固定源码复核（2026-09-06）
+
+- 固定 checkout 的 `git rev-parse HEAD` 为 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`，工作树无未提交修改。
+- `LICENSE` 文本为 GPL-3.0；`go.mod` 与 `go.sum` 的 SHA-256 分别为 `BAC10AEE76B477784CA48BEF18C00379DE54B6A2D803F90E9E1352D9F0D73686` 和 `7982069B99FC64C5A45A40055228BB3E188EC5EC4268FA22B1748018CCFEBC90`。
+- `go.mod` 约含 138 条带版本 `require` 记录。当前只确认 manifest 和校验锁定，尚未通过 `go list`/许可证数据库完成第三方 Go 传递依赖、native 产物与 notices 的逐项审查；因此 Proxy 仍保持 `Investigating`。
 
 ### FlClash Android 路径排除复核（2026-09-06）
 

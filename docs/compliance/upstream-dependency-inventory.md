@@ -5,17 +5,17 @@
 **适用阶段：** [Phase 02：上游复用与合规](../specs/02-upstream-reuse-and-compliance.md)
 
 **需求追踪：** `PRO-*`、`CLN-*`、`MED-*`、`IMG-*`
-**盘点日期：** 2026-09-05
+**盘点日期：** 2026-09-06
 
 ## 用途与边界
 
 本文是四个固定上游归档的**直接源码声明依赖**索引，供后续 `engine-*` 隔离 proof、许可证审查和 CycloneDX SBOM 生成使用。它不是完整依赖树、许可证结论、漏洞扫描结果或发布许可声明。
 
-以下项目在真实 Gradle/Flutter 解析成功前均保持“待解析”：传递依赖、版本冲突后的实际选择、variant 条件依赖、插件解析结果、AAR/JAR/SO 内容、原生二进制 SHA-256、许可证文本与安全公告。任何此类项目不得仅凭本文转为 `Approved`。
+以下依赖项目在真实 Gradle/Flutter/Go 解析成功前均保持“待解析”：传递依赖、版本冲突后的实际选择、variant 条件依赖、插件解析结果、AAR/JAR/SO 内容、原生二进制 SHA-256、许可证文本与安全公告。Clash.Meta 根源码的固定提交、`LICENSE`、`go.mod` 和 `go.sum` 已单独完成来源与哈希复核，但不替代上述依赖解析；任何此类项目不得仅凭本文转为 `Approved`。
 
 | 域 | 固定提交 | 本地归档 SHA-256 | 直接来源清单 |
 | --- | --- | --- | --- |
-| Proxy | `62addf738a76b1a492e19af2dbabdb6d572b9e72` | `70042455690F88D8CFD070F7EA6B9269060C42745BD8F7E90AD7EE3826FA48A8` | `pubspec.yaml`、`.gitmodules`、`android/**/build.gradle.kts`、`android/gradle/libs.versions.toml` |
+| Proxy | `62addf738a76b1a492e19af2dbabdb6d572b9e72`；Clash.Meta `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c` | `70042455690F88D8CFD070F7EA6B9269060C42745BD8F7E90AD7EE3826FA48A8` | `pubspec.yaml`、`.gitmodules`、`core/Clash.Meta/LICENSE`、`core/Clash.Meta/go.mod`、`core/Clash.Meta/go.sum`、`android/**/build.gradle.kts`、`android/gradle/libs.versions.toml` |
 | Cleaner | `b9b01ee0af648fa6af25d388bb39bacde8d5b7a9` | `3EF93551ECFEAA7CCAFA71772C8EA81C08F1F52EA314D5B0CB45C8310E1FCA4E` | `app-tool-corpsefinder/build.gradle.kts`、相关 `app-common-*/build.gradle.kts`、根构建与 wrapper |
 | Media | `13320bb64f35c8d04f01bebfa782d7947758fb66` | `F859B856D846801B42B3063B00CB36C002E6708DC469297836DEB6545FF7C98D` | `app/build.gradle`、根 `build.gradle`、`settings.gradle`、wrapper |
 | Image | `cb73d7a2e3094fb49e4d32cb07ad2903b62f8ac0` | `CBCA2FB7E9235AD96C89498B0A851D2AFAC4EDF3625BAD37D88C1188439B08C8` | `gradle/libs.versions.toml`、所选 `core/`、`lib/`、`feature/` 模块构建文件与 wrapper |
@@ -38,7 +38,7 @@ Cleaner 的直接来源表以 `app-tool-corpsefinder` 作为已读取的构建�
 
 | 来源路径 | 直接声明 | 对拟议 proof 的意义 | 状态 |
 | --- | --- | --- | --- |
-| `.gitmodules` | `core/Clash.Meta`，`git@github.com:chen08209/Clash.Meta.git`，分支 `FlClash` | 原生 core 的必需子模块；GitHub ZIP 不包含其内容。 | 待获取并固定具体 commit |
+| `.gitmodules` | `core/Clash.Meta`，`git@github.com:chen08209/Clash.Meta.git`，分支 `FlClash`；固定提交 `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c` | 原生 core 的必需子模块；GitHub ZIP 不包含其内容。该提交已在 Git 忽略的隔离 proof 工作树中 detach checkout，工作树干净。 | 已固定并 checkout；Go 传递依赖许可证仍待解析 |
 | `pubspec.yaml` | Flutter SDK（SDK `>=3.8.0 <4.0.0`）、`flutter_localizations`；本地 package `plugins/proxy`、`window_ext`、`wifi_ssid`、`rust_api`、`setup`；git package `window_manager`、`launch_at_startup`、`tray_manager`、`yaml_writer` | 说明该上游应用本身依赖 Flutter package 图；只有 `proxy`、`rust_api`、`setup` 可能与 engine 路径有关，仍需源码和运行 proof 确认。 | 待 Flutter `pub get` 解析 |
 | `pubspec.yaml` | 数据/平台相关的直接 package：`path_provider`、`shared_preferences`、`file_picker`、`app_links`、`ffi`、`dio`、`drift`、`drift_flutter`、`crypto`、`device_info_plus`、`connectivity_plus` | 这些是上游 app 的直接声明，不等于 XToolpro engine 的批准依赖；如候选路径实际引用，必须单独审查。 | 待引用分析 |
 | `android:app` | projects `:service`、`:common`、`:core`；`androidx.core:core-splashscreen:1.0.1`、`gson:2.13.1`、`smali-dexlib2:3.0.9`、Firebase BOM `34.15.0`、Crashlytics NDK、Analytics | `:app` 是 Flutter Android 容器，不是拟议引擎 API；Firebase 与启动页等 app 层项默认不带入 XToolpro。 | 待裁剪证明 |
@@ -46,6 +46,16 @@ Cleaner 的直接来源表以 `app-tool-corpsefinder` 作为已读取的构建�
 | `android:core` | `androidx.annotation:annotation-jvm:1.9.1`；CMake `3.22.1`；NDK `28.2.13676358` | 该模块直接要求 native build；解析出的 core 二进制、ABI 与许可证尚未知。 | 待 native proof |
 | `android:common` | `androidx.core:core-ktx:1.17.0`、`gson:2.13.1`、Firebase BOM `34.15.0`、Crashlytics NDK、Analytics | 该通用层仍夹带应用观测依赖，需在 fork-port 设计中明确保留或剔除。 | 待裁剪证明 |
 | `android/gradle/wrapper/gradle-wrapper.properties` | Gradle `9.2.1-all` | Flutter/Android proof 的构建分发前置条件。 | 未运行 |
+
+Clash.Meta 固定 checkout 的源码清单（路径相对于 FlClash 隔离 proof 工作树）如下：
+
+| 文件 | 复核结果 |
+| --- | --- |
+| `core/Clash.Meta/LICENSE` | GPL-3.0；SHA-256 `230184F60BAE2FEAF244F10A8BAC053C8FF33A183BCC365B4D8B876D2B7F4809` |
+| `core/Clash.Meta/go.mod` | SHA-256 `BAC10AEE76B477784CA48BEF18C00379DE54B6A2D803F90E9E1352D9F0D73686`；约 138 条带版本 `require` 记录，传递依赖许可尚未逐项解析 |
+| `core/Clash.Meta/go.sum` | SHA-256 `7982069B99FC64C5A45A40055228BB3E188EC5EC4268FA22B1748018CCFEBC90`；仅作为 Go 校验锁定证据，不替代许可证清单 |
+
+上述文件由 `git rev-parse HEAD` 与只读哈希命令复核；该 checkout 只用于 proof 和审计，不进入 XToolpro 生产模块或构建产物。
 
 ### Proxy Android 依赖裁剪复核（2026-09-06）
 
