@@ -400,6 +400,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在 `checked=false` 状态从仪表盘启动，`tun0` 地址行数变为 2 且 FlClash `VpnService` 存在；随后停止，`tun0`、`VpnService` 和系统 legacy `VPN CONNECTED` 均恢复为 0。Android API 33 的 `dumpsys connectivity` 与 `dumpsys vpn_management` 没有暴露 `allowBypass` 字段，本轮也没有让测试应用调用网络绑定 API，因此不能把源码调用或 VPN 成功启动外推为实际绕过流量已验证。
 - 随后将 Switch 恢复为 `checked=true`，再次强停并启动后仍为 `checked=true`。结束时应用位于仪表盘且仪表盘节点 `selected=true` 计数为 1，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除；未改变应用选择、配置内容、节点、订阅 URL、凭据、Cookie 或其他网络开关。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S DNS 劫持开关 proof（2026-09-06）
+
+- 固定源码 `lib/views/config/network.dart` 将“DNS 劫持”绑定到 `vpnSettingProvider.dnsHijacking`，`lib/providers/state.dart` 把该值传入 `VpnOptions.dnsHijacking`。`android/service/src/main/java/com/follow/clash/service/VpnService.kt` 在值为真时向 `Core.startTun` 传入 `dns = "0.0.0.0"`，值为假时传入固定 DNS stub；`VpnService.Builder.addDnsServers()` 在两态都向 Android VPN 发布固定 stub，因此系统 `LinkProperties` 本身不能证明 core 的捕获范围。
+- 真机初始 `IPv6=false`、`DNS 劫持=false`。在 VPN 停止态临时开启 DNS 劫持并执行 `am force-stop --user 0 com.follow.clash.dev`，确认进程消失且 `tun0` 为 0；重新启动并返回网络页后 DNS 劫持仍为 `checked=true`，证明开启值可跨进程重建保持。
+- 开启态启动 VPN 后，`tun0` 有 1 条 IPv4、0 条 scope global IPv6 地址，系统 legacy `VPN CONNECTED` 为 1；对应 `LinkProperties` 中固定 DNS stub 与 `tun0` 均各匹配 1 项。公开主机名解析退出码为 0；一次公开 HTTPS 端点连接超时并返回退出码 28，另一次公开 HTTPS 返回 `200` 且退出码为 0，因此只证明开启态存在可用的真实主机名 HTTPS 路径，不把单一端点失败归因于 DNS 劫持。
+- `curl --dns-servers` 指向保留地址或 loopback 的请求在开启与关闭两态均返回成功，无法排除系统代理或代理侧解析，故不作为任意目标 DNS 已被 TUN 捕获的通过证据。随后停止 VPN，将 DNS 劫持恢复为 `checked=false`，再次强停重启后仍为关闭。结束时应用位于仪表盘且 `selected=true` 计数为 1，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 不存在；没有读取 DNS 正文、配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
