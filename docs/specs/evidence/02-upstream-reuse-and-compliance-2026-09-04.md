@@ -180,6 +180,7 @@ $env:GRADLE_USER_HOME = 'D:\xtoolpro\.gradle-upstream-media'
 - 本地检查点提交：`16becda`（`docs(phase02): back up upstream proof checkpoint`），内容仅包括 `AGENTS.md` 的 GitHub 检查点规则、本证据文件和 `scripts/phase02-central-mirror.init.gradle`；未包含 SDK、缓存、上游归档、设备截图、构建输出、凭据或其他混合工作树变更。
 - 此前直接使用 Windows Schannel 的推送曾因 `Failed to connect to github.com:443` 失败；本次通过仓库已配置的 Karing 代理并以 Git 的 OpenSSL TLS 后端执行 `git -c http.sslBackend=openssl ls-remote origin refs/heads/main`，远端返回 `85a1a79c9f92fec10a25d7a667f200bbb11f9735`。
 - 因此，`16becda` 检查点及其后记录失败原因的 `85a1a79` 均已确认存在于 GitHub `origin/main`；本节此前的“未完成 GitHub 远程备份”状态已解除。该复核不代表 Phase 02 或任何 engine 已批准。
+- 2026-09-06 本次真机证据提交 `b6d6ed26474b45083b8abc5112253c4ed89e455e` 已通过同一 Karing/OpenSSL Git 通道推送，`git ls-remote origin refs/heads/main` 返回相同哈希；仅该证据文件进入提交，SDK、缓存、上游归档、设备原始输出和混合工作树变更均未进入提交。
 
 ### 2026-09-05 Phase 02 preflight
 
