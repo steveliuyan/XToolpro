@@ -443,6 +443,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机初始开关为 `checked=true`。在 VPN 停止态临时关闭后执行 `am force-stop --user 0 com.follow.clash.dev` 并重新启动，基本配置页中的子 `Switch` 仍为 `checked=false`，证明关闭值可跨进程重建保持；本轮没有启动 VPN，复核时系统 `VPN CONNECTED` 计数为 0。
 - 随后将开关恢复为 `checked=true`，再次强停重启后仍为开启；最终复核 `unified_delay=true`，随后停止应用，`VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 只证明开关映射和持久化，不证明测速结果实际去除握手等额外延迟。没有读取或输出配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 测速链接校验与取消边界 proof（2026-09-07）
+
+- 固定源码 `lib/views/config/general.dart` 的 `TestUrlItem` 从 `appSettingProvider` 读取 `testUrl`，使用默认公开测试链接作为重置值，并拒绝空值或非 URL；`lib/providers/actions/proxies.dart` 将该设置作为默认测速链接传入代理组计算，`lib/core/interface.dart` 以 `test-url` 传入 core 的延迟测试请求，`lib/common/compute.dart` 用它参与延迟状态和排序。本轮只复核源码路径和 UI 校验边界。
+- 真机基本配置页显示当前公开测试链接为 `https://www.gstatic.com/generate_204`。打开“测速链接”编辑对话框后，ADB 临时输入的非法文本触发 UI 校验提示“测速链接必须为 URL”；本轮没有提交该非法值，也没有运行测速或读取延迟结果。
+- 点击取消后，基本配置页仍显示原公开测试链接；随后停止应用，系统 `VPN CONNECTED=0`，设备临时 UI hierarchy 已删除。该 proof 只证明入口、非空/URL 校验和取消不落盘边界，不证明新测速 URL 的保存、跨进程持久化、可达性或实际节点测速行为。没有读取或输出订阅 URL、凭据、Cookie、节点名、请求或日志内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
