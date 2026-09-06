@@ -386,6 +386,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 停止后，`tun0` IPv4、全局 IPv6、系统 `VPN CONNECTED` 和该 DNS stub 的匹配数均恢复为 0，仪表盘标签为 `selected=true`，设备临时 UI hierarchy 已删除。本轮没有读取 DNS 查询正文、配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。
 - 当前结果只验证 IPv6 关闭时的接口/路由边界和现有 DNS stub 的最小解析路径；DNS 劫持、Fake-IP/Host、流量嗅探及其错误和恢复场景仍未验证。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 代理组选择强停持久化 proof（2026-09-06）
+
+- 固定源码 `lib/views/proxies/card.dart` 以 `selectedProxyNameProvider(groupName)` 驱动节点卡片的选中状态，节点点击依次调用 `updateCurrentSelectedMap(groupName, nextProxyName)` 和 `changeProxyDebounce(...)`。`lib/providers/actions/profiles.dart` 将选择写入当前 Profile 的 `selectedMap` 并调用 profile 持久化；`lib/database/profiles.dart` 又把该字段映射到 Drift `profiles.selected_map` 文本列。`lib/widgets/card.dart` 的选中态只改变视觉颜色/边框，并显示没有独立 accessibility 标签的 check 图标，因此不从 UI hierarchy 猜测节点名称或选中卡片。
+- 设备没有可用的 `sqlite3` CLI，FlClash 也没有暴露该表的 ContentProvider。本轮在 `run-as com.follow.clash.dev` 沙箱内临时运行只读 Android SQLite 探针：以结构化 XML/JSON API 解析 `currentProfileId`，再以 `SQLiteDatabase.OPEN_READONLY` 只查询该 Profile 的 `selected_map` 和 `current_group_name`。探针只向主机输出布尔值、条目数和按排序键/长度前缀规范化后的 SHA-256；没有输出或复制数据库、配置、profile ID、组名、节点名、订阅 URL、凭据、Cookie 或任何原始字段值。
+- 强停前，当前 Profile 可解析且存在，`selected_map` 非空并含 1 条映射，当前组已记录且其选择非空。执行 `am force-stop --user 0 com.follow.clash.dev` 后确认进程消失、`tun0` 不存在、FlClash `VpnService` 计数为 0；重新通过 launcher 启动并等待初始化后重复只读查询，以上布尔值和条目数不变，规范化 SHA-256 与强停前完全一致。该结果证明当前代理组选择由固定包持久化并在进程重建后恢复，不外推为多个组、所有节点协议或实时 core 切换均通过。
+- 验证结束时应用位于仪表盘，仪表盘节点 `selected=true` 计数为 1；`tun0` 地址行数、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 行数均为 0。主机临时探针目录、设备 app 私有临时 dex、`/data/local/tmp` 探针和 UI hierarchy 均已删除；没有修改数据库、配置、节点选择、SDK、缓存、上游归档或构建产物。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。

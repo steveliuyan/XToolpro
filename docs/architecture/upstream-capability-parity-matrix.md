@@ -21,7 +21,7 @@
 | YAML、剪贴板、URL/订阅导入与导出 | `lib/views/profiles/add.dart`、`lib/widgets/input.dart`、`lib/providers/actions/profiles.dart`、`android/`、`core/` | 配置导入、校验、备份恢复、错误回退 | Partial：真机识别文件配置；确认二维码、文件、URL 添加入口；配置导出经 SAF 提交，系统文件选择器中配置卡片标签与导出文件名精确匹配 1 项，未打开或读取文件；本地备份经 SAF 保存后应用报告成功，系统 ZIP 选择器可见对应文件；独立配置剪贴板导入在固定 Android 包中为 Unavailable，源码和真机添加页均只有二维码、文件、URL 三项，URL 文本框长按未显示“粘贴”动作且未改写剪贴板，标准文本粘贴仍未验证；未验证备份恢复 |
 | 订阅更新、重命名、复制、删除和持久化 | `lib/views/profiles/profiles.dart`、`lib/views/profiles/edit.dart`、`lib/providers/actions/profiles.dart`、配置服务 | 配置仓库和版本化变更 | Partial：真机确认编辑、预览、覆写和删除入口；后续当前配置出现仅限 URL 类型的“同步”和“复制链接”，编辑页存在 3 个非空输入框、自动更新项和保存动作，未读取字段值或提交变更；固定 Android UI/源码没有复制或克隆配置动作，“复制链接”不能替代配置复制；未执行订阅更新、重命名、删除或持久化行为验证 |
 | 规则/全局/直连模式 | `core/Clash.Meta`、配置路径 | 模式选择与状态持久化 | Verified：真机确认三种模式；全局和直连均经强停重启保持；直连模式下公开 HTTPS 返回 `200` 且 TUN 收发计数增长，结束时恢复规则模式并再次强停重启确认 |
-| 代理组展开、节点切换和当前节点 | `core/`、Android bridge | 代理组/节点页面与运行状态 | Partial：规则模式下真机显示多个代理组、节点卡，以及“自动选择”“故障转移”组入口；切换节点产生持久状态变更并可重启，当前节点未能通过无敏感语义独立复核；直连模式按上游逻辑隐藏代理入口，恢复规则模式后入口重新出现 |
+| 代理组展开、节点切换和当前节点 | `core/`、Android bridge | 代理组/节点页面与运行状态 | Partial：规则模式下真机显示多个代理组、节点卡，以及“自动选择”“故障转移”组入口；固定源码将节点点击写入当前 Profile 的 `selectedMap` 和 Drift `profiles.selected_map`；设备内只读查询确认当前 Profile 的映射非空、当前组选择非空，强停重启前后条目数与规范化 SHA-256 完全一致，且未输出组名、节点名或原始值；直连模式按上游逻辑隐藏代理入口，恢复规则模式后入口重新出现；无敏感 UI 语义仍不能独立标识所选卡片，且未覆盖多个组/节点切换，故保持 `Partial` |
 | 节点协议、地区、标签筛选 | `core/`、Clash.Meta provider | 筛选、排序和可用性标记 | Partial：固定 Clash.Meta provider 源码存在 `filter`/`exclude-filter` 正则字段；真机代理页未出现独立协议、地区或标签筛选控件，当前仅能确认上游内部字段，未验证用户可见筛选行为 |
 | 单节点与批量测速 | `core/`、服务层 | 测速任务、结果和失败原因 | Verified：单节点返回 `103 ms`；当前组批量测速显示 10 个结果节点和 9 个不同延迟值 |
 | Android VPN 启停与竞争 VPN 处理 | `android/service`、`android/core` | `VpnService` 生命周期和权限流程 | Partial：真机多次完成启动、停止和恢复；未验证竞争 VPN、首次授权拒绝或撤销 |
