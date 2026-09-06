@@ -407,6 +407,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 开启态启动 VPN 后，`tun0` 有 1 条 IPv4、0 条 scope global IPv6 地址，系统 legacy `VPN CONNECTED` 为 1；对应 `LinkProperties` 中固定 DNS stub 与 `tun0` 均各匹配 1 项。公开主机名解析退出码为 0；一次公开 HTTPS 端点连接超时并返回退出码 28，另一次公开 HTTPS 返回 `200` 且退出码为 0，因此只证明开启态存在可用的真实主机名 HTTPS 路径，不把单一端点失败归因于 DNS 劫持。
 - `curl --dns-servers` 指向保留地址或 loopback 的请求在开启与关闭两态均返回成功，无法排除系统代理或代理侧解析，故不作为任意目标 DNS 已被 TUN 捕获的通过证据。随后停止 VPN，将 DNS 劫持恢复为 `checked=false`，再次强停重启后仍为关闭。结束时应用位于仪表盘且 `selected=true` 计数为 1，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 不存在；没有读取 DNS 正文、配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S IPv6 开关 proof（2026-09-06）
+
+- 固定源码 `lib/views/config/network.dart` 将“IPv6”绑定到 `vpnSettingProvider.ipv6`；`android/service/src/main/java/com/follow/clash/service/VpnService.kt` 在该值为真时添加固定 IPv6 TUN 地址与 `::/0` 路由，并向 `Core.startTun` 传入包含 IPv4/IPv6 的地址和 DNS 参数。`VpnService.Builder.addDnsServers()` 同时发布固定 IPv4/IPv6 DNS stub。
+- 真机初始 `IPv6=false`。在 VPN 停止态临时开启 IPv6 并执行强停重启，网络页仍显示 `checked=true`，证明开关值可跨进程重建保持。开启态启动 VPN 后，`tun0` 有 1 条 IPv4 地址和 1 条 scope global IPv6 地址；系统 legacy `VPN CONNECTED` 为 1；VPN `LinkProperties` 中 IPv4 DNS stub 与 IPv6 DNS stub 各匹配 1 项，`::/0` 路由匹配 2 项；公开 HTTPS 请求返回 `200`，退出码为 0。
+- 停止 VPN 后将 IPv6 恢复为 `checked=false`，再次强停重启后仍为关闭。结束时应用回到仪表盘，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除；没有读取或输出配置、节点、订阅 URL、凭据、Cookie、DNS 查询正文或日志正文。该 proof 仅证明固定包在目标 API 33 设备上的 IPv6 VPN/TUN 地址、路由、DNS stub 和 HTTPS 基本行为，不外推为所有 IPv6 代理规则、Fake-IP/Host 或流量嗅探行为通过。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
