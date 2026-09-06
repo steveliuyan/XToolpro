@@ -393,6 +393,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 强停前，当前 Profile 可解析且存在，`selected_map` 非空并含 1 条映射，当前组已记录且其选择非空。执行 `am force-stop --user 0 com.follow.clash.dev` 后确认进程消失、`tun0` 不存在、FlClash `VpnService` 计数为 0；重新通过 launcher 启动并等待初始化后重复只读查询，以上布尔值和条目数不变，规范化 SHA-256 与强停前完全一致。该结果证明当前代理组选择由固定包持久化并在进程重建后恢复，不外推为多个组、所有节点协议或实时 core 切换均通过。
 - 验证结束时应用位于仪表盘，仪表盘节点 `selected=true` 计数为 1；`tun0` 地址行数、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 行数均为 0。主机临时探针目录、设备 app 私有临时 dex、`/data/local/tmp` 探针和 UI hierarchy 均已删除；没有修改数据库、配置、节点选择、SDK、缓存、上游归档或构建产物。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 允许应用绕过 VPN 开关 proof（2026-09-06）
+
+- 固定源码 `lib/views/config/network.dart` 的 `AllowBypassItem` 将“允许应用绕过 VPN”绑定到 `vpnSettingProvider.allowBypass`；`lib/providers/state.dart` 将该值传入 `VpnOptions.allowBypass`；`android/service/src/main/java/com/follow/clash/service/VpnService.kt` 在建 VPN 时对真值调用 Android `VpnService.Builder.allowBypass()`。该路径与“访问控制”的允许/排除应用列表不同，本轮没有读取、枚举或修改任何应用清单。
+- 真机初始 Switch 为 `checked=true`。在停止态临时切换为 `false` 后执行 `am force-stop --user 0 com.follow.clash.dev`，确认进程和 `tun0` 均消失；重新启动并等待初始化后 Switch 仍为 `checked=false`，证明关闭值在进程重建后保持。
+- 在 `checked=false` 状态从仪表盘启动，`tun0` 地址行数变为 2 且 FlClash `VpnService` 存在；随后停止，`tun0`、`VpnService` 和系统 legacy `VPN CONNECTED` 均恢复为 0。Android API 33 的 `dumpsys connectivity` 与 `dumpsys vpn_management` 没有暴露 `allowBypass` 字段，本轮也没有让测试应用调用网络绑定 API，因此不能把源码调用或 VPN 成功启动外推为实际绕过流量已验证。
+- 随后将 Switch 恢复为 `checked=true`，再次强停并启动后仍为 `checked=true`。结束时应用位于仪表盘且仪表盘节点 `selected=true` 计数为 1，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除；未改变应用选择、配置内容、节点、订阅 URL、凭据、Cookie 或其他网络开关。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。

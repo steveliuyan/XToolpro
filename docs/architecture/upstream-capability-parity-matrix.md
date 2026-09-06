@@ -28,7 +28,7 @@
 | 始终开启、断线阻止 | Android VPN bridge、系统能力 | 能力检测、系统设置入口和明确 unavailable 状态 | Partial：ADB 可打开 Android `Settings$VpnSettingsActivity`；secure settings 显示始终开启 VPN 未配置、lockdown 未启用；未验证 FlClash 设置入口的写入行为或断线阻止实际效果 |
 | TUN、系统代理、局域网共享 | `android/service/src/main/java/com/follow/clash/service/VpnService.kt`、`core/`、Android bridge | 运行模式和局域网开关 | Partial：`tun0` 与真实 HTTPS 流量已验证；真机“系统代理”为开启，运行态 Android VPN `LinkProperties` 报告 loopback `7890` HTTP proxy，停止后对应代理消失；“局域网代理”为关闭，运行态 mixed port 的 4 条 TCP 监听均仅绑定 loopback且无 wildcard，验证了关闭边界；未开启或验证局域网共享访问 |
 | IPv6、DNS、Fake-IP/Host、流量嗅探 | `lib/views/config/network.dart`、`android/service/src/main/java/com/follow/clash/service/VpnService.kt`、`core/Clash.Meta` | DNS/IPv6/嗅探配置和诊断 | Partial：真机当前 `IPv6=false`、`DNS 劫持=false`；运行态 `tun0` 有 1 条 IPv4、0 条全局 IPv6 地址，VPN `LinkProperties` 含 1 条 `172.19.0.2` DNS stub 和 `::/0 unreachable`，公开主机名解析连通成功，停止后对应状态消失；未改变开关或验证 DNS 劫持、Fake-IP/Host、流量嗅探行为 |
-| 按应用代理/绕过 | `core/`、Android package bridge | 应用选择与路由策略 | Partial：真机进入访问控制应用列表，并确认“允许应用绕过 VPN”入口；未改变应用选择或验证路由结果 |
+| 按应用代理/绕过 | `core/`、Android package bridge | 应用选择与路由策略 | Partial：真机进入访问控制应用列表；“允许应用绕过 VPN”初始为开启，临时关闭后强停重启仍为关闭，关闭态可建立并停止 `VpnService`/`tun0`，恢复开启后再次强停重启仍为开启；固定源码把该值传入 `VpnOptions.allowBypass` 并在建 VPN 时调用 `VpnService.Builder.allowBypass()`；Android 13 `dumpsys` 未暴露该字段，本轮未选择应用或验证应用主动绕过后的实际流量路径 |
 | 域名/IP/GeoIP 规则集和命中日志 | `core/` | 规则管理、命中详情和脱敏日志 | Partial：真机确认附加规则入口和规则模式；未读取规则内容、命中详情或日志 |
 | 实时上下行速率、会话流量、连接列表 | `core/`、service bridge | 实时状态、历史摘要和任务事件 | Verified：运行态显示实时/累计流量；公开 HTTPS 流量后连接页显示 10 个可见记录 |
 | 请求、规则、内核日志与崩溃诊断 | `core/`、service bridge | 脱敏诊断导出 | Partial：直连公开 HTTPS 流量后请求页显示 10 个可见记录，其中 6 个 accessibility 节点带 `DIRECT` 路由语义；临时启用 `info` 和日志捕获后日志页显示 6 条可见/部分可见 `info` 记录，随后恢复原设置；规则模式重测返回 HTTP `000`，未形成可归因的新记录；未读取正文，仍未验证规则命中日志或崩溃诊断 |
