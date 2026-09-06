@@ -419,6 +419,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机在 VPN 停止态临时开启“局域网代理”，执行 `am force-stop --user 0 com.follow.clash.dev` 后重新启动，基本配置页仍为 `checked=true`，证明开关值可跨进程重建保持。开启态启动 VPN 后，`tun0` IPv4 地址行数为 1，系统 legacy `VPN CONNECTED` 为 1，mixed port 监听计数为 8，其中 wildcard `:7890` 计数为 1；公开 HTTPS 请求返回 `200`，退出码为 0。
 - 本轮没有从其他局域网设备发起连接，也没有读取或输出配置、节点、订阅 URL、凭据、Cookie、请求或日志正文，因此只证明目标设备上开关对监听边界和 VPN 生命周期的影响，不证明跨设备共享访问、鉴权或防火墙路径。随后停止 VPN，将开关恢复为 `checked=false`，再次强停重启后仍为关闭；结束时应用回到仪表盘，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 追加系统 DNS 开关 proof（2026-09-07）
+
+- 固定源码 `lib/views/config/general.dart` 将基本配置中的“追加系统 DNS”绑定到 `networkSettingProvider.appendSystemDns`；`lib/providers/actions/setup.dart` 将该值传入 `MakeRealProfileState`，`lib/common/task.dart` 在开启时向 `rawConfig['dns']['nameserver']` 追加 `system://`。本轮只复核源码路径和设备侧开关状态，没有读取配置正文。
+- 真机初始开关为 `checked=false`。在 VPN 停止态临时开启后执行 `am force-stop --user 0 com.follow.clash.dev` 并重新启动，基本配置页仍为 `checked=true`，证明开启值可跨进程重建保持。开启态启动 VPN 后，`tun0` 地址行数为 2，系统 legacy `VPN CONNECTED` 为 1，`172.19.0.2` IPv4 DNS stub 匹配为 1，IPv6 DNS stub 匹配为 0；公开 HTTPS 请求返回 `200`，退出码为 0。
+- 随后停止 VPN，将开关恢复为 `checked=false`，再次强停重启后仍为关闭。结束时应用回到仪表盘，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除。由于未读取生成配置，不能把源码追加 `system://` 外推为最终 nameserver 列表已实际包含该值；本 proof 只证明开关持久化、开启态 VPN/TUN 和公开 HTTPS 基本运行边界。没有读取或输出 DNS 查询正文、配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
