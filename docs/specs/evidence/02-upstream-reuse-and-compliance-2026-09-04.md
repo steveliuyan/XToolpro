@@ -305,6 +305,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 用户观察到直连模式下底部没有“代理”选项。固定上游 `lib/providers/state.dart` 的 `currentGroupsState` 在 `Mode.direct` 下返回空组，`lib/common/navigation.dart` 又仅在 `hasProxies` 时显示代理页，因此该现象是上游模式语义而非配置丢失。切回规则模式并强停重启后，单选序列为 `true,false,false`，“代理”入口恢复，代理页再次显示“自动选择”和“故障转移”组入口。
 - 验证结束后已恢复原设备设置：核心日志等级为 `error`，“日志捕获”关闭且工具页日志入口消失，模式为规则；`tun0` 不存在，FlClash `VpnService` 不再运行，活动通知记录为 0。未更改配置内容、节点选择、订阅 URL、凭据、Cookie、访问控制、DNS、系统代理或系统 VPN 设置。
 
+### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
+
+- 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
+- 平台声明复核显示：`proxy` 仅 Windows，`window_ext` 仅 Windows/macOS，`rust_api` 仅 iOS/Linux/macOS/Windows；固定 Android proof APK（SHA-256 `4F374C68570EB4837B94D7026D594237035E18A97B84B27AAEEEBA4FAD7355EC`）的 ZIP 成员和 `classes.dex` ASCII 字符串扫描均未发现 `ProxyPlugin`、`RustLib` 或 `WindowExtPlugin` 及对应 plugin 成员。APK 中唯一的 `proxy` 路径是应用空状态图标，不属于 plugin 代码。
+- 该证据将 Android `engine-proxy` 路径的三个未声明许可插件标记为已验证排除项；它不解除桌面/full-capability 路径的许可阻塞，也不替代 Flutter/Gradle resolved dependency tree、Clash.Meta 子模块、native/传递依赖的许可证审查。后续 Android 构建必须保留依赖裁剪检查。
+- `plugins/rust_api/rust/Cargo.lock` 的固定文件 SHA-256 为 `B258BC0B66CBC29884BA75746090B7F5B82FFA5303BB06F68F5228B21A60B843`，记录 87 个 Cargo 包；该锁文件不含完整许可证字段，桌面候选传递依赖仍需独立许可证解析。
+- 已同步更新 [许可审计](../../compliance/upstream-license-source-audit.md)、[直接依赖盘点](../../compliance/upstream-dependency-inventory.md)、[第三方声明底稿](../../compliance/THIRD_PARTY_NOTICES.md) 和 [上游复用台账](../../architecture/upstream-reuse-ledger.md)。Proxy 台账仍为 `Investigating`，未进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
