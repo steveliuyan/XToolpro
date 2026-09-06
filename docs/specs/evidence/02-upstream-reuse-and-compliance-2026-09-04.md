@@ -274,6 +274,15 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 小米 10S（`M2102J2SC`、Android API `33`、`arm64-v8a`）上，旧测试包因签名不同无法覆盖安装；仅卸载包名 `com.follow.clash.dev` 的旧 proof 包后重新安装，ADB 返回 `Success`，`pm path` 和版本 `0.8.96`/`versionCode=2026081701` 均复核通过。启动后的前台 Activity 为 `com.follow.clash.MainActivity`，UI dump 显示真实“仪表盘”页面及配置/工具标签，不再出现 `Init Failed` 或 `MissingPluginException`；相关 logcat 未再出现 `GeneratedPluginRegistrant`/`device_info` 初始化错误。UI dump 同时产生了 MIUI 缺失 `/data/system/theme_config/theme_compatibility.xml` 的系统警告，但 dump 成功且不属于应用崩溃。
 - 本检查点只证明 Flutter 原生插件注册、APK 安装和应用初始化已通过；尚未请求 VPN 用户授权、启动/停止 TUN、验证代理流量或恢复流程。Proxy 台账继续保持 `Investigating`，不可将初始化 proof 宣称为 VPN/代理 capability parity 通过。
 
+### FlClash 小米 10S 配置后 VPN/TUN 闭环 proof（2026-09-06）
+
+- 用户已在设备上的配置页添加真实配置；本记录不保存配置内容、节点信息、订阅 URL、凭据或 Cookie。设备仍为 `bf353dda`、Xiaomi `M2102J2SC`、Android API `33`、`arm64-v8a`，前台 Activity 为 `com.follow.clash.dev/com.follow.clash.MainActivity`。
+- 启动状态由 ADB 独立复核：`com.follow.clash.dev/com.follow.clash.service.VpnService` 为 `isForeground=true`，系统 `dumpsys connectivity` 报告 `VPN CONNECTED`；接口为 `tun0`，地址 `172.19.0.1/30`，DNS `172.19.0.2`，VPN session 为 `FlClash`，owner UID 为 `10300`，本地 HTTP proxy 为 `127.0.0.1:7890`。本轮未出现新的 VPN 授权弹窗，记录仅证明当时系统已有授权状态并成功建立连接，不推断授权来源。
+- 最小真实流量验证通过：设备侧 `curl --fail --silent --max-time 15 https://example.com` 返回 `HTTP 200`；请求前后 `tun0` 统计从接收 `81,501`/发送 `86,530` 字节增长到接收 `89,046`/发送 `94,059` 字节。界面同时显示运行计时 `00:00:45`、速度 `↑ 24B/s ↓ 1.4KB/s`、累计上传 `73.8KB`、下载 `86.6KB`。该结果证明当前配置下的最小可达流量和 TUN 计数变化，不证明所有代理协议或节点均可用。
+- 停止验证通过：点击运行控件后等待 3 秒，`ip addr show tun0` 报告 `Device "tun0" does not exist`，`dumpsys activity services com.follow.clash.dev` 不再列出运行中的 `VpnService`，连接状态中也不再保留该 VPN 网络。
+- 恢复验证通过：再次使用停止态实际启动控件，等待 6 秒后 `tun0` 重新为 `UP`，地址恢复为 `172.19.0.1/30`；`VpnService` 恢复 `isForeground=true`，系统重新报告 `VPN CONNECTED`，底层网络为原始 Wi-Fi `wlan0`。随后 HTTPS 请求返回 `HTTP 200` 且 `tun0` 字节计数继续增长。
+- 该检查点扩大了 FlClash arm64 proof 的真实设备边界，仍未完成配置/节点/代理组全量矩阵、规则/DNS/IPv6、测速、日志、更新、备份、通知、异常崩溃和权限拒绝场景，也未完成许可证、SBOM 和完整 upstream capability parity 审查。Proxy 台账继续保持 `Investigating`，不得进入正式 engine 集成或改写为能力完整。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
