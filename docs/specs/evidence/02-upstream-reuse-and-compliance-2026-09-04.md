@@ -413,6 +413,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机初始 `IPv6=false`。在 VPN 停止态临时开启 IPv6 并执行强停重启，网络页仍显示 `checked=true`，证明开关值可跨进程重建保持。开启态启动 VPN 后，`tun0` 有 1 条 IPv4 地址和 1 条 scope global IPv6 地址；系统 legacy `VPN CONNECTED` 为 1；VPN `LinkProperties` 中 IPv4 DNS stub 与 IPv6 DNS stub 各匹配 1 项，`::/0` 路由匹配 2 项；公开 HTTPS 请求返回 `200`，退出码为 0。
 - 停止 VPN 后将 IPv6 恢复为 `checked=false`，再次强停重启后仍为关闭。结束时应用回到仪表盘，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除；没有读取或输出配置、节点、订阅 URL、凭据、Cookie、DNS 查询正文或日志正文。该 proof 仅证明固定包在目标 API 33 设备上的 IPv6 VPN/TUN 地址、路由、DNS stub 和 HTTPS 基本行为，不外推为所有 IPv6 代理规则、Fake-IP/Host 或流量嗅探行为通过。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 局域网代理开关 proof（2026-09-06）
+
+- 固定源码的基本配置页将“局域网代理”持久化为代理监听范围设置；此前关闭态已记录 mixed port 的 4 条 TCP 监听均为 loopback 且 wildcard 计数为 0。
+- 真机在 VPN 停止态临时开启“局域网代理”，执行 `am force-stop --user 0 com.follow.clash.dev` 后重新启动，基本配置页仍为 `checked=true`，证明开关值可跨进程重建保持。开启态启动 VPN 后，`tun0` IPv4 地址行数为 1，系统 legacy `VPN CONNECTED` 为 1，mixed port 监听计数为 8，其中 wildcard `:7890` 计数为 1；公开 HTTPS 请求返回 `200`，退出码为 0。
+- 本轮没有从其他局域网设备发起连接，也没有读取或输出配置、节点、订阅 URL、凭据、Cookie、请求或日志正文，因此只证明目标设备上开关对监听边界和 VPN 生命周期的影响，不证明跨设备共享访问、鉴权或防火墙路径。随后停止 VPN，将开关恢复为 `checked=false`，再次强停重启后仍为关闭；结束时应用回到仪表盘，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
