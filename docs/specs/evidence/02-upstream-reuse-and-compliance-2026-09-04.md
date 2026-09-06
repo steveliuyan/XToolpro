@@ -295,7 +295,15 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 应用设置页确认自动运行、选项卡动画、日志捕获、自动关闭连接、仅统计代理、崩溃分析和自动检查更新开关；Android 页面不显示桌面端自启动项。对已安装包的只读 manifest/package 状态检查未发现 `android.app.shortcuts`、`APPWIDGET_UPDATE`/`AppWidgetProvider` 或 `BOOT_COMPLETED` 声明，因此固定 Android proof 包的静态快捷方式、小组件和开机广播路径记为 `Unavailable`，不能用应用打开后的“自动运行”替代。
 - 运行态复核：从停止态启动后，系统列出 `com.follow.clash.dev/com.follow.clash.service.VpnService`，`tun0` 为 `UP`，并存在 1 条该包的活动通知。Android 系统当前未把 FlClash 配置为始终开启 VPN，断线阻止值为未配置；本轮没有改变系统 VPN 设置。结合上一节设备侧 HTTPS `HTTP 200` 和 TUN 字节增长证据，本轮再打开公开 HTTPS 地址后，请求页与连接页各显示 10 个可见记录；只记录计数，不记录目标地址、应用或规则内容。
 - 结束状态复核：停止后 `tun0` 不存在，FlClash `VpnService` 不再运行，活动通知记录为 0，规则模式保持选中。一次节点切换用于验证持久状态变更，但原节点无法在不暴露设备私有名称的前提下识别，因此不声明节点选择已恢复。除该已披露的节点选择外，本轮未改变配置、访问控制、DNS、系统代理、局域网、自动运行、更新、备份或系统 VPN 设置。
-- 判定已同步到 [上游完整能力对照矩阵](../../architecture/upstream-capability-parity-matrix.md)。完整通过仅包括单节点/批量测速，以及实时/累计流量与连接列表两个合并行；其余已观察能力保持 `Partial` 或 `Pending`。仍缺节点筛选、订阅更新、导出提交、备份/恢复提交、直连行为、竞争 VPN、首次授权拒绝/撤销、始终开启/断线阻止、DNS/Fake-IP/Host/嗅探行为、规则命中/日志、更新/回滚、异常崩溃和对应契约测试。Proxy 台账继续保持 `Investigating`，不得进入正式 engine 集成。
+- 判定已同步到 [上游完整能力对照矩阵](../../architecture/upstream-capability-parity-matrix.md)。当时完整通过仅包括单节点/批量测速，以及实时/累计流量与连接列表两个合并行；其余已观察能力保持 `Partial` 或 `Pending`。仍缺节点筛选、订阅更新、导出提交、备份/恢复提交、竞争 VPN、首次授权拒绝/撤销、始终开启/断线阻止、DNS/Fake-IP/Host/嗅探行为、规则命中/日志、更新/回滚、异常崩溃和对应契约测试。Proxy 台账继续保持 `Investigating`，不得进入正式 engine 集成。
+
+### FlClash 小米 10S 直连与日志补充 proof（2026-09-06）
+
+- 在同一固定来源 proof 包和真机上将模式切换为直连，强停并重启后 UI 单选序列仍为 `false,false,true`，证明直连模式持久化。直连运行态的 `tun0` 和 FlClash `VpnService` 均存在，活动通知记录为 1；设备侧公开 HTTPS 请求返回 `200`，请求前后 `tun0` 接收增加 `8,693` 字节、发送增加 `8,677` 字节。
+- 直连流量后，请求页显示 10 条可见记录，其中 6 个 accessibility 节点包含允许记录的 `DIRECT` 路由语义。未读取或输出请求地址、应用、节点、规则或其他正文。结合此前全局模式强停重启 proof，矩阵中的“规则/全局/直连模式”合并行升级为 `Verified`；该结论不外推为所有代理协议、规则或 DNS 行为通过。
+- 日志验证前，核心日志等级为 `error`，应用“日志捕获”为关闭。验证期间仅临时切换到 `info` 并启用日志捕获；工具页随即出现日志入口，日志页标题可见，共显示 6 条可见/部分可见 `info` 记录。ADB 处理 UI hierarchy 时仅输出页面标题存在性、级别标签和计数，未输出日志正文、URL、应用名、规则或目标。
+- 用户观察到直连模式下底部没有“代理”选项。固定上游 `lib/providers/state.dart` 的 `currentGroupsState` 在 `Mode.direct` 下返回空组，`lib/common/navigation.dart` 又仅在 `hasProxies` 时显示代理页，因此该现象是上游模式语义而非配置丢失。切回规则模式并强停重启后，单选序列为 `true,false,false`，“代理”入口恢复，代理页再次显示“自动选择”和“故障转移”组入口。
+- 验证结束后已恢复原设备设置：核心日志等级为 `error`，“日志捕获”关闭且工具页日志入口消失，模式为规则；`tun0` 不存在，FlClash `VpnService` 不再运行，活动通知记录为 0。未更改配置内容、节点选择、订阅 URL、凭据、Cookie、访问控制、DNS、系统代理或系统 VPN 设置。
 
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
