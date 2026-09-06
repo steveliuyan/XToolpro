@@ -425,6 +425,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机初始开关为 `checked=false`。在 VPN 停止态临时开启后执行 `am force-stop --user 0 com.follow.clash.dev` 并重新启动，基本配置页仍为 `checked=true`，证明开启值可跨进程重建保持。开启态启动 VPN 后，`tun0` 地址行数为 2，系统 legacy `VPN CONNECTED` 为 1，`172.19.0.2` IPv4 DNS stub 匹配为 1，IPv6 DNS stub 匹配为 0；公开 HTTPS 请求返回 `200`，退出码为 0。
 - 随后停止 VPN，将开关恢复为 `checked=false`，再次强停重启后仍为关闭。结束时应用回到仪表盘，`tun0`、FlClash `VpnService` 和系统 legacy `VPN CONNECTED` 均为 0，设备临时 UI hierarchy 已删除。由于未读取生成配置，不能把源码追加 `system://` 外推为最终 nameserver 列表已实际包含该值；本 proof 只证明开关持久化、开启态 VPN/TUN 和公开 HTTPS 基本运行边界。没有读取或输出 DNS 查询正文、配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 查找进程模式 proof（2026-09-07）
+
+- 固定源码 `lib/views/config/general.dart` 的 `FindProcessItem` 将开关值映射为 `FindProcessMode.always` 或 `FindProcessMode.off`；`lib/providers/state.dart` 将 `state.findProcessMode` 传入 `UpdateParams.findProcessMode`，`lib/models/clash_config.dart` 和 `lib/models/core.dart` 分别以 `find-process-mode` 保持配置/核心参数映射。本轮只复核源码路径和设备侧开关状态，没有读取配置正文或进程/请求内容。
+- 真机初始开关为 `checked=false`。在 VPN 停止态临时开启后执行 `am force-stop --user 0 com.follow.clash.dev` 并重新启动，基本配置页中的子 `Switch` 仍为 `checked=true`，证明开启值可跨进程重建保持；本轮没有启动 VPN，复核时系统 `VPN CONNECTED` 计数为 0。
+- 随后将开关恢复为 `checked=false`，再次强停重启后仍为关闭；结束时 `VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 只证明开关映射和持久化，不证明 Clash.Meta 实际完成进程识别、请求归因或性能开销变化。没有读取或输出配置、进程名、节点、订阅 URL、凭据、Cookie、请求或日志内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
