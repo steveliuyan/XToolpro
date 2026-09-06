@@ -27,7 +27,7 @@
 | Android VPN 启停与竞争 VPN 处理 | `android/service`、`android/core` | `VpnService` 生命周期和权限流程 | Partial：真机多次完成启动、停止和恢复；未验证竞争 VPN、首次授权拒绝或撤销 |
 | 始终开启、断线阻止 | Android VPN bridge、系统能力 | 能力检测、系统设置入口和明确 unavailable 状态 | Partial：ADB 可打开 Android `Settings$VpnSettingsActivity`；secure settings 显示始终开启 VPN 未配置、lockdown 未启用；未验证 FlClash 设置入口的写入行为或断线阻止实际效果 |
 | TUN、系统代理、局域网共享 | `android/service/src/main/java/com/follow/clash/service/VpnService.kt`、`core/`、Android bridge | 运行模式和局域网开关 | Partial：`tun0` 与真实 HTTPS 流量已验证；真机“系统代理”为开启，运行态 Android VPN `LinkProperties` 报告 loopback `7890` HTTP proxy，停止后对应代理消失；“局域网代理”为关闭，运行态 mixed port 的 4 条 TCP 监听均仅绑定 loopback且无 wildcard，验证了关闭边界；未开启或验证局域网共享访问 |
-| IPv6、DNS、Fake-IP/Host、流量嗅探 | `core/Clash.Meta` | DNS/IPv6/嗅探配置和诊断 | Partial：真机确认 IPv6、系统 DNS、DNS 劫持和 DNS 进阶入口；未改变配置或验证 Fake-IP/Host/嗅探行为 |
+| IPv6、DNS、Fake-IP/Host、流量嗅探 | `lib/views/config/network.dart`、`android/service/src/main/java/com/follow/clash/service/VpnService.kt`、`core/Clash.Meta` | DNS/IPv6/嗅探配置和诊断 | Partial：真机当前 `IPv6=false`、`DNS 劫持=false`；运行态 `tun0` 有 1 条 IPv4、0 条全局 IPv6 地址，VPN `LinkProperties` 含 1 条 `172.19.0.2` DNS stub 和 `::/0 unreachable`，公开主机名解析连通成功，停止后对应状态消失；未改变开关或验证 DNS 劫持、Fake-IP/Host、流量嗅探行为 |
 | 按应用代理/绕过 | `core/`、Android package bridge | 应用选择与路由策略 | Partial：真机进入访问控制应用列表，并确认“允许应用绕过 VPN”入口；未改变应用选择或验证路由结果 |
 | 域名/IP/GeoIP 规则集和命中日志 | `core/` | 规则管理、命中详情和脱敏日志 | Partial：真机确认附加规则入口和规则模式；未读取规则内容、命中详情或日志 |
 | 实时上下行速率、会话流量、连接列表 | `core/`、service bridge | 实时状态、历史摘要和任务事件 | Verified：运行态显示实时/累计流量；公开 HTTPS 流量后连接页显示 10 个可见记录 |

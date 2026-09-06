@@ -379,6 +379,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机基本配置页中“局域网代理”对应 Switch 为 `checked=false`。运行态 `netstat -ltn` 对 mixed port 返回 4 条 TCP 监听，全部仅绑定 loopback，wildcard 监听计数为 0；该结果验证当前关闭状态的监听边界，不证明开启后的局域网共享访问可用。本轮没有打开该开关，也没有从其他局域网设备发起连接。
 - 验证结束后再次打开应用，`tun0` 和系统 `VPN CONNECTED` 行数仍均为 0，仪表盘标签为 `selected=true`，设备临时 UI hierarchy 已删除。没有读取或输出配置、节点、订阅 URL、凭据、Cookie、请求或日志内容，也没有修改任何配置开关。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S DNS 与 IPv6 关闭边界（2026-09-06）
+
+- 固定源码 `lib/views/config/network.dart` 将 Android VPN 的 IPv6 与 DNS 劫持分别绑定到 `vpnSettingProvider.ipv6` 和 `vpnSettingProvider.dnsHijacking`。依据该页面固定的控件顺序和真机 Switch 状态，本轮开始时两者均为 `checked=false`；验证过程没有点击或更改这些开关。
+- 从停止态启动后，`tun0` 有 1 条 IPv4 地址、0 条 scope global IPv6 地址，系统存在 1 条 `VPN CONNECTED`；对应 VPN `LinkProperties` 中 `172.19.0.2` DNS stub 匹配 1 条，`::/0 unreachable` 默认路由匹配 1 条。设备对公开测试主机名 `example.com` 的一次解析及 ICMP 连通检查退出码为 0；该结果证明当前 DNS stub 可支持主机名解析，不外推为所有 DNS 模式或代理规则可用。
+- 停止后，`tun0` IPv4、全局 IPv6、系统 `VPN CONNECTED` 和该 DNS stub 的匹配数均恢复为 0，仪表盘标签为 `selected=true`，设备临时 UI hierarchy 已删除。本轮没有读取 DNS 查询正文、配置、节点、订阅 URL、凭据、Cookie、请求或日志内容。
+- 当前结果只验证 IPv6 关闭时的接口/路由边界和现有 DNS stub 的最小解析路径；DNS 劫持、Fake-IP/Host、流量嗅探及其错误和恢复场景仍未验证。矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
