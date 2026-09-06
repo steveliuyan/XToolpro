@@ -348,7 +348,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在同一固定 proof 包和 VPN 停止态，从当前文件配置的菜单进入“更多 -> 导出文件”。固定源码 `lib/views/profiles/profiles.dart` 的 `_handleExportFile` 读取该配置私有文件字节并调用 `picker.saveFile(profile.realLabel, bytes)`；`lib/common/picker.dart` 在 Android 上将字节交给 `FilePicker.saveFile`，因此真实提交边界是系统 SAF `CREATE_DOCUMENT`。
 - 系统保存页位于“下载内容”，保留应用给出的默认文件名并点击“保存”，随后返回 FlClash 配置页。为避免在主机输出配置名，ADB UI hierarchy 只在进程内比较配置卡片候选标签与系统文件选择器的可见文件名：配置卡片候选数为 1、精确匹配数为 1，`corresponding_export_visible=true`。
 - 随后的文件选择器复核没有选择、打开、读取或复制导出文件，也没有输出配置名、节点、URL、凭据或文件内容。一次用于测试非敏感文件名输入的第二次保存页调用因 ADB 文本输入未生效而返回取消，不计入通过且未生成第二个测试文件。
-- 导出文件保留在设备文档提供者中；本轮未重新导入、恢复、删除或修改当前配置。结束时应用已回到仪表盘，`tun0` 行数为 0、系统 `VPN CONNECTED` 行数为 0。矩阵对应合并行仍为 `Partial`，因为备份恢复和独立剪贴板入口尚未验证；Proxy 台账继续保持 `Investigating`。
+- 导出文件保留在设备文档提供者中；本轮未重新导入、恢复、删除或修改当前配置。结束时应用已回到仪表盘，`tun0` 行数为 0、系统 `VPN CONNECTED` 行数为 0。矩阵对应合并行仍为 `Partial`，因为备份恢复尚未验证；独立配置剪贴板入口的结论见下一节，Proxy 台账继续保持 `Investigating`。
+
+### FlClash 小米 10S 配置剪贴板导入边界（2026-09-06）
+
+- 固定源码 `lib/views/profiles/add.dart` 的配置添加页只构造二维码、文件和 URL 三项；URL 路径使用 `InputDialog`，其 `lib/widgets/input.dart` 实现为普通 `TextFormField`，提交后才调用 `addProfileFormURL`。配置添加路径没有专用 `Clipboard.getData`、剪贴板识别或独立剪贴板菜单项。
+- 源码中的 `Clipboard.getData('text/plain')` 位于 `lib/views/access.dart`，用于导入访问控制应用列表；配置卡片的 `Clipboard.setData` 仅为 URL 类型配置的“复制链接”。两者都不能作为配置剪贴板导入通过的证据。
+- 真机添加配置页通过 ADB 确认恰有二维码、文件、URL 三个可点击入口。打开“从URL导入”后存在 1 个空 `EditText`；长按输入框后“粘贴”动作计数仍为 0，输入值保持为空。本轮没有执行粘贴或提交，没有读取、输出或改写设备剪贴板内容。
+- 因此独立配置剪贴板导入在固定 Android 包中记为 `Unavailable`；普通 `TextFormField` 在剪贴板含文本时是否暴露系统标准粘贴仍未验证，不能从 Flutter 控件类型推断为真机通过。退出对话框后应用回到仪表盘，`tun0` 和系统 `VPN CONNECTED` 行数均为 0；矩阵合并行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
