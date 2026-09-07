@@ -566,6 +566,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 但应用初始化会经 `AppPlugin.didCrashOnPreviousExecution` 调用 `FirebaseApp.initializeApp` 和 `FirebaseCrashlytics.didCrashOnPreviousExecution()`，此时尚未由当前 Flutter 设置显式写入 collection 开关；固定 Android manifest 中也未声明静态默认禁用的 Firebase collection metadata。静态源码不能确定 Firebase SDK 在该时点的有效 collection 状态、自动采集字段、是否实际传输或任何第三方服务端处理，故不得把依赖存在推断为已上传数据，也不得把 UI 开关视为完整隐私保证。
 - 本轮未读取设备 Firebase 状态、Crashlytics/logcat 内容、网络请求、配置、节点、订阅 URL、凭据、Cookie 或导出文件，也没有改动设备设置。XToolpro 的拟议 adapter 必须默认禁用并避免初始化第三方遥测，只有在明确同意后才允许受审计的最小化崩溃报告；在许可、数据字段、网络目的地、撤回/删除行为和 URI 脱敏契约完成独立审查前，该路径不可进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash VPN 前台通知配置标签边界源码审计（2026-09-07）
+
+- 固定 Dart `sharedStateProvider` 将 `currentProfileProvider` 的 `label` 填入 `SharedState.currentProfileName`，Android `ServiceState.applySharedState()` 再以该值构造 `NotificationParams.title`。这条数据流不需要读取任何当前配置值即可由固定源码确定。
+- `android/service/.../NotificationModule.kt` 的 builder 初始标题是中性字符串 `FlClash`，但每次运行态 `update` 都以 `setContentTitle(params.title)` 覆盖它；`params.title` 即上述配置显示标签。通知正文仅由 core 的速度/流量文本生成，停止动作文字来自 `stopText`。源码未显示将订阅 URL、节点/组名或规则直接写入该通知，但用户可控制的配置标签本身可能含敏感语义，不能作为中性系统通知标题使用。
+- 本轮未读取 `dumpsys notification` 正文、状态栏内容、配置标签、节点、订阅 URL、凭据、Cookie、请求或日志，也没有启动 VPN 或修改设备设置。此前的真机检查仅以计数验证通知生命周期，不能替代本次字段来源审计。
+- XToolpro 的未来 VPN shell/adapter 必须采用固定中性前台通知标题，禁止把配置标签、订阅 URL、节点/组名、规则或代理目标写入标题、正文、操作、channel 或 notification extras；在脱敏契约测试和 Android 通知隐私复核完成前，该路径不可进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
