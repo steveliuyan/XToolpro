@@ -479,6 +479,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在该后台状态由设备访问公开 `https://connectivitycheck.android.com/generate_204`，HTTP 状态为 `204`；请求完成后 `VPN CONNECTED` 仍为 1。该结果证明该固定包在目标设备后台期间保持已建立的规则模式 VPN/TUN 并允许真实公开 HTTPS 流量。
 - 将应用带回前台后通过仪表盘停止 VPN，复核 `VPN CONNECTED=0`、`tun0` 不存在，并删除设备临时 UI hierarchy。该 proof 不覆盖竞争 VPN、首次授权拒绝/撤销、始终开启或断线阻止，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S VPN 进程终止清理 proof（2026-09-07）
+
+- VPN 停止态从仪表盘启动固定 FlClash proof 包。启动后系统以布尔值确认 `VPN CONNECTED=1`，且 VPN `LinkProperties` 归属 `tun0`；不读取或输出配置、代理节点、规则、订阅 URL、凭据、Cookie、请求或日志正文。
+- 在该运行态执行 `am force-stop --user 0 com.follow.clash.dev`。随后系统复核 `VPN CONNECTED=0`、`tun0` 不存在，证明进程被终止时未保留系统 VPN/TUN。通过 launcher 重新启动应用后再次复核两项均为 0，未自动恢复陈旧 VPN 会话。
+- 该 proof 仅覆盖应用进程被 Android 强停时的 VPN 清理与重新启动边界；不模拟 core 崩溃、竞争 VPN、首次授权拒绝/撤销、始终开启或断线阻止。结束时设备临时 UI hierarchy 已删除，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
