@@ -722,6 +722,11 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `lib/database/profiles.dart` 与生成 Drift schema 将 `selectedMap` 和 `currentGroupName` 分别映射到 `selected_map`、`current_group_name` 字段；profile provider 启动时从数据库重新读取，因此源码合同包含持久化和重建恢复路径。该结论不等同于本轮改变或读取设备上的原始值。
 - 本轮仅复核固定源码，未点击节点或组、未读取设备数据库、配置、节点名、组名、订阅 URL、凭据、Cookie、日志或网络请求；矩阵保持 `Partial`，因为尚未完成用户可见的具体切换、失败回滚和路由结果契约测试，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 代理组详情展开复核（2026-09-07）
+
+- 在代理页点击进入一个既有策略组详情，仅观察页面结构；ADB UI hierarchy 对“自动选择”和“故障转移”组标签合计计数 `2`，协议卡片计数 `6`。本轮不输出任何节点名称、流量额度、延迟值或其他卡片字段。
+- 未点击节点卡、未切换当前选择、未启动 VPN、未发起流量，也未读取配置、数据库、订阅 URL、凭据、Cookie 或日志正文。该结果证明真实设备上的组展开和节点卡渲染可达，但不证明节点选择、失败回滚或路由命中；矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
