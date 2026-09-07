@@ -698,6 +698,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 这条边界与前述 Android `Log.d`/Flutter `commonPrint` 路径不同：即使未开启日志捕获，core/native 异常正文也可能经 MethodChannel 进入 Flutter 错误处理或 Toast。静态源码不能证明具体异常一定包含 URL、节点、凭据、Cookie、路径或响应内容，也不能证明设备上实际展示过这些值。
 - 本轮未触发 MethodChannel 失败、未读取 Toast、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie、请求或响应；只做固定提交源码审计，没有改变设备设置。XToolpro adapter 必须把 native/core 失败转换为稳定错误 code 与本地化、脱敏用户文案，原始异常仅可留在受访问控制的内部诊断并默认禁用；完成错误映射和 UI/日志脱敏契约测试前，Proxy 台账保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
 
+### FlClash Flutter commonPrint 敏感字段生产者边界源码审计（2026-09-07）
+
+- 固定 `lib/common/http.dart` 将待检查的完整 `url` 拼入 `commonPrint.log('find $url proxy: ...')`；`lib/common/request.dart` 将 URL 获取异常和 IP 检查异常正文直接记录。`lib/providers/actions/setup.dart` 将 `profile?.realLabel` 写入日志，`lib/manager/connectivity_manager.dart` 将 Wi‑Fi SSID 写入日志，`lib/application.dart` 记录 `ConnectivityResult.toString()`，`lib/providers/app.dart` 记录 IP 检查响应对象。上述调用点都在 `commonPrint.log` 前没有统一的 URL、标签、网络标识或响应字段过滤。
+- 这些生产者可能把订阅/测速 URL、用户配置标签、局域网标识或网络响应细节送入 Flutter `debugPrint` 与内存 `logsProvider`；该静态结果只说明数据流存在，不能断言任一具体值在设备上产生，也不证明 IP 响应对象含有何种字段。
+- 本轮未发送请求、未读取 Wi‑Fi SSID、IP 响应、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie 或导出文件；仅复核固定源码，设备设置未改变。XToolpro 必须在日志 API 入口按字段类型脱敏/拒绝、默认不记录 URL/SSID/响应正文，并对日志 UI/导出复用同一过滤合同；完成静态调用点扫描和设备契约测试前，Proxy 台账保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
