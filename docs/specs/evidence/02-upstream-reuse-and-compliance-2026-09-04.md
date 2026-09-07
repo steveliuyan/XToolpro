@@ -685,6 +685,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `android/common/.../Ext.kt` 的 `Service.startForeground` helper 在 API 34+ 调用三参数重载并传入 `FOREGROUND_SERVICE_TYPE_SPECIAL_USE`，低于 API 34 使用双参数兼容重载；这与 manifest 的 special-use 类型和两个 subtype 声明一致。该源码边界没有把 VPN service 公开给普通第三方应用。
 - 目标设备仅做无内容状态复核：`VPN CONNECTED=0`、`tun0=0`、FlClash 进程数 `0`。本轮未启动 service、未读取通知正文或系统日志，不能把静态类型一致性外推为 Android 14+ 的实际前台启动、通知可见性或类型拒绝测试。XToolpro 可保留该“声明与调用一致”的正向证据，但仍需在目标 API 上验证启动失败、通知权限不可用和服务类型违规时的稳定错误映射；Proxy 台账保持 `Investigating`。
 
+### FlClash Android bridge 日志脱敏边界源码审计（2026-09-07）
+
+- 固定 `android/common/.../GlobalState.kt` 的 `GlobalState.log(text)` 直接调用 `Log.d("FlClash", text)`，未见统一的字段分类、截断或脱敏层。`android/service/.../VpnService.kt` 的路由循环把 `route.address` 与 `route.prefixLength` 直接写入 `Log.d`；该字段可能是实际路由地址，因此不能作为默认诊断日志合同复用。
+- `android/app/.../ServiceState.kt` 将 core setup 返回的完整 `message` 或异常对象拼入 `Unable to set up core: ...`，并将启动/停止请求失败对象写入日志；`ServiceController.kt` 还将 bind/start/stop/disconnect/unbind 失败消息直接拼接，`ServiceBroadcastReceiver.kt` 将 action、超时和异常对象直接写入日志。固定源码不能证明任一具体 `message` 或 exception 必然包含订阅 URL、凭据、Cookie、节点名、请求目标或响应内容，但这些值若由下游异常提供，当前调用点没有屏障。
+- 本轮仅做固定提交源码审计，没有读取设备 `logcat`、应用日志正文、配置、节点、订阅 URL、凭据、Cookie、请求或响应，也没有触发失败路径；因此不推断设备上实际出现过敏感日志内容。此前真机结束状态仍为 `VPN CONNECTED=0`、`tun0=0`、FlClash 进程数 `0`，且本轮没有改变设备设置。
+- XToolpro 的未来 adapter 必须将 native/core 失败映射为稳定错误类别或代码，默认关闭敏感诊断，并在 Android 日志、UI、导出与遥测边界统一过滤地址、URL、凭据、节点/组名、应用包名列表和异常正文；应以 success、unavailable、cancel、crash、version mismatch 及日志脱敏契约测试证明。完成前该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
