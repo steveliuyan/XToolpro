@@ -658,6 +658,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 这解释了此前目标设备上“无条目、无错误/重试”的观察，不需要读取或输出任何实际应用清单。应用包名、标签、网络声明和更新时间共同构成敏感设备使用信息；固定源码把完整集合跨 Android/Flutter 边界传输，未见该 path 的字段最小化或专用隐私合同。
 - 本轮未调用 `getPackages`、`getChinaPackageNames`、图标查询或任何 package-manager 命令，未选择应用或更改访问控制，且未读取配置、节点、订阅 URL、凭据、Cookie、日志、通知或文件；设备仍为 `VPN CONNECTED=0`、`tun0=0`。XToolpro 未来仅可在用户显式打开按应用路由时按需获取最小字段，结果仅保留在内存并禁止日志、导出、遥测和默认持久化；还必须提供 empty、permission/unavailable、engine-error 与 retry 状态。完成隐私、错误映射与真实绕过流量契约测试前，该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash VPN 前台通知停止动作边界源码审计（2026-09-07）
+
+- 固定 `NotificationModule.update()` 将 `QuickAction.STOP.quickIntent.toPendingIntent` 加为前台 VPN 通知的停止 action。`QuickAction.quickIntent` 显式指向 `Components.quickActionActivity`，其 action 为 `${applicationId}.action.STOP`；`Intent.toPendingIntent` 以 `PendingIntent.getActivity(..., FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT)` 创建系统管理 token。
+- `FLAG_IMMUTABLE` 正向限制已获该 token 的通知接收方修改其 encapsulated intent；它不改变 token 所指向 Android 组件的 manifest 暴露面。固定 app manifest 将 `QuickActionActivity` 声明为 `exported=true`，未设置组件 permission，并为 START/STOP/TOGGLE 注册 action；其 `onCreate()` 未校验 caller、permission 或一次性 token，只按 action 调度 `ServiceState.handleStartAction()`、`handleStopAction()` 或 `handleToggleAction()`。因此通知 token 不可变不能阻止第三方绕过该 token、直接调用同一公开 STOP Activity。
+- 本轮未读取 `dumpsys notification`、状态栏文本、notification extras、配置、节点、订阅 URL、凭据、Cookie、请求或日志，也没有点击通知或发送 intent。仅以无内容计数确认目标设备仍为 `VPN CONNECTED=0`、`tun0=0`。
+- XToolpro 未来 VPN 通知必须使用中性、脱敏内容，并将停止动作绑定到不可导出或签名保护的内部组件；`PendingIntent` 仍应 immutable，但它是 token 完整性要求，不是公开组件调用者校验的替代品。完成 merged-manifest、notification action 和第三方直接调用的契约测试前，通知停止动作保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
