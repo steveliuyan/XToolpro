@@ -704,6 +704,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 这些生产者可能把订阅/测速 URL、用户配置标签、局域网标识或网络响应细节送入 Flutter `debugPrint` 与内存 `logsProvider`；该静态结果只说明数据流存在，不能断言任一具体值在设备上产生，也不证明 IP 响应对象含有何种字段。
 - 本轮未发送请求、未读取 Wi‑Fi SSID、IP 响应、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie 或导出文件；仅复核固定源码，设备设置未改变。XToolpro 必须在日志 API 入口按字段类型脱敏/拒绝、默认不记录 URL/SSID/响应正文，并对日志 UI/导出复用同一过滤合同；完成静态调用点扫描和设备契约测试前，Proxy 台账保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
 
+### FlClash 小米 10S 代理组入口重复真机复核（2026-09-07）
+
+- 目标设备 `bf353dda` 上固定 dev 包 `com.follow.clash.dev` 的 launcher 组件解析为 `com.follow.clash.dev/com.follow.clash.MainActivity`；此前使用 `com.follow.clash.dev/.MainActivity` 的启动尝试返回 Activity 不存在，本次未修改 APK 或应用数据。
+- 通过该真实 launcher 进入仪表盘并切换到“代理”标签后，ADB UI hierarchy 对固定文本“自动选择”和“故障转移”各计数 `1`。该复核只记录能力语义和出现次数，不读取节点名、配置正文、订阅 URL、凭据、Cookie、日志正文或 IP 内容；VPN 未启动，未改变代理设置。
+- 结果与既有规则模式 capability-parity 证据一致：代理组入口在真实设备上可达，但本轮未切换具体节点或组、未发起流量、未证明选择结果持久化，因此矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
