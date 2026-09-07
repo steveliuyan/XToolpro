@@ -580,6 +580,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 审计到的 `SharedState` 模型不含订阅 URL 正文字段，不能据此判断订阅 URL 是否由其他配置/数据库路径持久化；但测试 URL、用户标签、节点/代理组选择和应用路由数据本身已足以构成不应直接复用的敏感启动状态集合。
 - 本轮没有读取设备 SharedPreferences、应用数据、配置、节点、应用列表、订阅 URL、凭据、Cookie、日志或通知正文，也没有改动任何设置。XToolpro 必须令 native cold-start 合同只含启动所必需的最小字段，并以受 Keystore 保护的版本化存储和过期清理替代该明文 JSON 状态；订阅 URL、节点/组名、应用包名列表与测试 URL 默认不得进入该合同。完成存储威胁建模、迁移/清理和脱敏契约测试前，Proxy 路径不得进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，台账保持 `Investigating`。
 
+### FlClash URL 配置更新失败隐私边界源码审计（2026-09-07）
+
+- 固定源码中，`Profile.normal(url: url).update()` 与既有 URL 配置的 `Profile.update()` 都调用 `request.getFileResponseForUrl(url)`。该方法在捕获异常时先执行 `commonPrint.log('getFileResponseForUrl error ${e.toString()}')`；对于 `DioException`，未知错误和坏响应被转为本地化错误，其他类型则重新抛出。日志调用保留原始异常字符串，未见字段脱敏。
+- 自动更新路径在捕获 `updateProfile` 抛出的异常后再次调用 `commonPrint.log(e.toString())`。批量更新页面则以 `UpdatingMessage(label: profile.realLabel, message: e.toString())` 收集失败，并把该消息列表交给 UI 对话框。配置标签还可能由 HTTP `content-disposition` 更新，因此错误展示不应把标签视为天然无敏感性。
+- 静态源码不能证明 Dio 在任一具体失败场景的 `toString()` 一定含 URL、请求头或响应内容，也不能证明这些值曾在设备上出现。本轮未触发 URL 更新、未发送真实订阅 URL，未读取设备配置、节点、应用日志、系统日志、请求、响应、Cookie 或导出内容。
+- 将来若进入 adapter 设计，XToolpro 必须在网络和 UI 边界把更新失败映射为稳定且脱敏的错误类别或代码；原始异常文本、订阅 URL、配置标签和协议细节不得进入 UI、应用/系统日志、诊断导出或遥测。相关脱敏契约和失败路径测试完成前，Proxy 路径不得进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
