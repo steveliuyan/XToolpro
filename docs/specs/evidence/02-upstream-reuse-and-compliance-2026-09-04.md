@@ -704,6 +704,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 这些生产者可能把订阅/测速 URL、用户配置标签、局域网标识或网络响应细节送入 Flutter `debugPrint` 与内存 `logsProvider`；该静态结果只说明数据流存在，不能断言任一具体值在设备上产生，也不证明 IP 响应对象含有何种字段。
 - 本轮未发送请求、未读取 Wi‑Fi SSID、IP 响应、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie 或导出文件；仅复核固定源码，设备设置未改变。XToolpro 必须在日志 API 入口按字段类型脱敏/拒绝、默认不记录 URL/SSID/响应正文，并对日志 UI/导出复用同一过滤合同；完成静态调用点扫描和设备契约测试前，Proxy 台账保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
 
+#### 本检查点远端备份状态（2026-09-07）
+
+- 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
