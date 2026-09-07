@@ -519,6 +519,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 用户在“访问控制”页准备选择 UC 浏览器作为一次可恢复的绕过 VPN 测试目标，但固定包没有获取到可选应用列表。ADB UI hierarchy 只确认页面说明“选中应用将会被排除在 VPN 之外”，没有暴露应用条目、错误文本或重试控件；本轮没有点击“取消全选”或修改任何应用选择。
 - 只读 `dumpsys package com.follow.clash.dev` 确认固定包声明 `android.permission.QUERY_ALL_PACKAGES` 且系统授予状态为 `true`。该结果排除该单一运行时权限缺失作为列表不可见的解释，但不确定上游页面、MIUI、包查询、Flutter UI 或其他运行时因素中的具体根因。
+- 固定源码的 `lib/views/access.dart` 仅在 `initState` 发起一次 `getPackages()`；`FutureBuilder` 在请求结束后遇到空 `packages` 直接渲染“无数据”，没有错误态或重试入口。其 Android `AppPlugin` 将请求转给 `PackageResolver`，后者在 Android 13 调用 `PackageManager.getInstalledPackages(PackageInfoFlags)`；源码与 manifest 均具备该路径，但不足以在不读取设备应用清单或原始诊断的前提下判定返回空集的具体原因。
 - 验证期间 `VPN CONNECTED=0`，未读取应用清单、已选应用、配置、节点、规则、订阅 URL、凭据、Cookie、请求或日志内容；设备临时 UI hierarchy 已删除。因此不能声明按应用实际绕过已验证，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
