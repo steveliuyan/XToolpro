@@ -558,6 +558,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 这解释了为何本次证据把 QuickAction 的系统 VPN 连接与可用 VPN/TUN 严格区分：强停 cold-start 后观测到 `VPN CONNECTED=1`、`tun0=0`，只能证明请求达到系统 VPN 层，不能证明 `establish`、`Core.startTun` 或后续运行中的哪一环失败。未读取 logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie、请求或通知正文，也没有再次启动 VPN。
 - XToolpro 的未来 adapter 契约必须把 Android service 已绑定、TUN 已建立、core ready 和公开受控流量成功建模为不同状态，并为每个失败/取消路径提供脱敏错误代码；未完成这些独立状态的设备验证前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash QuickAction 启动失败错误传播源码审计（2026-09-07）
+
+- 原生 fallback 的 `setupCore()` 将 `SharedState.setupParams` JSON 交给 `Core.quickSetup`。回调返回非空 message 时，固定源码把完整 message 拼入 `GlobalState.log("Unable to set up core: $message")`，再把同一 message 传给 `showConfigError`；异常时也把完整 exception 写入该日志，并将 `error.message` 交给 Toast。`GlobalState.log` 直接调用 Android `Log.d("FlClash", text)`。
+- 随后的 `requestStart()` 捕获启动异常时同样把完整异常插入 `GlobalState.log("Unable to process service start request: $error")`。只有缺少配置、无权限和通用启动失败等少数路径使用固定文案；core 返回值、异常消息和其潜在字段没有在这条路径上做脱敏或归类。
+- 静态源码不能断言任何具体 core message 或 exception 一定包含订阅 URL、配置、路径、节点或网络细节，也不能证明本机曾产生或显示过此类内容。本轮未触发 QuickAction、未读取 Toast、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie、请求或通知正文。
+- XToolpro 不得直接复用原始 core message/exception 作为 UI、Android 日志、诊断导出或遥测字段。未来 adapter 必须只在受访问控制的内部诊断中保留脱敏原因，并向用户与默认日志输出稳定错误类别/代码；在该失败路径的脱敏契约测试完成前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android 专用配置深链接入口边界（2026-09-07）
 
 - 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
