@@ -537,6 +537,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 再次点击同一磁贴并移除该临时磁贴后，系统仍为 `VPN CONNECTED=1`、无 `tun0`。随后使用前述已验证的固定 STOP action，5 秒后恢复 `VPN CONNECTED=0`、无 `tun0`。该结果不证明磁贴的独立停止路径可用，也不改变前述 QuickAction 直接 STOP action 的恢复结论。
 - 本轮未读取快捷设置现有布局、配置、节点、规则、订阅 URL、凭据、Cookie、请求、日志或通知正文；没有修改配置或网络设置，且临时磁贴已移除。启动与停止的真实 TUN 生命周期缺口保持 `Partial`，Proxy 台账继续为 `Investigating`。
 
+### FlClash 磁贴 Flutter 生命周期依赖源码追踪（2026-09-07）
+
+- 固定 Android `MainActivity` 创建 Flutter engine 后注册 `TilePlugin` 并调用 `ServiceState.attachFlutterEngine()`。该 engine 存在时，`ServiceState.handleStartAction()` / `handleStopAction()` 不直接调用 `loadPreferencesAndStart()` 或 `requestStop()`，而是通过 `TilePlugin` 的 `${packageName}/tile` MethodChannel 发送 `start` / `stop`。
+- 固定 Dart `Tile` 将该 channel 事件广播给监听者；`TileManager` 作为 widget 的 `TileListener` 仅在其 `initState` 注册，在 `onStart` / `onStop` 中调用 `setupActionProvider.setRunning(true/false)`。没有附着 engine 时，Android 才走读取已保存 `setupParams` 与 `vpnOptions`、设置 core 并请求服务的后备路径。
+- 该 UI 生命周期依赖与本轮磁贴和 QuickAction 路径中“系统出现 VPN 请求但未建立 `tun0`”的真机观察一致，但没有读取日志、状态对象或配置来确认触发时的实际 engine/监听者状态，故不将其记为已证明根因，也不改变 `Partial` 或 `Investigating` 状态。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
