@@ -530,6 +530,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 为排除冷启动时机，保持主界面已初始化且 VPN 停止后再次触发相同 START action；7 秒后仍为 `VPN CONNECTED=1`、`tun0` 不存在。随后 STOP action 在 5 秒后再次恢复 `VPN CONNECTED=0`、`tun0` 不存在。该重测未读取或修改配置、快捷方式、节点、规则或网络设置。
 - 本轮没有读取或输出配置、节点、规则、订阅 URL、凭据、Cookie、请求、日志或通知正文。该入口的真实 TUN/流量启动缺口保持 `Partial`，不改变 Proxy 台账 `Investigating` 状态。
 
+### FlClash 小米 10S 系统快捷设置磁贴入口边界（2026-09-07）
+
+- 固定源码 `AndroidManifest.xml` 声明导出的 `.TileService`，要求 `android.permission.BIND_QUICK_SETTINGS_TILE`；`TileService.onClick()` 调用 `QuickAction.TOGGLE.quickIntent`，再由 `QuickActionActivity` 分派至 `ServiceState.handleToggleAction()`。这是一条系统快捷设置磁贴入口，不等同于前述动态应用快捷方式。
+- 目标设备 Android 13 的 `cmd statusbar` 明确支持 `add-tile`、`click-tile` 和 `remove-tile`。从 `VPN CONNECTED=0`、无 `tun0` 的停止态，仅临时添加并点击 `com.follow.clash.dev/com.follow.clash.TileService`；7 秒及 14 秒后均为 `VPN CONNECTED=1`、无 `tun0`，故未发起任何流量。
+- 再次点击同一磁贴并移除该临时磁贴后，系统仍为 `VPN CONNECTED=1`、无 `tun0`。随后使用前述已验证的固定 STOP action，5 秒后恢复 `VPN CONNECTED=0`、无 `tun0`。该结果不证明磁贴的独立停止路径可用，也不改变前述 QuickAction 直接 STOP action 的恢复结论。
+- 本轮未读取快捷设置现有布局、配置、节点、规则、订阅 URL、凭据、Cookie、请求、日志或通知正文；没有修改配置或网络设置，且临时磁贴已移除。启动与停止的真实 TUN 生命周期缺口保持 `Partial`，Proxy 台账继续为 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
