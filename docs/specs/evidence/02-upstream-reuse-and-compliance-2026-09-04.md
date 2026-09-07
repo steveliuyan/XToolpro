@@ -467,6 +467,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在仪表盘保持“规则”模式并启动后，Android 系统确认 VPN 已连接且 VPN `LinkProperties` 归属 `tun0`；设备对公开 `https://connectivitycheck.android.com/generate_204` 的 HTTPS 请求返回 `204`。请求后，用户在设备日志页人工确认新增记录。ADB 的无障碍层只暴露“日志”页标题，未暴露每条记录的文本；因此没有导出、保存或解析任何日志正文。
 - 验证后停止 VPN，系统复核 `VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 证明固定 Android 包在规则模式真实流量后具有用户可见的日志捕获事件；它不证明某个具体规则条目命中、日志字段完整性、所有代理路径或崩溃诊断。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 日志入口跨进程重建 proof（2026-09-07）
+
+- 上一项日志可见性 proof 完成后，设备保持 VPN 停止态。对 `com.follow.clash.dev` 执行 `am force-stop --user 0` 并从 launcher 重新启动；启动后系统复核 `VPN CONNECTED=0`、`tun0` 不存在，未发生自动联网。
+- 通过 ADB UI hierarchy 返回工具/设置主页，只对固定 accessibility 标签“日志 / 日志捕获记录”进行设备端计数，结果为 1；未读取日志正文、设置内容、节点、规则、订阅 URL、凭据或 Cookie。该入口在进程重建后仍可见，符合用户已启用日志捕获后的可见 UI 状态。
+- 日志捕获底层开关和日志条目文本均未暴露给本轮 ADB 无障碍树，因而本 proof 只证明入口跨进程保留，不证明该布尔值的存储字段、日志写入完整性或任何规则命中详情。结束时临时 UI hierarchy 已删除，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
