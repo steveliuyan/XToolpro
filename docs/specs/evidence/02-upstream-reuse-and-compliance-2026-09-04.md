@@ -509,6 +509,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 设备并发发起 4 个显式 HTTP proxy `127.0.0.1:7890` 请求，均访问公开 `https://connectivitycheck.android.com/generate_204` 且禁用 `NO_PROXY` 回退。设备端仅将每个 HTTP 状态码写入临时文件后汇总，得到 `4/4` 成功 `204`，随即删除临时状态文件；未读取或输出请求/响应正文、连接元数据、代理配置或日志内容。
 - 停止 VPN 后，复核 `VPN CONNECTED=0`、`tun0` 不存在，并删除设备临时 UI hierarchy。该 proof 只证明此受限并发的功能性转发，不是吞吐、延迟、资源泄漏、TCP 并发开关因果关系或压力测试证据；矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S loopback mixed proxy 停止态关闭 proof（2026-09-07）
+
+- 确认 VPN 停止态 `VPN CONNECTED=0` 后，设备显式经 HTTP proxy `127.0.0.1:7890` 访问公开 `https://connectivitycheck.android.com/generate_204`，并传入空 `NO_PROXY` 覆盖以避免直连回退。
+- 请求返回 HTTP 状态 `000`、curl 退出码 `7`，表示无法建立该显式 proxy 连接。未读取或输出任何请求/响应正文、端口枚举、代理配置、日志、节点、订阅 URL、凭据或 Cookie。
+- 该结果证明这个已验证 mixed HTTP port 在 VPN 停止后不保留可用监听；它不验证全部端口、SOCKS、UDP、Android 系统代理对象或所有异常关闭路径。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
