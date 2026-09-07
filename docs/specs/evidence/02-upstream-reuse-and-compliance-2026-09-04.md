@@ -727,6 +727,11 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在代理页点击进入一个既有策略组详情，仅观察页面结构；ADB UI hierarchy 对“自动选择”和“故障转移”组标签合计计数 `2`，协议卡片计数 `6`。本轮不输出任何节点名称、流量额度、延迟值或其他卡片字段。
 - 未点击节点卡、未切换当前选择、未启动 VPN、未发起流量，也未读取配置、数据库、订阅 URL、凭据、Cookie 或日志正文。该结果证明真实设备上的组展开和节点卡渲染可达，但不证明节点选择、失败回滚或路由命中；矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
 
+### FlClash 小米 10S 代理组标签切换复核（2026-09-07）
+
+- 在同一代理详情页仅切换两个既有组标签，ADB UI hierarchy 对每个标签各计数 `1`；两个标签页面均统计到 `6` 个协议卡片。切换完成后恢复到原标签。
+- 本轮未点击节点卡、未改变当前节点选择、未启动 VPN、未发起流量，也未读取节点名称、配置、订阅 URL、凭据、Cookie 或日志正文。该结果证明多个组标签均可渲染并可逆切换，不证明组选择持久化、节点切换或实际路由命中；矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
