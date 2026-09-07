@@ -565,6 +565,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 静态源码不能断言任何具体 core message 或 exception 一定包含订阅 URL、配置、路径、节点或网络细节，也不能证明本机曾产生或显示过此类内容。本轮未触发 QuickAction、未读取 Toast、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie、请求或通知正文。
 - XToolpro 不得直接复用原始 core message/exception 作为 UI、Android 日志、诊断导出或遥测字段。未来 adapter 必须只在受访问控制的内部诊断中保留脱敏原因，并向用户与默认日志输出稳定错误类别/代码；在该失败路径的脱敏契约测试完成前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash QuickAction 导出调用者边界源码审计（2026-09-07）
+
+- 固定 Android manifest 将 `QuickActionActivity` 声明为 `exported="true"`，并为 START、STOP、TOGGLE 注册 `DEFAULT` intent filter；该 Activity 未声明 `android:permission`。相比之下，同一 manifest 的 `ServiceBroadcastReceiver` 明确使用应用私有 permission，说明该 QuickAction 组件没有沿用受权限保护的入口模式。
+- `QuickActionActivity.onCreate()` 不读取或验证 calling package、calling activity、签名、权限或一次性 token，而是仅按 `intent.action` 直接调度 `ServiceState.handleStartAction()`、`handleStopAction()` 或 `handleToggleAction()`，随后结束 Activity。按 Android 导出组件规则，知道组件或 action 的外部应用可请求这些状态变更；静态源码不能证明任一第三方应用曾实际发起请求，也不能保证每个请求都会形成可用 TUN。
+- 本轮没有再发送 intent，也没有读取设备 Activity 记录、logcat、配置、节点、订阅 URL、凭据、Cookie、请求、通知或日志内容；仅以无内容计数确认设备仍为 `VPN CONNECTED=0`、`tun0=0`。
+- XToolpro 不得直接复用无权限的导出 START/STOP Activity。系统快捷方式、通知 action 与快捷设置磁贴应优先使用不可导出的组件或仅由系统持有的 immutable `PendingIntent`；若业务确有跨应用入口，必须以签名级 permission、显式调用者校验和重放防护收窄合同。在该攻击面完成 Android 安全审查和契约测试前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android 专用配置深链接入口边界（2026-09-07）
 
 - 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
