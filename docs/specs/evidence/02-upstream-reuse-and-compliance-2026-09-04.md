@@ -461,6 +461,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在该运行态使用设备 `curl` 访问公开 `https://cp.cloudflare.com/generate_204`，HTTP 状态为 `204`。随后进入请求页，页面可访问且未出现 `DIRECT` 路由语义。本轮只记录公开 URL、状态码和语义存在性，不读取或输出请求目标、应用、规则、节点或日志正文。
 - 先前规则模式请求曾返回 `000`；本次成功证明该固定 proof 包在用户选择的可用路径下能够建立规则模式 VPN/TUN 并传输真实公开 HTTPS 流量，但不证明具体规则条目命中、所有规则/节点行为或日志诊断完整性。结束时停止应用，`VPN CONNECTED=0`、`tun0` 不存在、`VpnService` 无匹配项，设备临时 UI hierarchy 已删除。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 规则模式日志捕获可见性 proof（2026-09-07）
+
+- 用户在设备设置的“应用程序”项中启用了“日志捕获”；该用户设置未由本轮 ADB 操作改写。只通过 ADB UI hierarchy 确认设置主页存在“日志”入口，未读取日志内容、配置、节点、规则、订阅 URL、凭据或 Cookie。
+- 在仪表盘保持“规则”模式并启动后，Android 系统确认 VPN 已连接且 VPN `LinkProperties` 归属 `tun0`；设备对公开 `https://connectivitycheck.android.com/generate_204` 的 HTTPS 请求返回 `204`。请求后，用户在设备日志页人工确认新增记录。ADB 的无障碍层只暴露“日志”页标题，未暴露每条记录的文本；因此没有导出、保存或解析任何日志正文。
+- 验证后停止 VPN，系统复核 `VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 证明固定 Android 包在规则模式真实流量后具有用户可见的日志捕获事件；它不证明某个具体规则条目命中、日志字段完整性、所有代理路径或崩溃诊断。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
