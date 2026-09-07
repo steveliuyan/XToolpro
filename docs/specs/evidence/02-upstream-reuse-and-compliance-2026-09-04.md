@@ -768,6 +768,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读审计固定源码，未打开连接页、未点击关闭/阻断、不读取连接 ID 或正文，未发起流量、未改动 VPN、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件。静态结论不代表目标设备发生过关闭失败。
 - XToolpro 的未来 adapter 必须将单条与批量关闭视为有副作用的操作：先取得明确用户意图，await 受限结果，报告关闭成功/未找到/部分失败/不可用，并保留可重新建立连接的说明；不得把未执行或部分失败报告为成功。完成 success、partial-failure、cancel、engine-crash 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 请求缓存停止、重启与重设清理边界源码审计（2026-09-08）
+
+- 固定 `lib/providers/actions/setup.dart` 中只有 `fullSetup()` 显式把 `requestsProvider` 重置为新的 `FixedList(500)`。`CoreManager` 仅在 `currentProfileIdProvider` 发生变化时调用 `fullSetup()`；这证明 Profile 切换会清空该内存队列，但不能外推为每次 VPN 停止、重连或配置应用都会清空。
+- 普通 `setRunning(false)` 进入 `_stop()`：先停止 core listener/service，再调用 `resetCoreTraffic()`，清空 `trafficsProvider`，并将 `totalTrafficProvider` 置为零；该函数及其同步调用链未对 `requestsProvider` 执行 clear/reset。随后 `setRunning(true)` 只启动 listener 后以 debounce 调用 `applyProfile(force: true)`；`applyProfile()` 的 `_runSetup()` 也未重置请求队列。
+- VPN 配置变化提示的“重启”明确按 `setRunning(false)` 后 `setRunning(true)` 执行。独立 core restart 则先完成 `coreController.restart()`，再依据运行状态重放 `setRunning(true, initialize: true)` 或 `applyProfile(force: true)`；两条路径同样不调用 `fullSetup()`。因此，在 Flutter app process 仍存活的前提下，普通停止/重连、该 VPN 配置重启和 core restart 均没有由这些固定调用点清理既有请求缓存的机制；不能据此断言 listener 停止期间仍会收到新 request event，亦不能替代实际设备生命周期 proof。
+- 目标小米 10S 本轮仅做无内容 ADB 状态检查，确认序列号 `bf353dda` 仍为 `device`；未启动或停止 VPN、未进入“更多”菜单、未读取请求/连接、网络标识、配置、节点、订阅 URL、凭据、Cookie、日志、通知或任何设备数据库内容，也没有改动设备设置。
+- XToolpro 的 future `engine-proxy` 必须在用户可感知的停止、重设、切换 Profile 和进程死亡边界上定义独立的请求诊断清理合同，并以无敏感字段的设备断言证明实际清理；诊断默认关闭、字段最小化，并提供本地清除。完成清理、脱敏与 success/unavailable/cancel/crash/version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
