@@ -503,6 +503,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 设备经显式 SOCKS5 hostname proxy `127.0.0.1:7890` 访问公开 `https://connectivitycheck.android.com/generate_204`，HTTP 状态为 `204`。该命令指定 SOCKS5 协议，因此成功结果证明同一运行态 loopback mixed port 能接收并转发一次 SOCKS5 TCP HTTPS 请求；未读取或保存 SOCKS 握手、请求/响应正文、代理配置或日志内容。
 - 通过仪表盘停止 VPN 后，复核 `VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 不验证 SOCKS UDP、鉴权、局域网客户端、跨设备访问、全部端口或全部协议，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S loopback mixed proxy 功能性并发 proof（2026-09-07）
+
+- 在 VPN 停止态强停并重新启动固定 proof 包，以回到仪表盘的已知停止状态；没有变更应用访问控制、基本配置、网络开关、节点、规则、订阅 URL、凭据或 Cookie。启动后系统确认 `VPN CONNECTED=1`。
+- 设备并发发起 4 个显式 HTTP proxy `127.0.0.1:7890` 请求，均访问公开 `https://connectivitycheck.android.com/generate_204` 且禁用 `NO_PROXY` 回退。设备端仅将每个 HTTP 状态码写入临时文件后汇总，得到 `4/4` 成功 `204`，随即删除临时状态文件；未读取或输出请求/响应正文、连接元数据、代理配置或日志内容。
+- 停止 VPN 后，复核 `VPN CONNECTED=0`、`tun0` 不存在，并删除设备临时 UI hierarchy。该 proof 只证明此受限并发的功能性转发，不是吞吐、延迟、资源泄漏、TCP 并发开关因果关系或压力测试证据；矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
