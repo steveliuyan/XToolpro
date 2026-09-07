@@ -572,6 +572,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮没有再发送 intent，也没有读取设备 Activity 记录、logcat、配置、节点、订阅 URL、凭据、Cookie、请求、通知或日志内容；仅以无内容计数确认设备仍为 `VPN CONNECTED=0`、`tun0=0`。
 - XToolpro 不得直接复用无权限的导出 START/STOP Activity。系统快捷方式、通知 action 与快捷设置磁贴应优先使用不可导出的组件或仅由系统持有的 immutable `PendingIntent`；若业务确有跨应用入口，必须以签名级 permission、显式调用者校验和重放防护收窄合同。在该攻击面完成 Android 安全审查和契约测试前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash VPN 系统回调广播权限边界源码审计（2026-09-07）
+
+- 与无权限的 `QuickActionActivity` 不同，固定 `android/common` manifest 定义 `${applicationId}.permission.RECEIVE_BROADCASTS` 为 `signature` 保护级别；app manifest 为导出的 `ServiceBroadcastReceiver` 设置同一 permission。该 receiver 只处理 `VPN_START_REQUESTED` 和 `VPN_REVOKED` 两个 action。
+- `ServiceBroadcastReceiver` 将前者分派到 `ServiceState.handleStartAction()`，后者分派到 `handleVpnRevokeAction()`；receiver 本身没有额外调用者校验，但 Android signature permission 已在组件分派前限制普通第三方应用。固定源码还显示 service 发送这两个内部广播时使用同一 permission。
+- 该正向结果只证明固定源码的 permission 合同，不证明 Android 系统 always-on VPN、lockdown、授权撤销或任何外部调用在本机的实际行为；这些状态未按本轮边界进行测试。未读取系统设置、广播记录、logcat、配置、节点、订阅 URL、凭据、Cookie、请求或通知正文，设备仍为 `VPN CONNECTED=0`、`tun0=0`。
+- XToolpro 若需要系统级 VPN 回调，必须保留或强化签名级权限，并把 action 集合最小化、显式化；不得因该受保护 receiver 的存在而放宽 QuickAction、通知或磁贴入口的调用者约束。完成 Android 组件暴露面清单和契约测试前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android 专用配置深链接入口边界（2026-09-07）
 
 - 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
