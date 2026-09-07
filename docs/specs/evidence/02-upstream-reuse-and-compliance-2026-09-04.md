@@ -752,6 +752,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅复核固定提交源码，未读取设备连接正文、网络标识、请求目标、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件，也未改变设备设置。该结果证明请求/连接列表及详情入口存在，但未证明设备上任一具体字段的实际值或敏感内容出现。
 - XToolpro 的未来 `engine-proxy` 合同必须按字段最小化返回，默认隐藏或截断应用包名、UID、地址、host、规则 payload、GeoIP/ASN、代理链与远端目标，并统一将读取失败映射为稳定、脱敏错误；完成字段级脱敏、搜索/详情一致性和 success/unavailable/cancel/crash/version-mismatch 契约测试前，该行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 请求内存保留与清理边界源码审计（2026-09-08）
+
+- 固定 `lib/core/event.dart` 将 core `request` event 解析成完整 `TrackerInfo`；`lib/manager/core_manager.dart` 的 `onRequest` 直接调用 `requestsProvider.notifier.addRequest(trackerInfo)`。`Requests` provider 为 keep-alive 内存状态，追加前只复制 `FixedList`，未见字段脱敏、持久化或加密路径。
+- 固定 `lib/providers/actions/setup.dart` 的 `fullSetup()` 将 requests provider 重置为 `FixedList(500)`；`FixedList.add` 在追加后截断到最大长度。启动初始 `AppState` 使用容量 `1000`，但完成 setup 后实际请求缓存容量为 `500`。`RequestsView` 仅提供搜索和自动滚动切换；固定路径未见用户清除、单项删除、保留期或导出入口。
+- 这意味着请求记录是有界、进程内的完整连接元数据缓存；重新 setup 会替换为空列表，应用进程重建也不会从存储恢复。该生命周期减少长期留存，但不解决运行期间完整地址、host、应用识别、规则和代理字段进入内存/详情页的最小化与脱敏缺口。
+- 本轮只读复核固定源码，并以 ADB 确认目标设备仍在线、FlClash 主界面可见；未打开“更多”菜单、不盲点按、不读取请求或连接正文、网络标识、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件，也未改动设备状态。
+- XToolpro 未来应将请求诊断明确设为默认关闭、短生命周期且按字段最小化的内存队列，提供本地清除和可验证的进程/重设清理合同；任何详情或导出必须再经同一脱敏层。完成保留上限、清理、脱敏与 success/unavailable/cancel/crash/version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
