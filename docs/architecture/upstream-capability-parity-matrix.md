@@ -37,7 +37,7 @@
 | 实时上下行速率、会话流量、连接列表 | `core/`、service bridge | 实时状态、历史摘要和任务事件 | Verified：运行态显示实时/累计流量；公开 HTTPS 流量后连接页显示 10 个可见记录 |
 | 请求、规则、内核日志与崩溃诊断 | `core/`、service bridge | 脱敏诊断导出 | Partial：直连公开 HTTPS 流量后请求页显示 10 个可见记录，其中 6 个 accessibility 节点带 `DIRECT` 路由语义；临时启用 `info` 和日志捕获后日志页显示 6 条可见/部分可见 `info` 记录，随后恢复原设置；规则模式早期重测返回 HTTP `000`，但用户在设备侧选择可用路径后，规则模式 VPN/TUN 建立且公开 Cloudflare 204 HTTPS 返回 `204`，请求页可见且未出现 `DIRECT` 路由语义。随后用户开启日志捕获，规则模式下另一公开 HTTPS `204` 请求后，在设备日志页人工确认新增记录；强停重启后 VPN 未自动建立且“日志”入口仍可见。ADB UI tree 只暴露该入口，未读取或导出任何日志正文，也不能直接读取日志捕获开关值。该结果证明真机可见的日志捕获事件与入口跨进程保留，不证明具体规则命中详情、日志字段完整性或崩溃诊断 |
 | 内核版本、更新和回滚 | `lib/views/about.dart`、`lib/common/request.dart`、`android/core/src/main/cpp/CMakeLists.txt` | 组件管理、校验和、回滚 | Unavailable（固定 Android 包）：真机关于页仅显示应用版本；“检查更新”检查 FlClash 应用 Release，“内核”只打开上游源码链接；未提供运行时内核版本、内核更新或内核回滚控件，`libclash.so` 在构建期链接，更新需随受审计的 engine/APK 发布 |
-| 启动连接、自动更新、快捷方式/小组件 | `android/`、平台集成 | 后台入口和设备能力开关 | Partial：真机临时开启“自动运行”后，应用强停再打开会自动建立 `VpnService`、`tun0` 和系统 VPN；恢复关闭后再次强停再打开保持停止，确认开关行为和持久化；自动检查更新开关可见，手动更新检查完成 Release 元数据查询并返回当前应用已是最新版，未进入下载/安装分支；固定 Android 包未声明静态快捷方式或 AppWidget，相关能力为 Unavailable |
+| 启动连接、自动更新、快捷方式/小组件 | `android/`、`QuickActionActivity`、平台集成 | 后台入口和设备能力开关 | Partial：真机临时开启“自动运行”后，应用强停再打开会自动建立 `VpnService`、`tun0` 和系统 VPN；恢复关闭后再次强停再打开保持停止，确认开关行为和持久化；自动检查更新开关可见，手动更新检查完成 Release 元数据查询并返回当前应用已是最新版，未进入下载/安装分支。固定源码的导出 `QuickActionActivity` 将 START/STOP action 分派至 `ServiceState`；真机在 VPN 停止态触发 START 后，系统报告 `VPN CONNECTED=1`，但 14 秒内始终未见 `tun0`，故未发起流量测试，随后 STOP action 使 `VPN CONNECTED=0`、`tun0` 不存在。该结果只证明该 action 入口可达并可停止，不能证明其可用的后台 VPN 启动；固定 Android 包未声明静态快捷方式或 AppWidget，相关能力为 Unavailable |
 
 ## sdmaid-se：设备维护能力
 
