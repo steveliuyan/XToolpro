@@ -787,6 +787,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮除对停止态核心状态控件执行一次精确触发并立即以 BACK 取消外，仅做固定 FlClash 提交源码审计和无内容 ADB 状态检查；未启动 VPN、未改变配置或持久化设备状态，未读取请求/连接、日志、网络标识、通知、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。
 - XToolpro 的 future `engine-proxy` 必须将“停止请求已提交”与“实际停止已核验”分为不同状态：await 受限的停止结果，并在实际停止完成或失败/超时时，以单一生命周期锁或串行执行器停止事件生产、drain/drop 队列、解绑消费者、等待 in-flight callback 后再释放 JNI/engine 引用，随后清理诊断队列并给出稳定脱敏错误。需以无敏感字段的设备断言覆盖成功、失败、超时、取消、engine crash、detach/restart racing 与 version mismatch；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 仪表盘启动请求与 TUN 回执真机复核（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）处于停止态时，先以 ADB 无内容检查确认 `tun0` 不存在且 FlClash 进程数为 1。固定 `lib/views/dashboard/widgets/start_button.dart` 显示 `StartButton.handleSwitchStart()` 调用 `toggleRunning()`；经 UI hierarchy 的“00:00:00”运行时控件精确边界触发该按钮后，在 10 秒及再等待 10 秒的检查中 `tun0` 仍不存在。未读取按钮附近的配置、网络标识或错误文本。
+- 随后用同一已定位运行控制再次触发，5 秒后仍为无 `tun0`、FlClash 进程数 1；未发起流量，也未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。该操作仅尝试运行时启停，未修改配置或其他持久化设备设置。
+- 因未形成 TUN，未执行原计划的运行态 force-stop / process-death 测试，也不把该 UI 请求写为 VPN 启动成功，更不由此判断配置、core 或系统权限的故障原因。该次复核与先前成功建立 VPN/TUN 的证据并存，表明固定包的 UI 请求缺少可复现、可观察的实际启动回执。
+- XToolpro 的 future `engine-proxy` 必须将用户请求、`VpnService` establish、TUN 存在、core health 与可转发流量区分为独立、受限且可观测的状态；在无回执、超时或错误时保持可恢复的 unavailable/error 状态，不得呈现“已连接”。完成 success、unavailable、cancel、crash、process-death、竞争 VPN、permission revoke 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
