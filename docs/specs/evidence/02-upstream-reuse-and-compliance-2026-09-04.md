@@ -692,6 +692,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅做固定提交源码审计，没有读取设备 `logcat`、应用日志正文、配置、节点、订阅 URL、凭据、Cookie、请求或响应，也没有触发失败路径；因此不推断设备上实际出现过敏感日志内容。此前真机结束状态仍为 `VPN CONNECTED=0`、`tun0=0`、FlClash 进程数 `0`，且本轮没有改变设备设置。
 - XToolpro 的未来 adapter 必须将 native/core 失败映射为稳定错误类别或代码，默认关闭敏感诊断，并在 Android 日志、UI、导出与遥测边界统一过滤地址、URL、凭据、节点/组名、应用包名列表和异常正文；应以 success、unavailable、cancel、crash、version mismatch 及日志脱敏契约测试证明。完成前该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android MethodChannel 错误正文边界源码审计（2026-09-07）
+
+- 固定 `android/app/.../plugins/ServicePlugin.kt` 的 `invokeMethod` 在 `ServiceController.invokeMethod` 失败时调用 `result.error("CORE_ERROR", error.message, null)`；该错误 code 虽然固定，但 message 仍来自原始异常，没有稳定类别映射或字段脱敏。`AppPlugin` 的 `tip` 分支把调用方传入的 `message` 直接交给 `GlobalState.application.showToast`，而 `showToast` 只做空值判断后显示完整文本。
+- 这条边界与前述 Android `Log.d`/Flutter `commonPrint` 路径不同：即使未开启日志捕获，core/native 异常正文也可能经 MethodChannel 进入 Flutter 错误处理或 Toast。静态源码不能证明具体异常一定包含 URL、节点、凭据、Cookie、路径或响应内容，也不能证明设备上实际展示过这些值。
+- 本轮未触发 MethodChannel 失败、未读取 Toast、logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie、请求或响应；只做固定提交源码审计，没有改变设备设置。XToolpro adapter 必须把 native/core 失败转换为稳定错误 code 与本地化、脱敏用户文案，原始异常仅可留在受访问控制的内部诊断并默认禁用；完成错误映射和 UI/日志脱敏契约测试前，Proxy 台账保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
