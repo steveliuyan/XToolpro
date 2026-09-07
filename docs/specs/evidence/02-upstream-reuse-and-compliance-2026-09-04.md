@@ -528,6 +528,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在 VPN 停止态以固定包的 START action 启动，等待 14 秒后系统 `VPN CONNECTED=1`，但 `tun0` 仍不存在；因此本轮没有发起任何流量请求，也不把该 action 记作可用 VPN 启动。随后调用同一固定包的 STOP action，5 秒后 `VPN CONNECTED=0`、`tun0` 不存在，恢复路径成功。
 - 固定源码在应用初始化后以 `ShortcutManagerCompat.setDynamicShortcuts` 注册 ID 为 `toggle` 的动态快捷方式。真机启动 FlClash 主界面后，系统只按该固定 ID 计数为 1，且 `VPN CONNECTED=0`、`tun0` 不存在；未读取快捷方式标签或系统中其他应用的快捷方式记录。
 - 为排除冷启动时机，保持主界面已初始化且 VPN 停止后再次触发相同 START action；7 秒后仍为 `VPN CONNECTED=1`、`tun0` 不存在。随后 STOP action 在 5 秒后再次恢复 `VPN CONNECTED=0`、`tun0` 不存在。该重测未读取或修改配置、快捷方式、节点、规则或网络设置。
+- 进一步从停止态强停固定包后，直接 target 启动同一 `QuickActionActivity` 的 START action；20 秒后仍为 `VPN CONNECTED=1`、`tun0` 不存在，未发起流量。固定源码只在 `MainActivity.configureFlutterEngine()` 附着 Flutter engine，而本次 intent 没有启动该 Activity，因此该结果覆盖无附着 engine 时的原生 fallback。随后通过同一 STOP action 在 5 秒后恢复 `VPN CONNECTED=0`、`tun0` 不存在。
 - 本轮没有读取或输出配置、节点、规则、订阅 URL、凭据、Cookie、请求、日志或通知正文。该入口的真实 TUN/流量启动缺口保持 `Partial`，不改变 Proxy 台账 `Investigating` 状态。
 
 ### FlClash 小米 10S 系统快捷设置磁贴入口边界（2026-09-07）
