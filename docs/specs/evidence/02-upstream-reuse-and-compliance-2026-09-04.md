@@ -455,6 +455,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在规则模式下启动 VPN 后，系统 `VPN CONNECTED=1`，`tun0` IPv4 地址行数为 1。代理页的“延迟测试”操作返回 6 个可见延迟值：`57`、`69`、`91`、`96`、`104`、`138 ms`。本轮不记录代理组、节点、配置、请求地址或日志正文；该结果证明已保存的测速链接可参与一次真实设备延迟测试流程，但没有捕获 core 请求，不能独立归因每个请求的最终 URL，也不外推为所有节点或代理组均通过。
 - 验证结束后停止应用，`VPN CONNECTED=0`、`tun0` 不存在。通过“测速链接”对话框的“重置”动作恢复默认公开 URL `https://www.gstatic.com/generate_204`，并确认无 URL 校验错误；设备临时 UI hierarchy 和主机临时截图均已删除。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 规则模式公开 HTTPS 流量 proof（2026-09-07）
+
+- 用户在设备侧选择了可用代理路径；未读取、输出或保存其节点、代理组、订阅 URL、凭据或 Cookie。ADB 返回仪表盘“规则”模式为选中状态，启动后系统 `VPN CONNECTED=1`、`tun0` IPv4 地址行数为 1。
+- 在该运行态使用设备 `curl` 访问公开 `https://cp.cloudflare.com/generate_204`，HTTP 状态为 `204`。随后进入请求页，页面可访问且未出现 `DIRECT` 路由语义。本轮只记录公开 URL、状态码和语义存在性，不读取或输出请求目标、应用、规则、节点或日志正文。
+- 先前规则模式请求曾返回 `000`；本次成功证明该固定 proof 包在用户选择的可用路径下能够建立规则模式 VPN/TUN 并传输真实公开 HTTPS 流量，但不证明具体规则条目命中、所有规则/节点行为或日志诊断完整性。结束时停止应用，`VPN CONNECTED=0`、`tun0` 不存在、`VpnService` 无匹配项，设备临时 UI hierarchy 已删除。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。

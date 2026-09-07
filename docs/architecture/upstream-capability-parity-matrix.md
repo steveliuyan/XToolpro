@@ -35,7 +35,7 @@
 | 按应用代理/绕过 | `core/`、Android package bridge | 应用选择与路由策略 | Partial：真机进入访问控制应用列表；“允许应用绕过 VPN”初始为开启，临时关闭后强停重启仍为关闭，关闭态可建立并停止 `VpnService`/`tun0`，恢复开启后再次强停重启仍为开启；固定源码把该值传入 `VpnOptions.allowBypass` 并在建 VPN 时调用 `VpnService.Builder.allowBypass()`；Android 13 `dumpsys` 未暴露该字段，本轮未选择应用或验证应用主动绕过后的实际流量路径 |
 | 域名/IP/GeoIP 规则集和命中日志 | `core/` | 规则管理、命中详情和脱敏日志 | Partial：真机确认附加规则入口和规则模式；未读取规则内容、命中详情或日志 |
 | 实时上下行速率、会话流量、连接列表 | `core/`、service bridge | 实时状态、历史摘要和任务事件 | Verified：运行态显示实时/累计流量；公开 HTTPS 流量后连接页显示 10 个可见记录 |
-| 请求、规则、内核日志与崩溃诊断 | `core/`、service bridge | 脱敏诊断导出 | Partial：直连公开 HTTPS 流量后请求页显示 10 个可见记录，其中 6 个 accessibility 节点带 `DIRECT` 路由语义；临时启用 `info` 和日志捕获后日志页显示 6 条可见/部分可见 `info` 记录，随后恢复原设置；规则模式重测返回 HTTP `000`，未形成可归因的新记录；未读取正文，仍未验证规则命中日志或崩溃诊断 |
+| 请求、规则、内核日志与崩溃诊断 | `core/`、service bridge | 脱敏诊断导出 | Partial：直连公开 HTTPS 流量后请求页显示 10 个可见记录，其中 6 个 accessibility 节点带 `DIRECT` 路由语义；临时启用 `info` 和日志捕获后日志页显示 6 条可见/部分可见 `info` 记录，随后恢复原设置；规则模式早期重测返回 HTTP `000`，但用户在设备侧选择可用路径后，规则模式 VPN/TUN 建立且公开 Cloudflare 204 HTTPS 返回 `204`，请求页可见且未出现 `DIRECT` 路由语义。未读取规则详情、请求或日志正文，仍未验证规则命中日志或崩溃诊断 |
 | 内核版本、更新和回滚 | `lib/views/about.dart`、`lib/common/request.dart`、`android/core/src/main/cpp/CMakeLists.txt` | 组件管理、校验和、回滚 | Unavailable（固定 Android 包）：真机关于页仅显示应用版本；“检查更新”检查 FlClash 应用 Release，“内核”只打开上游源码链接；未提供运行时内核版本、内核更新或内核回滚控件，`libclash.so` 在构建期链接，更新需随受审计的 engine/APK 发布 |
 | 启动连接、自动更新、快捷方式/小组件 | `android/`、平台集成 | 后台入口和设备能力开关 | Partial：真机临时开启“自动运行”后，应用强停再打开会自动建立 `VpnService`、`tun0` 和系统 VPN；恢复关闭后再次强停再打开保持停止，确认开关行为和持久化；自动检查更新开关可见，手动更新检查完成 Release 元数据查询并返回当前应用已是最新版，未进入下载/安装分支；固定 Android 包未声明静态快捷方式或 AppWidget，相关能力为 Unavailable |
 
