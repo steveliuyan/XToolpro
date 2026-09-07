@@ -738,6 +738,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在同一代理详情页仅切换两个既有组标签，ADB UI hierarchy 对每个标签各计数 `1`；两个标签页面均统计到 `6` 个协议卡片。切换完成后恢复到原标签。
 - 本轮未点击节点卡、未改变当前节点选择、未启动 VPN、未发起流量，也未读取节点名称、配置、订阅 URL、凭据、Cookie 或日志正文。该结果证明多个组标签均可渲染并可逆切换，不证明组选择持久化、节点切换或实际路由命中；矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
 
+### FlClash 延迟测试失败日志边界源码审计（2026-09-07）
+
+- 固定 `lib/views/proxies/common.dart` 的 `proxyDelayTest` 在 `coreController.getDelay(url, proxyName)` 失败时调用 `commonPrint.log('Delay test failed for ${state.proxyName}: $error', ...)`；因此失败日志包含实际代理名称和原始异常对象。测试 URL 作为 `getDelay` 参数传递，但未在该模板中直接拼入日志；异常对象仍可能由下游携带请求细节。
+- `coreFailureLogLevel` 仅按异常类型选择 debug/warning 级别，不执行字段脱敏；失败后 UI 状态写入延迟值 `-1`，但固定路径未见稳定错误代码、重试原因或日志过滤合同。该静态结果不证明任一失败在设备上实际发生。
+- 本轮未执行测速、未读取节点名、测试 URL、配置、logcat、应用日志、凭据、Cookie 或网络请求；XToolpro 必须把延迟失败映射为稳定类别，禁止默认日志包含节点/组名、URL 或异常正文，并为重试与 unavailable 状态提供脱敏契约测试。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 本检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
