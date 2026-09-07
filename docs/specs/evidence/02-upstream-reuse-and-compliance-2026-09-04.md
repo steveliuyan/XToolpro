@@ -710,6 +710,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 通过该真实 launcher 进入仪表盘并切换到“代理”标签后，ADB UI hierarchy 对固定文本“自动选择”和“故障转移”各计数 `1`。该复核只记录能力语义和出现次数，不读取节点名、配置正文、订阅 URL、凭据、Cookie、日志正文或 IP 内容；VPN 未启动，未改变代理设置。
 - 结果与既有规则模式 capability-parity 证据一致：代理组入口在真实设备上可达，但本轮未切换具体节点或组、未发起流量、未证明选择结果持久化，因此矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
 
+### FlClash 小米 10S 代理组入口进程重建复核（2026-09-07）
+
+- 在不启动 VPN、不切换节点且不读取配置正文的前提下，对 `com.follow.clash.dev` 执行 `am force-stop`，再以真实 launcher 组件 `com.follow.clash.dev/com.follow.clash.MainActivity` 重启并进入“代理”标签。
+- 重建后的 ADB UI hierarchy 对固定文本“自动选择”和“故障转移”各计数 `1`，与重建前结果一致。该计数只证明代理组入口在进程重建后仍可见，不读取节点名、组名、配置、订阅 URL、凭据、Cookie、日志正文或网络响应。
+- 本轮未启动 VPN、未发起测试流量、未改动代理设置；该结果不覆盖节点切换、组选择持久化或流量路由命中，矩阵行继续保持 `Partial`，Proxy 台账继续为 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
