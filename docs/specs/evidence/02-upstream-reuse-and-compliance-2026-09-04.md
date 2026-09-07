@@ -515,6 +515,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 请求返回 HTTP 状态 `000`、curl 退出码 `7`，表示无法建立该显式 proxy 连接。未读取或输出任何请求/响应正文、端口枚举、代理配置、日志、节点、订阅 URL、凭据或 Cookie。
 - 该结果证明这个已验证 mixed HTTP port 在 VPN 停止后不保留可用监听；它不验证全部端口、SOCKS、UDP、Android 系统代理对象或所有异常关闭路径。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 按应用访问控制列表不可用边界（2026-09-07）
+
+- 用户在“访问控制”页准备选择 UC 浏览器作为一次可恢复的绕过 VPN 测试目标，但固定包没有获取到可选应用列表。ADB UI hierarchy 只确认页面说明“选中应用将会被排除在 VPN 之外”，没有暴露应用条目、错误文本或重试控件；本轮没有点击“取消全选”或修改任何应用选择。
+- 只读 `dumpsys package com.follow.clash.dev` 确认固定包声明 `android.permission.QUERY_ALL_PACKAGES` 且系统授予状态为 `true`。该结果排除该单一运行时权限缺失作为列表不可见的解释，但不确定上游页面、MIUI、包查询、Flutter UI 或其他运行时因素中的具体根因。
+- 验证期间 `VPN CONNECTED=0`，未读取应用清单、已选应用、配置、节点、规则、订阅 URL、凭据、Cookie、请求或日志内容；设备临时 UI hierarchy 已删除。因此不能声明按应用实际绕过已验证，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
