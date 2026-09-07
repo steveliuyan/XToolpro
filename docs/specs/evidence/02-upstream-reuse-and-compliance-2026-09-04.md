@@ -543,6 +543,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 Dart `Tile` 将该 channel 事件广播给监听者；`TileManager` 作为 widget 的 `TileListener` 仅在其 `initState` 注册，在 `onStart` / `onStop` 中调用 `setupActionProvider.setRunning(true/false)`。没有附着 engine 时，Android 才走读取已保存 `setupParams` 与 `vpnOptions`、设置 core 并请求服务的后备路径。
 - 该 UI 生命周期依赖与本轮磁贴和 QuickAction 路径中“系统出现 VPN 请求但未建立 `tun0`”的真机观察一致，但没有读取日志、状态对象或配置来确认触发时的实际 engine/监听者状态，故不将其记为已证明根因，也不改变 `Partial` 或 `Investigating` 状态。
 
+### FlClash Android 专用配置深链接入口边界（2026-09-07）
+
+- 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
+- 源码在确认后才调用 `Profile.normal(url).update()`。为避免触碰用户配置，本轮先打开已初始化的主界面，再以公开保留域名作为深链接参数发送 `ACTION_VIEW`；ADB UI hierarchy 只按该公开值计数，确认对话框中匹配 1 次。随后使用系统返回键取消，未确认、未联网、未写入配置。
+- 该真机结果证明专用深链接到导入确认的分派可达；URL 位于 deep-link query，不能替代 Android 标准系统分享文本入口，也不证明任何真实订阅 URL 的下载、校验、保存或恢复。结束时 `VPN CONNECTED=0`、无 `tun0`，未读取或输出现有配置、节点、订阅 URL、凭据、Cookie、请求或日志，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
