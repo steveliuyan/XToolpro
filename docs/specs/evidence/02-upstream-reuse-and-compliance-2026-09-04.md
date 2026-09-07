@@ -551,6 +551,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 对同一固定包发送 package-restricted `ACTION_SEND`、`text/plain` 与公开保留域名文本时，Android 在启动前拒绝该 intent；未打开 FlClash。该真机结果与 manifest 中缺少 `ACTION_SEND` filter 一致，因此固定 Android 包的标准系统分享文本入口为 `Unavailable`，不能以专用 deep link 替代。
 - 该真机结果证明专用深链接到导入确认的分派可达；URL 位于 deep-link query，不能替代 Android 标准系统分享文本入口，也不证明任何真实订阅 URL 的下载、校验、保存或恢复。结束时 `VPN CONNECTED=0`、无 `tun0`，未读取或输出现有配置、节点、订阅 URL、凭据、Cookie、请求或日志，Proxy 台账保持 `Investigating`。
 
+### FlClash 配置深链接日志与导出边界源码审计（2026-09-07）
+
+- 对固定 FlClash 提交做只读源码追踪：`lib/common/link.dart` 的 `LinkManager` 在分派 `install-config` 前执行 `commonPrint.log('onAppLink: $uri')`。因此 URI 的完整字符串会进入该日志调用；当 `url` query 承载订阅地址时，该地址不会在这一层被脱敏。
+- `lib/common/print.dart` 的 `commonPrint.log` 先调用 `debugPrint`，并在 `GlobalState.attach()` 完成后将相同 payload 作为 `Log.app` 写入 `logsProvider`。`lib/providers/actions/setup.dart` 在完整 setup 时将该列表重置为 `FixedList(500)`；`FixedList` 只保留内存中的最后 500 项。源码检索未发现 `logsProvider` 的自动持久化路径，不能据此声称普通深链接会自动写入应用文件或被上传。
+- 但 `lib/views/logs.dart` 提供显式导出动作：`lib/providers/app.dart` 调用 `encodeLogsTask(value.list)`，其实现逐条拼接 `Log.toString()`，不做字段脱敏；随后写入临时文件并交给系统 `FilePicker.saveFile`。`lib/common/picker.dart` 在该调用后删除临时文件。该导出路径仍可将未脱敏日志内容写入用户选定位置，不能作为 XToolpro 默认诊断导出方案直接复用。
+- 设置中的 `openLogs` 会控制 core controller 的 `startLog`/`stopLog` 和日志入口可见性，但不会阻止上述 `commonPrint` 在 app attach 后写入内存日志。因此“日志捕获”开关不是配置深链接 URI 的脱敏屏障。
+- 本轮未向设备发送真实订阅 URL，也没有读取 logcat、应用日志、配置、节点、凭据、Cookie 或任何导出文件；仅复核固定本地源码。将来若进入 engine adapter 设计，必须先在入口、应用诊断、系统调试输出和导出路径统一删除或脱敏 URI query/订阅 URL，并以不含敏感值的契约测试证明。该合规缺口阻止把当前 Proxy 路径标为 `Approved`；矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
