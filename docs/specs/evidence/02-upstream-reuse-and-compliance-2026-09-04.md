@@ -543,6 +543,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 Dart `Tile` 将该 channel 事件广播给监听者；`TileManager` 作为 widget 的 `TileListener` 仅在其 `initState` 注册，在 `onStart` / `onStop` 中调用 `setupActionProvider.setRunning(true/false)`。没有附着 engine 时，Android 才走读取已保存 `setupParams` 与 `vpnOptions`、设置 core 并请求服务的后备路径。
 - 该 UI 生命周期依赖与本轮磁贴和 QuickAction 路径中“系统出现 VPN 请求但未建立 `tun0`”的真机观察一致，但没有读取日志、状态对象或配置来确认触发时的实际 engine/监听者状态，故不将其记为已证明根因，也不改变 `Partial` 或 `Investigating` 状态。
 
+### FlClash QuickAction 与磁贴共享 Flutter 生命周期源码追踪（2026-09-07）
+
+- 固定 Android manifest 将导出的 `QuickActionActivity` 的 START、STOP、TOGGLE action 映射到 `ServiceState.handleStartAction`、`handleStopAction` 和 `handleToggleAction`；`TileService` 点击也创建同一 `QuickAction.TOGGLE` intent。因此这两个系统入口进入相同的启动/停止分派，而不是两套独立的 Android service 启动实现。
+- `ServiceState` 在 `tilePlugin` 存在时调用 `TilePlugin.handleStart` 或 `handleStop` 并立即返回。该 plugin 仅向 Flutter MethodChannel 发送 `start`/`stop`；Dart `TileManager` 的监听者才调用 `setupActionProvider.setRunning(true/false)`。这一分支不会执行原生 `loadPreferencesAndStart`、`setupCore`、`requestStart` 或 `ServiceController.start`。只有 Flutter engine 未附着时，原生 fallback 才从 SharedPreferences 读取启动状态、完成 core setup 并请求 service start。
+- 该数据流与此前 QuickAction START 和磁贴点击均达到系统 VPN 连接、但观测窗口内没有 `tun0` 的真机现象相容；但固定源码不能确定试验时 Flutter engine 是否附着、MethodChannel 事件是否投递或 Dart 侧状态机为何未完成，故不将其表述为根因。未再次触发入口、未读取 logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie 或通知正文。
+- XToolpro 后续若获准设计 adapter，系统快捷入口必须有可独立完成或可显式恢复的持久启动合同，不能把可用 VPN/TUN 生命周期隐式绑定于存活的 Flutter UI 监听者。在这一入口的冷启动、已附着 engine、事件丢失、取消和失败路径均完成脱敏契约测试前，Proxy 路径保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
+
 ### FlClash Android 专用配置深链接入口边界（2026-09-07）
 
 - 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
