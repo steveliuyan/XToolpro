@@ -449,6 +449,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机基本配置页显示当前公开测试链接为 `https://www.gstatic.com/generate_204`。打开“测速链接”编辑对话框后，ADB 临时输入的非法文本触发 UI 校验提示“测速链接必须为 URL”；本轮没有提交该非法值，也没有运行测速或读取延迟结果。
 - 点击取消后，基本配置页仍显示原公开测试链接；随后停止应用，系统 `VPN CONNECTED=0`，设备临时 UI hierarchy 已删除。该 proof 只证明入口、非空/URL 校验和取消不落盘边界，不证明新测速 URL 的保存、跨进程持久化、可达性或实际节点测速行为。没有读取或输出订阅 URL、凭据、Cookie、节点名、请求或日志内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S 测速链接保存、重启与延迟测试 proof（2026-09-07）
+
+- 用户在真机“基本配置”中保存公开 URL `https://cp.cloudflare.com/generate_204`。随后对 `com.follow.clash.dev` 执行 `am force-stop --user 0` 并重新启动；通过 ADB UI hierarchy 仅检查“测速链接”项和该公开 URL，二者均存在，证明本次保存值可跨进程重建保留。
+- 在规则模式下启动 VPN 后，系统 `VPN CONNECTED=1`，`tun0` IPv4 地址行数为 1。代理页的“延迟测试”操作返回 6 个可见延迟值：`57`、`69`、`91`、`96`、`104`、`138 ms`。本轮不记录代理组、节点、配置、请求地址或日志正文；该结果证明已保存的测速链接可参与一次真实设备延迟测试流程，但没有捕获 core 请求，不能独立归因每个请求的最终 URL，也不外推为所有节点或代理组均通过。
+- 验证结束后停止应用，`VPN CONNECTED=0`、`tun0` 不存在。通过“测速链接”对话框的“重置”动作恢复默认公开 URL `https://www.gstatic.com/generate_204`，并确认无 URL 校验错误；设备临时 UI hierarchy 和主机临时截图均已删除。矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
