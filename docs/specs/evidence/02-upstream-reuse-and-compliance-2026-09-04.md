@@ -559,6 +559,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 设置中的 `openLogs` 会控制 core controller 的 `startLog`/`stopLog` 和日志入口可见性，但不会阻止上述 `commonPrint` 在 app attach 后写入内存日志。因此“日志捕获”开关不是配置深链接 URI 的脱敏屏障。
 - 本轮未向设备发送真实订阅 URL，也没有读取 logcat、应用日志、配置、节点、凭据、Cookie 或任何导出文件；仅复核固定本地源码。将来若进入 engine adapter 设计，必须先在入口、应用诊断、系统调试输出和导出路径统一删除或脱敏 URI query/订阅 URL，并以不含敏感值的契约测试证明。该合规缺口阻止把当前 Proxy 路径标为 `Approved`；矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash Firebase Crashlytics 初始化与遥测开关源码审计（2026-09-07）
+
+- 固定 Android Gradle 配置启用了 `com.google.gms.google-services` 与 `com.google.firebase.crashlytics` plugin，并直接依赖 Firebase Analytics 和 Crashlytics NDK。`android/common/.../GlobalState.kt` 的 `setCrashlytics` 会初始化 `FirebaseApp`，随后写入 `FirebaseCrashlytics.isCrashlyticsCollectionEnabled`；服务每次同步 Flutter `SharedState` 和 setup 时均调用该方法。
+- Dart `AppSettingProps.crashlytics` 的默认值是 `false`，设置页也将该值写入 `SharedState`，再通过 service MethodChannel 传给 Android。因此正常 Flutter 完成状态同步后的 collection 开关可由用户设置控制。固定源码没有发现 `commonPrint`、完整 URI、订阅 URL、配置字段或 Flutter 异常被直接作为 Crashlytics `log`、custom key 或 `recordException` 参数提交的调用。
+- 但应用初始化会经 `AppPlugin.didCrashOnPreviousExecution` 调用 `FirebaseApp.initializeApp` 和 `FirebaseCrashlytics.didCrashOnPreviousExecution()`，此时尚未由当前 Flutter 设置显式写入 collection 开关；固定 Android manifest 中也未声明静态默认禁用的 Firebase collection metadata。静态源码不能确定 Firebase SDK 在该时点的有效 collection 状态、自动采集字段、是否实际传输或任何第三方服务端处理，故不得把依赖存在推断为已上传数据，也不得把 UI 开关视为完整隐私保证。
+- 本轮未读取设备 Firebase 状态、Crashlytics/logcat 内容、网络请求、配置、节点、订阅 URL、凭据、Cookie 或导出文件，也没有改动设备设置。XToolpro 的拟议 adapter 必须默认禁用并避免初始化第三方遥测，只有在明确同意后才允许受审计的最小化崩溃报告；在许可、数据字段、网络目的地、撤回/删除行为和 URI 脱敏契约完成独立审查前，该路径不可进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
