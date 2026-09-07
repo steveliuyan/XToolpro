@@ -679,6 +679,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 对仍存活 app process 内的绑定 service，`ServiceController` 处理 `onServiceDisconnected`、`onBindingDied` 与 `onNullBinding`：清空 binding、将 `runTimeMillis=0`，再使 `ServiceState.handleServiceLost()` 把当前 request 收敛为 `STOPPED`。该路径没有 retry/backoff、持久化 failure reason 或用户可见的明确恢复状态；app process 自身死亡时这些内存对象也不构成恢复记录。
 - 目标设备仅以无内容状态确认 `VPN CONNECTED=0`、`tun0=0`、FlClash 进程数 `0`。本轮未杀进程、未重启设备、未配置 always-on/lockdown、未撤销 VPN/通知权限，未读取配置、节点、订阅 URL、凭据、Cookie、通知、请求或日志。XToolpro 必须以独立持久状态机记录运行意图、失败类别和恢复条件，并在 service loss、process death、reboot、VPN revoke 与通知权限不可用场景各自完成设备契约测试；在此之前能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 前台服务类型与 VPN 组件边界源码审计（2026-09-07）
+
+- 固定 `android/service` manifest 将 `VpnService` 与 `ProxyService` 都声明为 `android:exported="false"`，并使用 `android:foregroundServiceType="specialUse"`；前者另保留 `android.permission.BIND_VPN_SERVICE` 与 `android.net.VpnService` action。两个 service 分别声明 `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` 值 `vpn` 与 `proxy`。
+- 固定 `android/common/.../Ext.kt` 的 `Service.startForeground` helper 在 API 34+ 调用三参数重载并传入 `FOREGROUND_SERVICE_TYPE_SPECIAL_USE`，低于 API 34 使用双参数兼容重载；这与 manifest 的 special-use 类型和两个 subtype 声明一致。该源码边界没有把 VPN service 公开给普通第三方应用。
+- 目标设备仅做无内容状态复核：`VPN CONNECTED=0`、`tun0=0`、FlClash 进程数 `0`。本轮未启动 service、未读取通知正文或系统日志，不能把静态类型一致性外推为 Android 14+ 的实际前台启动、通知可见性或类型拒绝测试。XToolpro 可保留该“声明与调用一致”的正向证据，但仍需在目标 API 上验证启动失败、通知权限不可用和服务类型违规时的稳定错误映射；Proxy 台账保持 `Investigating`。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
