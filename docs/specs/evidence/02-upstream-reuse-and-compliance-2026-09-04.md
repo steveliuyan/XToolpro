@@ -573,6 +573,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮未读取 `dumpsys notification` 正文、状态栏内容、配置标签、节点、订阅 URL、凭据、Cookie、请求或日志，也没有启动 VPN 或修改设备设置。此前的真机检查仅以计数验证通知生命周期，不能替代本次字段来源审计。
 - XToolpro 的未来 VPN shell/adapter 必须采用固定中性前台通知标题，禁止把配置标签、订阅 URL、节点/组名、规则或代理目标写入标题、正文、操作、channel 或 notification extras；在脱敏契约测试和 Android 通知隐私复核完成前，该路径不可进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash Android 启动共享状态持久化边界源码审计（2026-09-07）
+
+- 固定 `sharedStateProvider` 组装 Android service 所需的 `SharedState`：配置显示标签、`SetupParams.testUrl`、`SetupParams.selectedMap`、`VpnOptions.accessControlProps`（含 accept/reject 应用包名列表）以及绕过域名等。`AndroidManager` 在 state 变化后延迟调用 `preferences.saveShareState`，setup 路径也会直接调用同一保存方法。
+- `lib/common/preferences.dart` 将该对象直接 `json.encode` 后写入 Flutter SharedPreferences 的 `sharedState` key；Android `Application.sharedState` 再从 `FlutterSharedPreferences` 的 `flutter.sharedState` string 用 Gson 解码。该固定路径未出现应用层加密、Android Keystore 或字段级脱敏；本结论不否定 Android 系统级设备加密，也不涉及或推断其他配置文件的存储方式。
+- 审计到的 `SharedState` 模型不含订阅 URL 正文字段，不能据此判断订阅 URL 是否由其他配置/数据库路径持久化；但测试 URL、用户标签、节点/代理组选择和应用路由数据本身已足以构成不应直接复用的敏感启动状态集合。
+- 本轮没有读取设备 SharedPreferences、应用数据、配置、节点、应用列表、订阅 URL、凭据、Cookie、日志或通知正文，也没有改动任何设置。XToolpro 必须令 native cold-start 合同只含启动所必需的最小字段，并以受 Keystore 保护的版本化存储和过期清理替代该明文 JSON 状态；订阅 URL、节点/组名、应用包名列表与测试 URL 默认不得进入该合同。完成存储威胁建模、迁移/清理和脱敏契约测试前，Proxy 路径不得进入 `Approved` 或正式 engine 集成。矩阵保持 `Partial`，台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
