@@ -760,6 +760,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读复核固定源码，并以 ADB 确认目标设备仍在线、FlClash 主界面可见；未打开“更多”菜单、不盲点按、不读取请求或连接正文、网络标识、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件，也未改动设备状态。
 - XToolpro 未来应将请求诊断明确设为默认关闭、短生命周期且按字段最小化的内存队列，提供本地清除和可验证的进程/重设清理合同；任何详情或导出必须再经同一脱敏层。完成保留上限、清理、脱敏与 success/unavailable/cancel/crash/version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 连接关闭结果边界源码审计（2026-09-08）
+
+- 固定 `lib/views/connection/connections.dart` 的单条阻断按钮直接以连接 ID 调用 `coreController.closeConnection` 后刷新；顶栏“关闭全部”图标没有确认步骤，调用 `coreController.closeConnections()` 时未 `await`，随后立即刷新列表。两条 UI 路径均未把布尔结果或异常映射为稳定的成功、失败、取消或重试状态。
+- 固定 `core/hub.go` 的 `handleCloseConnections()` 遍历 trackers 并调用 `Close()`；任一项出错会停止剩余遍历，但该 handler 仍返回 `true`。`handleCloseConnection()` 对不存在的 ID 返回 `false`，但对已找到 tracker 的 `Close()` 错误使用空白赋值忽略并返回 `true`。Dart interface 再将缺失/空 bridge 返回值降级为 `false`，但页面调用点不读取这个结果。
+- 节点切换后若“自动关闭连接”设置开启，`ProxiesAction.changeProxy` 同样调用 `closeConnections()`；关闭设置时改为 `resetConnections()`，其 core 实现仅重置 resolver connection。这两种路径都没有为用户提供逐条结果、部分失败或回滚语义。
+- 本轮只读审计固定源码，未打开连接页、未点击关闭/阻断、不读取连接 ID 或正文，未发起流量、未改动 VPN、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件。静态结论不代表目标设备发生过关闭失败。
+- XToolpro 的未来 adapter 必须将单条与批量关闭视为有副作用的操作：先取得明确用户意图，await 受限结果，报告关闭成功/未找到/部分失败/不可用，并保留可重新建立连接的说明；不得把未执行或部分失败报告为成功。完成 success、partial-failure、cancel、engine-crash 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
