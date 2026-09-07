@@ -497,6 +497,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 设备使用显式 HTTP proxy `127.0.0.1:7890` 访问公开 `https://connectivitycheck.android.com/generate_204`，并传入空 `NO_PROXY` 覆盖以避免直连回退；HTTP 状态为 `204`。本轮不读取或保存 CONNECT 元数据、响应头、请求正文、代理配置或日志内容，结果只证明该运行态 loopback mixed proxy 可转发一次真实公开 HTTPS 请求。
 - 通过仪表盘停止 VPN 后，复核 `VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 不验证 SOCKS、鉴权、局域网客户端、跨设备访问、全部端口或全部协议，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S loopback mixed SOCKS5 转发 proof（2026-09-07）
+
+- VPN 停止态从仪表盘启动固定 proof 包，系统确认 `VPN CONNECTED=1`。不更改任何配置、代理节点、规则、订阅 URL、凭据或 Cookie。
+- 设备经显式 SOCKS5 hostname proxy `127.0.0.1:7890` 访问公开 `https://connectivitycheck.android.com/generate_204`，HTTP 状态为 `204`。该命令指定 SOCKS5 协议，因此成功结果证明同一运行态 loopback mixed port 能接收并转发一次 SOCKS5 TCP HTTPS 请求；未读取或保存 SOCKS 握手、请求/响应正文、代理配置或日志内容。
+- 通过仪表盘停止 VPN 后，复核 `VPN CONNECTED=0`、`tun0` 不存在，设备临时 UI hierarchy 已删除。该 proof 不验证 SOCKS UDP、鉴权、局域网客户端、跨设备访问、全部端口或全部协议，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
