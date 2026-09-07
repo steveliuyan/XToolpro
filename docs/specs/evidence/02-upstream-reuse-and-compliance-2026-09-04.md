@@ -527,6 +527,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定源码的导出 `QuickActionActivity` 将 `${applicationId}.action.START` 和 `${applicationId}.action.STOP` 分别分派给 `ServiceState.handleStartAction()` 与 `handleStopAction()`；这是一条 Android 平台启动入口，不是静态快捷方式或小组件。
 - 在 VPN 停止态以固定包的 START action 启动，等待 14 秒后系统 `VPN CONNECTED=1`，但 `tun0` 仍不存在；因此本轮没有发起任何流量请求，也不把该 action 记作可用 VPN 启动。随后调用同一固定包的 STOP action，5 秒后 `VPN CONNECTED=0`、`tun0` 不存在，恢复路径成功。
 - 固定源码在应用初始化后以 `ShortcutManagerCompat.setDynamicShortcuts` 注册 ID 为 `toggle` 的动态快捷方式。真机启动 FlClash 主界面后，系统只按该固定 ID 计数为 1，且 `VPN CONNECTED=0`、`tun0` 不存在；未读取快捷方式标签或系统中其他应用的快捷方式记录。
+- 为排除冷启动时机，保持主界面已初始化且 VPN 停止后再次触发相同 START action；7 秒后仍为 `VPN CONNECTED=1`、`tun0` 不存在。随后 STOP action 在 5 秒后再次恢复 `VPN CONNECTED=0`、`tun0` 不存在。该重测未读取或修改配置、快捷方式、节点、规则或网络设置。
 - 本轮没有读取或输出配置、节点、规则、订阅 URL、凭据、Cookie、请求、日志或通知正文。该入口的真实 TUN/流量启动缺口保持 `Partial`，不改变 Proxy 台账 `Investigating` 状态。
 
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
