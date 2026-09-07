@@ -548,6 +548,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
 - 源码在确认后才调用 `Profile.normal(url).update()`。为避免触碰用户配置，本轮先打开已初始化的主界面，再以公开保留域名作为深链接参数发送 `ACTION_VIEW`；ADB UI hierarchy 只按该公开值计数，确认对话框中匹配 1 次。随后使用系统返回键取消，未确认、未联网、未写入配置。强停固定包后，以相同公开 deep link 冷启动，确认对话框仍匹配 1 次；再次返回取消后仍未写入配置。
 - 使用 package-restricted（非 `-n` 强制 component）的 `ACTION_VIEW` 分别触发 `clash` 和 `clashmeta` scheme，ADB UI hierarchy 对两个不同公开保留域名均各匹配 1 次确认对话框；两次均用返回键取消。未读取或枚举设备上其他应用的 scheme 处理者，因此不声明系统全局 resolver 一定选择 FlClash。
+- 对同一固定包发送 package-restricted `ACTION_SEND`、`text/plain` 与公开保留域名文本时，Android 在启动前拒绝该 intent；未打开 FlClash。该真机结果与 manifest 中缺少 `ACTION_SEND` filter 一致，因此固定 Android 包的标准系统分享文本入口为 `Unavailable`，不能以专用 deep link 替代。
 - 该真机结果证明专用深链接到导入确认的分派可达；URL 位于 deep-link query，不能替代 Android 标准系统分享文本入口，也不证明任何真实订阅 URL 的下载、校验、保存或恢复。结束时 `VPN CONNECTED=0`、无 `tun0`，未读取或输出现有配置、节点、订阅 URL、凭据、Cookie、请求或日志，Proxy 台账保持 `Investigating`。
 
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
