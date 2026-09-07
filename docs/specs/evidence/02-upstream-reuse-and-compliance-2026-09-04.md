@@ -672,6 +672,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 目标 Android API 33 设备仅做只读状态检查：`POST_NOTIFICATION` app-op 为 `allow`，notification dump 中该包名匹配计数为 `5`，结束时 `VPN CONNECTED=0`、`tun0=0`。本轮未修改授权、未启动 VPN、未读取 notification 文本、extras、配置、节点、订阅 URL、凭据、Cookie、请求或日志；当前允许状态不能覆盖拒绝或撤销路径。
 - XToolpro 的未来 adapter 必须把 Android 13+ 的真实 permission result、Activity 可用性和前台通知可见性作为 VPN 启动的显式门控；拒绝、撤销或无法请求时保持未启动并暴露可恢复的 unavailable/cancel 状态。不得复用无条件 continue/skip 分支。完成 allow、deny、revoke、process recreation 与 foreground-notification visibility 的设备契约测试前，该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash VPN service 断开与系统恢复源码审计（2026-09-07）
+
+- 固定 `VpnService.onRevoke()` 先执行 `stop()`，后发送受签名 permission 保护的 `VPN_REVOKED` 广播；`stop()`/`onDestroy()` 均会停止 service modules 与 `Core.stopTun()`。`onStartCommand()` 则发送 `VPN_START_REQUESTED` 广播，注释说明 Android always-on VPN 经此 callback 而非普通 bound-service 路径启动；它随后直接 `return super.onStartCommand(...)`，固定源码没有声明独立的 service restart mode。
+- `ServiceBroadcastReceiver` 将系统启动广播交给 `ServiceState.handleStartAction()`。没有 Flutter engine 时，该方法走 native fallback：读取已有 shared state、调用 `quickSetup`，再请求启动服务。因此源码存在系统重启后尝试恢复的分派路径，但依赖先前持久化的状态与 core setup，不能替代实际 always-on、进程重建或 reboot proof。
+- 对仍存活 app process 内的绑定 service，`ServiceController` 处理 `onServiceDisconnected`、`onBindingDied` 与 `onNullBinding`：清空 binding、将 `runTimeMillis=0`，再使 `ServiceState.handleServiceLost()` 把当前 request 收敛为 `STOPPED`。该路径没有 retry/backoff、持久化 failure reason 或用户可见的明确恢复状态；app process 自身死亡时这些内存对象也不构成恢复记录。
+- 目标设备仅以无内容状态确认 `VPN CONNECTED=0`、`tun0=0`、FlClash 进程数 `0`。本轮未杀进程、未重启设备、未配置 always-on/lockdown、未撤销 VPN/通知权限，未读取配置、节点、订阅 URL、凭据、Cookie、通知、请求或日志。XToolpro 必须以独立持久状态机记录运行意图、失败类别和恢复条件，并在 service loss、process death、reboot、VPN revoke 与通知权限不可用场景各自完成设备契约测试；在此之前能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
