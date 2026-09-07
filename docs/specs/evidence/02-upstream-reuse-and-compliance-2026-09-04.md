@@ -644,6 +644,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `resolveFile` 对 document ID 做 canonicalization，并要求结果等于根或以根路径加目录分隔符开头，因而固定实现拒绝根目录外路径；但它不是专用导出目录，系统文件选择器或获用户授权的 URI 流程可面对 app 私有文件根。静态源码无法确定运行时是否存在敏感文件、系统实际授予了哪些 URI 权限，或任何外部应用曾读取/写入；本轮没有查询 provider、枚举文件、读取 URI、打开文件或改动设备配置。
 - XToolpro 不得直接复用将完整 engine 私有文件目录暴露给 DocumentsProvider 的设计。未来配置/备份导出必须经用户显式触发、仅将最小化且已审查的输出提交给 SAF；不得把配置数据库、订阅 URL、凭据、缓存、日志或内部状态作为可浏览根暴露。完成 provider 授权、文件范围、写入原子性及撤销后的契约测试前，配置导出行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android 平台组件暴露面完整性源码审计（2026-09-07）
+
+- 固定 `android/settings.gradle.kts` 仅纳入 `app`、`core`、`service`、`common`，且 app 直接依赖后三者。对这些 manifest 的只读盘点显示：`MainActivity`、`QuickActionActivity`、`TileService`、`ServiceBroadcastReceiver` 与 `FilesProvider` 为导出组件；前述深链接、QuickAction、签名广播与 DocumentsProvider 边界分别已有专门记录。`VpnService` 和 `ProxyService` 均为 `exported=false`，前者另声明 `BIND_VPN_SERVICE`。
+- `TileService` 以 `BIND_QUICK_SETTINGS_TILE` 和 `QS_TILE` action 供系统快捷设置绑定；其实现只在监听时订阅 `ServiceState`，点击时则构造 `QuickAction.TOGGLE.quickIntent` 并启动 `QuickActionActivity`。因此系统绑定权限保护磁贴 service 自身，但不保护该无权限导出 Activity 已存在的 START/STOP/TOGGLE 状态变更面。
+- `MainActivity` 的公开入口为 launcher、`QS_TILE_PREFERENCES` 与此前已审计的专用配置深链接；固定 `wifi_ssid` plugin manifest 只增加 Wi-Fi/位置权限，`setup`、`rust_api` plugin manifest 为空，未见额外 Android 组件。此结论是固定源码和 Gradle 模块关系的静态结果，不等同于对任一 Android 系统调用者、合并 manifest 或设备行为的运行时证明。
+- 本轮未发送 intent、绑定 service、查询 package 或 provider，未读取配置、节点、订阅 URL、凭据、Cookie、通知、日志或文件；无内容复核结果仍为 `VPN CONNECTED=0`、`tun0=0`。XToolpro 的 VPN shell 必须保持内部 service 不导出，系统 TileService 仅保留系统绑定权限，并使所有状态变更只经不可导出或签名保护的内部入口；在完整 merged-manifest 审计与调用者契约测试前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
