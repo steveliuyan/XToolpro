@@ -551,6 +551,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 该数据流与此前 QuickAction START 和磁贴点击均达到系统 VPN 连接、但观测窗口内没有 `tun0` 的真机现象相容；但固定源码不能确定试验时 Flutter engine 是否附着、MethodChannel 事件是否投递或 Dart 侧状态机为何未完成，故不将其表述为根因。未再次触发入口、未读取 logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie 或通知正文。
 - XToolpro 后续若获准设计 adapter，系统快捷入口必须有可独立完成或可显式恢复的持久启动合同，不能把可用 VPN/TUN 生命周期隐式绑定于存活的 Flutter UI 监听者。在这一入口的冷启动、已附着 engine、事件丢失、取消和失败路径均完成脱敏契约测试前，Proxy 路径保持 `Investigating`，矩阵保持 `Partial`，不进入正式 engine 集成。
 
+### FlClash QuickAction TUN 建立与运行状态源码边界（2026-09-07）
+
+- 固定 `VpnService.start()` 先启动 service modules，再调用 `handleStart()`；后者通过 `VpnService.Builder.establish()` 取得 TUN file descriptor，随后才调用 JNI `Core.startTun(...)`。任一步抛出异常时会调用 `stop()` 清理。因此真正的 TUN 建立路径包含 Android builder 建立、descriptor 交接和 native core 启动三个环节。
+- 但 `ServiceController.start()` 只要受绑定 service 的 `start()` 未返回失败，就记录非零 `runTimeMillis`；`ServiceState` 随之可进入 `STARTED`。该状态机没有独立检查 `tun0` 是否存在、native core 是否健康，或是否已有实际可转发流量。系统 `VPN CONNECTED=1` 同样不足以证明上述全部步骤持续成功。
+- 这解释了为何本次证据把 QuickAction 的系统 VPN 连接与可用 VPN/TUN 严格区分：强停 cold-start 后观测到 `VPN CONNECTED=1`、`tun0=0`，只能证明请求达到系统 VPN 层，不能证明 `establish`、`Core.startTun` 或后续运行中的哪一环失败。未读取 logcat、应用日志、配置、节点、订阅 URL、凭据、Cookie、请求或通知正文，也没有再次启动 VPN。
+- XToolpro 的未来 adapter 契约必须把 Android service 已绑定、TUN 已建立、core ready 和公开受控流量成功建模为不同状态，并为每个失败/取消路径提供脱敏错误代码；未完成这些独立状态的设备验证前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android 专用配置深链接入口边界（2026-09-07）
 
 - 固定 Android manifest 仅为 `MainActivity` 声明 `clash`、`clashmeta`、`flclash` scheme 与 `install-config` host 的 `ACTION_VIEW` / `BROWSABLE` filter；未声明标准 `ACTION_SEND` / `SENDTO`。`pubspec.yaml` 固定 `app_links` 依赖，`LinkManager` 监听该 host 的 URL query，并将 `url` 参数交给导入确认流程。
