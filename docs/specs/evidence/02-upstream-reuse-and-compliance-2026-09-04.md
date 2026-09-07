@@ -485,6 +485,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 在该运行态执行 `am force-stop --user 0 com.follow.clash.dev`。随后系统复核 `VPN CONNECTED=0`、`tun0` 不存在，证明进程被终止时未保留系统 VPN/TUN。通过 launcher 重新启动应用后再次复核两项均为 0，未自动恢复陈旧 VPN 会话。
 - 该 proof 仅覆盖应用进程被 Android 强停时的 VPN 清理与重新启动边界；不模拟 core 崩溃、竞争 VPN、首次授权拒绝/撤销、始终开启或断线阻止。结束时设备临时 UI hierarchy 已删除，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 小米 10S VPN 通知生命周期 proof（2026-09-07）
+
+- VPN 停止态从仪表盘启动后，系统确认 `VPN CONNECTED=1`。不读取 `dumpsys notification` 的任何记录正文，只在设备端统计包含 FlClash 包名的匹配行数，运行态为 13。
+- 通过仪表盘停止 VPN 后，系统复核 `VPN CONNECTED=0`；同一脱敏计数降为 5。该变化表明 VPN 运行期关联的系统通知服务记录在停止后被移除。
+- 计数不等同于单一通知的用户可见数量，且本轮不验证通知正文、通知渠道、权限提示、点击动作或 Android 系统状态栏呈现。结束时设备临时 UI hierarchy 已删除，矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 ### FlClash Android plugin 许可边界与依赖裁剪复核（2026-09-06）
 
 - 对固定 FlClash 提交的 `plugins/proxy/LICENSE`、`plugins/rust_api/LICENSE` 和 `plugins/window_ext/LICENSE` 做了只读复核；三者 SHA-256 均为 `422E0DE8E3275FEBF5C41A5CCF891F68F16BC40E1B5DCA26E50913B307EF794E`，内容仍是 `TODO: Add your license here.`。没有把根 GPL-3.0 推断为这些插件的授权，也没有修改上游归档。
