@@ -651,6 +651,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `MainActivity` 的公开入口为 launcher、`QS_TILE_PREFERENCES` 与此前已审计的专用配置深链接；固定 `wifi_ssid` plugin manifest 只增加 Wi-Fi/位置权限，`setup`、`rust_api` plugin manifest 为空，未见额外 Android 组件。此结论是固定源码和 Gradle 模块关系的静态结果，不等同于对任一 Android 系统调用者、合并 manifest 或设备行为的运行时证明。
 - 本轮未发送 intent、绑定 service、查询 package 或 provider，未读取配置、节点、订阅 URL、凭据、Cookie、通知、日志或文件；无内容复核结果仍为 `VPN CONNECTED=0`、`tun0=0`。XToolpro 的 VPN shell 必须保持内部 service 不导出，系统 TileService 仅保留系统绑定权限，并使所有状态变更只经不可导出或签名保护的内部入口；在完整 merged-manifest 审计与调用者契约测试前，快捷入口保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 按应用访问控制清单空态与隐私边界源码审计（2026-09-07）
+
+- 固定 `AppPlugin` 的 `getPackages` 在 IO coroutine 中直接将 `PackageResolver.installedPackages` Gson 序列化为 MethodChannel 字符串，不提供异常到稳定错误代码的映射。`PackageResolver` 使用 `PackageManager.getInstalledPackages(GET_PERMISSIONS)`，排除自身与 `android` 后为每项输出包名、显示标签、系统应用标记、`INTERNET` 声明标记与最后更新时间；manifest 声明 `QUERY_ALL_PACKAGES`，但源码无法证明设备实际返回任何数量。
+- Flutter `SystemAction.getPackages` 仅在内存 `packagesProvider` 为空时请求 bridge；`AccessView.initState` 对同一页面实例只调用一次。Future 完成后，空列表直接显示“无数据”，该页面未提供错误类别、当前页刷新或重试控件。若方法抛出异常，源码也没有在 native branch 或该 view 内将其转为可区分的界面状态；静态追踪无法把这些路径中的任一项认定为本机空列表根因。
+- 这解释了此前目标设备上“无条目、无错误/重试”的观察，不需要读取或输出任何实际应用清单。应用包名、标签、网络声明和更新时间共同构成敏感设备使用信息；固定源码把完整集合跨 Android/Flutter 边界传输，未见该 path 的字段最小化或专用隐私合同。
+- 本轮未调用 `getPackages`、`getChinaPackageNames`、图标查询或任何 package-manager 命令，未选择应用或更改访问控制，且未读取配置、节点、订阅 URL、凭据、Cookie、日志、通知或文件；设备仍为 `VPN CONNECTED=0`、`tun0=0`。XToolpro 未来仅可在用户显式打开按应用路由时按需获取最小字段，结果仅保留在内存并禁止日志、导出、遥测和默认持久化；还必须提供 empty、permission/unavailable、engine-error 与 retry 状态。完成隐私、错误映射与真实绕过流量契约测试前，该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
