@@ -752,9 +752,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅复核固定提交源码，未读取设备连接正文、网络标识、请求目标、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件，也未改变设备设置。该结果证明请求/连接列表及详情入口存在，但未证明设备上任一具体字段的实际值或敏感内容出现。
 - XToolpro 的未来 `engine-proxy` 合同必须按字段最小化返回，默认隐藏或截断应用包名、UID、地址、host、规则 payload、GeoIP/ASN、代理链与远端目标，并统一将读取失败映射为稳定、脱敏错误；完成字段级脱敏、搜索/详情一致性和 success/unavailable/cancel/crash/version-mismatch 契约测试前，该行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
-#### 本检查点远端备份状态（2026-09-07）
+#### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
+
+#### 本检查点远端备份状态（2026-09-07）
+
+- 本检查点 focused commit `b021cfb8fe6ee9a425966cf02917c4d8b5f36a5e` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。工作树中的其他既有修改和临时产物未纳入提交。
 
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
