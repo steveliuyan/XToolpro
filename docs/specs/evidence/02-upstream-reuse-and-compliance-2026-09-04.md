@@ -744,6 +744,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `coreFailureLogLevel` 仅按异常类型选择 debug/warning 级别，不执行字段脱敏；失败后 UI 状态写入延迟值 `-1`，但固定路径未见稳定错误代码、重试原因或日志过滤合同。该静态结果不证明任一失败在设备上实际发生。
 - 本轮未执行测速、未读取节点名、测试 URL、配置、logcat、应用日志、凭据、Cookie 或网络请求；XToolpro 必须把延迟失败映射为稳定类别，禁止默认日志包含节点/组名、URL 或异常正文，并为重试与 unavailable 状态提供脱敏契约测试。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 请求/连接列表字段边界源码审计（2026-09-07）
+
+- 固定 `lib/models/common.dart` 的 `Metadata`/`TrackerInfo` 模型包含 UID、进程与进程路径、网络类型、源/目的 IP 与端口、host、规则及 rule payload、代理链、源/目的 GeoIP、ASN、DNS mode、special proxy/rules 和 remote destination。`TrackerInfo.desc` 还组合网络类型、host/目的 IP 与目的端口作为列表摘要；这些字段均来自 core 返回的连接记录。
+- 固定 `lib/views/connection/connections.dart` 每秒调用 `coreController.getConnections()`，异常路径调用 `commonPrint.log('updateConnections error: $error', ...)`；空结果直接显示连接空态。固定 `lib/views/connection/item.dart` 在详情页直接渲染进程/UID、网络、规则、host、源/目的地址、上传/下载、GeoIP/ASN、DNS、special proxy/rules、remote destination 和代理链。
+- `TrackerInfosStateExt.list` 的搜索字段仅包含 network、host、destination IP、process 和 proxy chains；源/目的端口、规则 payload、GeoIP/ASN、DNS、special proxy/rules 与 remote destination 不参与搜索。该差异属于能力覆盖边界，不代表这些字段在详情页不可见。
+- 本轮仅复核固定提交源码，未读取设备连接正文、网络标识、请求目标、配置、节点、订阅 URL、凭据、Cookie、日志或导出文件，也未改变设备设置。该结果证明请求/连接列表及详情入口存在，但未证明设备上任一具体字段的实际值或敏感内容出现。
+- XToolpro 的未来 `engine-proxy` 合同必须按字段最小化返回，默认隐藏或截断应用包名、UID、地址、host、规则 payload、GeoIP/ASN、代理链与远端目标，并统一将读取失败映射为稳定、脱敏错误；完成字段级脱敏、搜索/详情一致性和 success/unavailable/cancel/crash/version-mismatch 契约测试前，该行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 本检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
