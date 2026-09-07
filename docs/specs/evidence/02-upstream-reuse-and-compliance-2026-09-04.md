@@ -665,6 +665,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮未读取 `dumpsys notification`、状态栏文本、notification extras、配置、节点、订阅 URL、凭据、Cookie、请求或日志，也没有点击通知或发送 intent。仅以无内容计数确认目标设备仍为 `VPN CONNECTED=0`、`tun0=0`。
 - XToolpro 未来 VPN 通知必须使用中性、脱敏内容，并将停止动作绑定到不可导出或签名保护的内部组件；`PendingIntent` 仍应 immutable，但它是 token 完整性要求，不是公开组件调用者校验的替代品。完成 merged-manifest、notification action 和第三方直接调用的契约测试前，通知停止动作保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android 13 前台通知权限门控源码审计（2026-09-07）
+
+- 固定 app manifest 声明 `android.permission.POST_NOTIFICATIONS`。`ServiceState.requestStart()` 在 Flutter `AppPlugin` 已附着时先调用 `requestNotificationPermission`，回调为 `false` 才让本次 request 失败；因此 Android bridge 的回调语义决定是否进入 VPN/core 启动路径。
+- API 33+ 的 `AppPlugin.requestNotificationPermission()` 先检查 `POST_NOTIFICATIONS`，未获准时以 `ActivityCompat.requestPermissions` 请求。其 permission-result listener 只核对 request code，既不读取 `permissions` 也不读取 `grantResults`，而是无条件将 `skipNotificationPermissionRequest=true` 并以 `true` 调用启动回调；如果当时没有 attached Activity，原方法也直接以 `true` 回调。固定源码因此没有把通知权限拒绝、撤销、空 Activity 或结果异常映射为稳定的 unavailable/cancel 状态。
+- 目标 Android API 33 设备仅做只读状态检查：`POST_NOTIFICATION` app-op 为 `allow`，notification dump 中该包名匹配计数为 `5`，结束时 `VPN CONNECTED=0`、`tun0=0`。本轮未修改授权、未启动 VPN、未读取 notification 文本、extras、配置、节点、订阅 URL、凭据、Cookie、请求或日志；当前允许状态不能覆盖拒绝或撤销路径。
+- XToolpro 的未来 adapter 必须把 Android 13+ 的真实 permission result、Activity 可用性和前台通知可见性作为 VPN 启动的显式门控；拒绝、撤销或无法请求时保持未启动并暴露可恢复的 unavailable/cancel 状态。不得复用无条件 continue/skip 分支。完成 allow、deny、revoke、process recreation 与 foreground-notification visibility 的设备契约测试前，该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
