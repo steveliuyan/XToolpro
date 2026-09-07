@@ -637,6 +637,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 根 `LICENSE` 的 SHA-256 为 `230184F60BAE2FEAF244F10A8BAC053C8FF33A183BCC365B4D8B876D2B7F4809`，文本为 GPL-3.0；`go.mod` 的 SHA-256 为 `BAC10AEE76B477784CA48BEF18C00379DE54B6A2D803F90E9E1352D9F0D73686`；`go.sum` 的 SHA-256 为 `7982069B99FC64C5A45A40055228BB3E188EC5EC4268FA22B1748018CCFEBC90`。
 - `go.mod` 约含 138 条带版本 `require` 记录。当前只完成固定来源、根许可和 Go manifest/校验锁定复核；第三方 Go 传递依赖许可证、native 闭包和 notices 仍待逐项解析，不能据此把 Proxy 台账改为 `Approved`。
 
+### FlClash Android 文档提供者私有文件边界源码审计（2026-09-07）
+
+- 固定 `android/service` manifest 将 `FilesProvider` 声明为导出的 `DocumentsProvider`，使用 `android.permission.MANAGE_DOCUMENTS`，并允许 URI grant。该组件服务于 `DOCUMENTS_PROVIDER` action；`VpnService`、`ProxyService` 均为 `exported=false`，其中前者还声明 `BIND_VPN_SERVICE`。本结论仅描述固定 manifest 合同，不把该系统权限推断为任意第三方应用可直接取得。
+- `FilesProvider` 以 app `filesDir` 的 canonical path 为根。`queryChildDocuments` 遍历该根目录及其子目录，`includeFile` 使用绝对路径作为 document ID；`openDocument` 按请求的 `ParcelFileDescriptor` mode 打开解析后的文件，普通文件在 document flags 中标记 `FLAG_SUPPORTS_WRITE`。它未实现 create、delete、rename、copy 或 move 方法。
+- `resolveFile` 对 document ID 做 canonicalization，并要求结果等于根或以根路径加目录分隔符开头，因而固定实现拒绝根目录外路径；但它不是专用导出目录，系统文件选择器或获用户授权的 URI 流程可面对 app 私有文件根。静态源码无法确定运行时是否存在敏感文件、系统实际授予了哪些 URI 权限，或任何外部应用曾读取/写入；本轮没有查询 provider、枚举文件、读取 URI、打开文件或改动设备配置。
+- XToolpro 不得直接复用将完整 engine 私有文件目录暴露给 DocumentsProvider 的设计。未来配置/备份导出必须经用户显式触发、仅将最小化且已审查的输出提交给 SAF；不得把配置数据库、订阅 URL、凭据、缓存、日志或内部状态作为可浏览根暴露。完成 provider 授权、文件范围、写入原子性及撤销后的契约测试前，配置导出行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
