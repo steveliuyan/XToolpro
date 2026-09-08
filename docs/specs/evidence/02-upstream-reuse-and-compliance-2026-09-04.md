@@ -945,6 +945,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL，也未发送流量。最后以正常 `pm grant` 恢复 `POST_NOTIFICATIONS`，package 层 app-op 显示 `allow`；设备没有遗留 TUN。因取消发生时的可见窗口内容未被读取，本轮不能证明系统 permission dialog 当时存在、BACK 实际触发 permission callback，或 UI 已显示稳定 `Cancelled`/`Unavailable`。
 - 结果仅补充“已撤销态 attached-activity + BACK 取消尝试”观察窗口内未形成 TUN；它不能替代对实际 callback result、前台通知可见性、permission dialog 生命周期或完整 VPN/core health 的真机契约。XToolpro future `engine-proxy` 仍须以逐请求、可观察的真实授权结果和一次性 `Cancelled` completion 作为启动门控；完成 deny/revoke/retry/recreate/visibility 设备契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 通知权限撤销期间进程终止与重开边界（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）停止基线下，强停 dev 变体并以正常 `pm revoke` 临时撤销 `POST_NOTIFICATIONS`。UID 层 `POST_NOTIFICATION` 为 `ignore`，同次 package 层仍显示 `allow`；此时 `tun0=0`、进程计数为 0。
+- 从 launcher 启动主界面、等待 5 秒并对精确 START action 仅等待 2 秒后，以 `am force-stop --user 0` 终止该包。5 秒后只确认 `tun0=0`、进程计数为 0、权限/app-op 状态仍处于同一撤销层级。随后再次从 launcher 请求启动，等待 8 秒时仍只观察到 `tun0=0`、进程计数为 0；未读取窗口、Activity、permission dialog 或任何应用内容，故不将该计数外推为 launcher 渲染、callback 或自动恢复的证明。
+- 发送同一精确 STOP action 后 5 秒仍无 TUN、进程存在；最后以正常 `pm grant` 恢复 `POST_NOTIFICATIONS`，package 层显示 `allow`。全程未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL，亦未发送流量。
+- 该检查仅证明本次撤销态下的强停会留下无 TUN/无进程状态，并且后续观察窗口未见自动 TUN 恢复；它不替代实际 permission callback、前台通知可见性、用户可见 unavailable/cancel、VPN consent 或 core health 验证。XToolpro future `engine-proxy` 必须把 process death/recreate 期间的每个等待 transaction 显式收敛为可恢复、脱敏结果，并以真机覆盖 deny/revoke/recreate/visibility 与 TUN 清理；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
