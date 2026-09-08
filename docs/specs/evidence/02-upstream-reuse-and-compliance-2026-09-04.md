@@ -1254,6 +1254,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `adb shell ip -o link show type tun` 被设备 shell 返回 `Permission denied`；`pm check-permission` 不是该设备 shell 的可用命令。未 root、未绕过权限、未读取完整 connectivity 输出或接口正文，不据此推断更多状态。
 - 本轮未写入 always-on/lockdown、未启动/停止/杀除应用、未重启设备、未触发 revoke 或竞争 VPN，也未读取配置、通知正文、日志、请求、节点、订阅 URL、凭据、Cookie、数据库、文件或流量内容。结果只是停止态状态复核，不构成 always-on、lockdown、reboot、process-death 或恢复 success proof；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### engine-proxy 五类契约闭包静态核验（2026-09-09）
+
+- 仅只读复核 `docs/architecture/engine-contract-test-plan.md`、`engine-proxy/build.gradle.kts`、`engine-proxy/src/main/AndroidManifest.xml` 与 `core-model/src/main/kotlin/com/steveliuyan/xtoolpro/core/model/ModuleId.kt`。计划统一定义 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并要求 task ID、能力/版本/健康入口及脱敏日志；Proxy 表格也列出固定 FlClash 提交与五类前置/断言。
+- 固定模块实际只有 Android library 壳、`implementation(project(":core-model"))` 和空 manifest；没有 Kotlin/Java adapter、native/FlClash 依赖、公开 contract、版本/健康 handshake、任务状态模型或测试源。只读 `Get-FileHash -Algorithm SHA256` 结果为：计划 `20161EFB1E7DFCA70CD31F88CA504328E172B0E534D7275F05E038D1E3BC77F6`，Gradle `5A152141FE75A58515AC09C45ED9A6EEB623767CCB44BF25C4299CE0E7D2CC65`，manifest `571F2735FAF5E857752EE057AC8EF63425576A721616C60B86EE5D4C0A2D682F`，`ModuleId.kt` `80B8B427F487858772F3D9FBEFD3878BDD7855AD4AFDB0FDD06628E87B0610ED`。
+- 本轮未读取或纳入任何 `build/` 产物、SDK、缓存、上游源码归档、凭据或设备数据，也未运行契约测试、构建 adapter、注入故障或启动 VPN。结论是计划与模块源码闭包不完整，不构成任何五类结果执行证据；future `engine-proxy` 必须先提供版本化公开 contract、签名 provenance/health manifest、可取消任务状态机和隔离 success/unavailable/cancel/crash/version-mismatch 测试，再由真实 FlClash proof 绑定。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，ADB 基线）
 
 - focused commit `1656a16` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
