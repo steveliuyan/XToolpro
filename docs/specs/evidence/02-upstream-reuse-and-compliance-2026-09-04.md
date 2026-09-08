@@ -888,6 +888,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 此结果与运行态偶数次切换最终保持运行相符。但本轮不读取 `isRunningRequested()`、短时间 TUN 状态、协程调度或资源计数，不能证明 action 逐个线性化、期间没有反向状态或不存在并发资源竞争。
 - XToolpro future `engine-proxy` 必须以线性化的显式目标状态、去重/取消语义和实际 TUN/core health 回执替代并发“读取后切换”；仍需无敏感字段的快速双切换、重复请求、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android native core/bridge 版本不匹配边界静态审计（2026-09-08）
+
+- 在固定 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72` 的隔离源码归档中，`android/core/src/main/cpp/CMakeLists.txt` 只有在当前 `${ANDROID_ABI}` 同时存在 `jniLibs/<ABI>/libclash.so`、`cpp/includes/<ABI>/libclash.h` 与 `bride.h` 时才定义 `LIBCLASH`、加入 include/link 路径并链接 `clash`；缺少任一输入时仍构建 `core`，但不链接 `libclash.so`。
+- 对应 `android/core/src/main/cpp/core.cpp` 的 `#else` 保留 Kotlin 所需 JNI 符号，却将 `startTun`、`stopTun`、`quickSetup`、`invokeMethod`、事件监听、DNS、暂停和 GC 实现为空操作，并让两种流量查询返回 `{}`。`android/core/.../Core.kt` 仅执行 `System.loadLibrary("core")`，其公开 JNI 表面和生成的 `libclash.h` 均没有 FlClash/Clash.Meta commit、engine API、ABI 或 artifact hash 查询/校验。
+- 归档当前只含 `arm64-v8a` 的 `libclash.so` 与两份生成头文件；这只说明该归档的一个 ABI 输入完整，不能证明其他 ABI、bridge/core 同步或设备加载路径。因 fallback 与完整路径的 Kotlin/JNI 名称相同，构建成功或 `System.loadLibrary` 成功不能作为锁定完整 core 的证明，也不能将错配自动解释为可恢复的 `VersionMismatch`。
+- 本轮仅读取隔离归档，未修改 SDK、缓存、上游源码归档或构建产物。设备端仅作允许范围内的停止基线读取：`tun0=0`、`com.follow.clash.dev` 进程计数为 `1`；未读取日志、配置、通知、节点、请求、数据库或其他敏感内容，亦未使用 ADB 发出 action 或改变任何设备设置。
+- XToolpro future `engine-proxy` 必须在任何配置写入、导出或 VPN 请求前，基于受签名 manifest 核验 FlClash/Clash.Meta commit、engine API、ABI、bridge 和 `libclash.so` SHA-256，以及必需符号/资源集合；缺失、ABI 不符或不一致时必须返回脱敏 `Unavailable`/`VersionMismatch` 并阻止启动。仍需在隔离环境以完整 core 与刻意缺失/错配 artifact 运行 success、unavailable、version-mismatch、cancel、crash 五类契约测试；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
