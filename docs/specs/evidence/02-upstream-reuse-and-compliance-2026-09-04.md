@@ -1304,6 +1304,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `proxyDelayTest` 的失败日志模板包含代理名和原始异常对象；本轮未见稳定的 URL 脱敏、目标范围限制、请求与 task ID 绑定或逐节点 terminal receipt。静态路径不能据此断言任意 URL 一定泄露，也不能证明任意 URL 均被安全拒绝或仅访问用户预期目标。
 - 本轮只读复核固定源码与既有脱敏 proof；未发起新的网络请求、未运行测速、未读取日志/请求/配置/节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须默认禁止敏感 URL 进入日志/遥测，采用受控允许范围和稳定脱敏错误码，并在同一 fixture 下覆盖 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 及逐节点结果完整性；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash DNS/IPv6 与 Fake-IP/Host/嗅探能力边界静态审计（2026-09-09）
+
+- 固定 `network.dart`/`general.dart` 的开关进入 profile 构造；DNS 劫持开启时 setup 路径向 `Core.startTun` 传入 `dns = "0.0.0.0"`，Android `VpnService` 同时发布固定 DNS stub；追加系统 DNS 路径向 `rawConfig['dns']['nameserver']` 追加 `system://`。这些是参数/配置映射，不是最终配置写入或 core 生效回执。
+- 既有设备摘要仅证明 IPv6、DNS 劫持和追加系统 DNS 开关可跨进程持久化，并在特定开启态观察到受限的 TUN、VPN、DNS stub、IPv6 地址/路由计数和公开 HTTPS 成功；停止后已恢复关闭。DNS 请求结果未做包级捕获，不能区分 TUN 捕获、代理侧解析或系统 resolver 路径。
+- 固定源码未提供 Fake-IP、Host 重写或流量嗅探的独立 capability/health 查询，也没有为 DNS 失败、IPv6 不可用、Fake-IP 冲突、嗅探超时或取消建立稳定脱敏分类。未读取生成配置、DNS/路由正文、请求、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
+- 本轮只读复核固定源码与既有脱敏计数证据，未切换设置、启动 VPN、发送新流量或执行包级 DNS/嗅探验证。future `engine-proxy` 必须将 DNS、IPv6、Fake-IP、Host 和 sniffing 拆成可探测 capability，默认最小化 DNS/host 字段，区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 并以受控 fixture 覆盖地址/路由、解析、冲突、超时和取消；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，测速链接审计）
 
 - focused commit `7c3de45` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
