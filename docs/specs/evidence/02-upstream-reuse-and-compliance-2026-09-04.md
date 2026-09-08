@@ -1290,6 +1290,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有 4 路 loopback HTTP 请求 proof 仅证明一次受限并发转发，未在 TCP 并发开关两态下使用相同 fixture 做对照，也未隔离 TUN、代理池、系统调度和网络条件，不能把它归因于 `tcp-concurrent`。
 - 本轮只读复核固定源码与既有持久化证据；未启动 VPN、未发起压力/并发流量、未读取连接元数据、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在受控 fixture 下验证开关两态的实际并发上限、资源与取消收敛，失败时返回脱敏 `Unavailable`/`EngineCrashed`，并以稳定 terminal receipt 覆盖重设、超时、crash 和 version mismatch。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，TCP 并发审计）
+
+- focused commit `311d17d` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，进程归因审计）
 
 - focused commit `82ebdd8` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
