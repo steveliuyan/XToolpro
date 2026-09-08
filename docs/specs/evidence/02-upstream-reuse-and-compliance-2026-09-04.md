@@ -1009,6 +1009,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅静态读取隔离归档；未触发缺库、错 ABI 或崩溃，未修改 SDK、缓存、上游源码归档或构建产物，也未使用 ADB。该审计不声称任何特定设备已发生上述情况。
 - XToolpro future `engine-proxy` 必须先验证受签名 native manifest，再以限定 timeout 包装初始化/回调和健康握手；将 hash/ABI/API/commit 不一致映射为 `VersionMismatch`，缺失组件映射为 `Unavailable`，加载、符号或运行健康失败映射为 `EngineCrashed`，在任何配置写入、导出或 VPN 请求前拒绝执行。仍需隔离的完整/缺失/错配 artifact 契约测试和真机健康回执；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 冷启动 core setup 等待期间 STOP/detach 取消边界静态审计（2026-09-08）
+
+- 固定 `ServiceState.handleStartAction()` 在没有 `TilePlugin` 的冷启动路径直接调用 `loadPreferencesAndStart()`。该函数先读取已有 shared state，随后 await `setupCore()`；只有后者成功返回后才创建 `requestStart()` 的 running request。因此 setup 等待窗口内 `latestRequest` 仍是默认 `running=false`。
+- `setupCore()` 委托 `ServiceController.quickSetup()`；后者的 `suspendCancellableCoroutine` 仅注册 native callback，没有 timeout 或 `invokeOnCancellation`。在该窗口调用 `handleStopAction()` 时，`isRunningRequested()` 为假而直接返回，不会取消或关联正在等待的 `quickSetup` coroutine。`ServiceState.detachFlutterEngine()` 同样只清空 engine 引用；`QuickActionActivity` 所用 `GlobalState` scope 不由 Activity lifecycle 取消。故原生 fallback 的 STOP 或 detach 对 core-setup in-flight work 没有有界的 `Cancelled` completion 合同。
+- 本轮仅只读固定 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72` 隔离归档中的 `ServiceState.kt` 与 `ServiceController.kt`；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。该静态结论不声称目标设备已发生挂起或在任何具体时序中留下 TUN。
+- XToolpro future `engine-proxy` 必须以一个受监督、可取消且有 deadline 的启动 transaction 覆盖 config/core setup、permission、VPN establish 与 health；STOP/detach 必须取消所有 in-flight 阶段，并只在实际清理/稳定脱敏 `Cancelled` 结果完成后结束。仍需在隔离 fixture 和真机上验证 setup callback timeout、STOP、detach/recreate、success、unavailable、crash 与 version mismatch；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android ABI 构建面与逐 ABI 验证边界静态审计（2026-09-08）
 
 - 固定 `plugins/setup/buildkit/build_tool` 的 `Target` 定义三个 Android c-shared 目标：`armeabi-v7a`、`arm64-v8a`、`x86_64`；未传 `--arch` 或 `--target-platform` 时会选中全部三个。`plugins/setup/buildkit/gradle/plugin.gradle` 将 Go core task 设为 `:core` 的 CMake configure、external native build 与 merge native libs 的前置依赖，说明这是原生桥接的构建输入链，而不是 Flutter APK split 的单独展示设置。
