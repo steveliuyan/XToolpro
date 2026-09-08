@@ -1575,6 +1575,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `rules/provider/provider.go` 在更新回调中直接替换 provider strategy 并发出全局 `RuleUpdateCallback`；固定路径未见 provider 级读写锁、逐项 terminal receipt、稳定错误码或 UI 取消状态。`rule_set.go` 在 provider 名称不存在时返回 `(false, "")`，未区分 provider 缺失、未初始化、更新失败和规则未命中。
 - 结论：上游 rule-provider 具备 parser-before-write、bundle/local fallback、取消 context 和失败 backoff，但仍缺少严格超限检测、原子发布、来源/版本证明、命中原因回执及缺失/失败状态分类。对应 parity 行继续保持 `Partial`，不得把 provider API JSON 的 `ruleCount/updatedAt` 视为经过 XToolpro 审计的 terminal receipt。
 
+### FlClash external-controller 管理面与认证边界静态审计（2026-09-09）
+
+- 审计对象仍为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未启动管理面、未请求 API、未读取设备配置/secret、未使用 ADB。相关源码为 `core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/config/config.go`、`lib/common/task.dart`。
+- `hub/route/server.go:92-135,162-245,249-325` 可并行创建 TCP、TLS、Unix socket 和 named pipe server；HTTP/TLS 共享同一个 router，路由包含 configs、proxies、groups、rules、connections、providers、cache 等管理面。
+- `authentication(secret)` 仅在 `secret != ""` 时挂 middleware；普通 HTTP 使用 `Authorization: Bearer <secret>`，websocket 在缺少自定义 header 时接受 query `token=<secret>`。secret 为空时整套路由无鉴权。比较使用 constant-time compare，但未见 secret 轮换、过期、权限分级、审计事件或限流合同。
+- `config.go` 默认 `ExternalControllerCors` 为 `AllowOrigins=["*"]` 和 `AllowPrivateNetwork=true`；debug 模式还会挂载 `/debug` profiler。配置模型虽支持 external-controller、TLS、Unix/pipe、CORS、client-auth、routing mark 和 secret，固定 Flutter `lib/common/task.dart:115` 只把 external-controller 地址写入 raw config，未提供 XToolpro 所需的最小 bind scope、管理面 allowlist、TLS/client-cert 健康回执或稳定错误类别。
+- 结论：该上游管理面具备 secret Bearer/query-token 认证和多种本地传输入口，但默认 CORS/私网策略宽泛，空 secret 会关闭鉴权，且 Android bridge 未形成可验证的 controller 绑定范围、secret 生命周期、权限分级或 terminal health contract。对应 parity 行保持 `Partial`，不得将 external-controller 认证外推到 mixed proxy inbound 或 LAN sharing。
+
 #### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
 
 - focused commit `7c23efa` 已创建但尚未 push；随后将以 evidence-only commit 固化本 hash 与未 push 状态。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
