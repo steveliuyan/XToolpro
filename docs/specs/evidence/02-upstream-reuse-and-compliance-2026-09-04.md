@@ -1284,6 +1284,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Android `PackageResolver`/`getPackages()` 是访问控制页的独立包清单入口，读取 `GET_PERMISSIONS` 安装包信息；它既不是 find-process 的运行时证明，也不应被 adapter 用作默认诊断或日志字段。固定请求/连接详情仍可能携带 process/path，未见统一最小化和脱敏边界。
 - 本轮仅复核固定源码与既有开关持久化 proof；未启动 VPN、未读取应用清单、进程名、请求/连接、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须将进程识别声明为可选 capability，在权限/引擎不可用时返回脱敏 `Unavailable`，对每项归因提供最小字段和可验证状态，并以真实流量、性能、取消、crash 与 version mismatch 契约测试确认；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash TCP 并发开关与运行时行为边界静态审计（2026-09-09）
+
+- 固定 `TcpConcurrentItem` 只读写 `state.tcpConcurrent`，由 `UpdateParams.tcpConcurrent` 传入 `tcp-concurrent`；可证明的是配置布尔值跨进程持久化，不是 core 已接受该参数或建立了可观测并发策略。路径未提供 core ack、有效范围/资源预算、每会话并发指标或失败回执。
+- 既有 4 路 loopback HTTP 请求 proof 仅证明一次受限并发转发，未在 TCP 并发开关两态下使用相同 fixture 做对照，也未隔离 TUN、代理池、系统调度和网络条件，不能把它归因于 `tcp-concurrent`。
+- 本轮只读复核固定源码与既有持久化证据；未启动 VPN、未发起压力/并发流量、未读取连接元数据、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在受控 fixture 下验证开关两态的实际并发上限、资源与取消收敛，失败时返回脱敏 `Unavailable`/`EngineCrashed`，并以稳定 terminal receipt 覆盖重设、超时、crash 和 version mismatch。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，进程归因审计）
 
 - focused commit `82ebdd8` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
