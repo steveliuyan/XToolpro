@@ -931,6 +931,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅只读审计固定公开 `ServiceState.kt` 与此前已读取的 `AppPlugin.kt`；未下载、写入或修改上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须以单一可取消 transaction 绑定通知权限、VPN consent、core setup 与 service start；STOP、detach 和 timeout 都必须令每个等待者一次性完成脱敏 `Cancelled`/`Unavailable`，再以真机验证 consent 等待期间的 STOP、deny/revoke、竞争 VPN、detach/recreate 与实际 TUN 清理。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 配置变更期间权限等待状态静态审计（2026-09-08）
+
+- 固定 `AppPlugin.onDetachedFromActivityForConfigChanges()` 仅把 `activity` 置空；与完全 activity detach/engine detach 不同，它不以 `false` 完成 notification 或 VPN callback。`onReattachedToActivityForConfigChanges()` 重新保存 Activity 并注册 activity-result 与 permission-result listener；既有 callback 槽和 `isRequestingNotificationPermission` 标志均在内存中保留。
+- 这不是对 Android 结果必然丢失的断言：重新附着的 listener 可能收到系统结果。但固定实现没有 transaction ID、持久恢复记录、timeout 或 stable state 来验证“旧 Activity 发起的 dialog 结果”与“新 binding 上仍等待的原请求”可靠对应。对 VPN consent 也同样只依赖随后 delivery 到 `onActivityResult`；没有 configuration-change 真机契约证明 callback、loading 和 STOP/retry 一致收敛。
+- 本轮先以允许范围内 ADB 只读复核小米 10S `bf353dda`：设备连接、`tun0=0`、dev 进程计数为 1、`POST_NOTIFICATION=allow`；随后只读固定公开 `AppPlugin.kt` 与 `ServiceState.kt`。未写入设备或上游源码，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须为 permission/consent transaction 定义可恢复或显式取消的生命周期合同，并以真机覆盖配置变更期间的 notification permission、VPN consent、STOP、retry、deny/revoke 与实际 TUN/前台通知状态；未证实前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
