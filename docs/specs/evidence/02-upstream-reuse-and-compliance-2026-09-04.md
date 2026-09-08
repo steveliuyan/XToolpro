@@ -896,6 +896,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 此结果与运行态偶数次切换最终保持运行相符。但本轮不读取 `isRunningRequested()`、短时间 TUN 状态、协程调度或资源计数，不能证明 action 逐个线性化、期间没有反向状态或不存在并发资源竞争。
 - XToolpro future `engine-proxy` 必须以线性化的显式目标状态、去重/取消语义和实际 TUN/core health 回执替代并发“读取后切换”；仍需无敏感字段的快速双切换、重复请求、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
+
+- 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
+- `core-model` 当前仅定义通用 `ModuleId.Proxy`；检索不到 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed` 或 `VersionMismatch` 的 Proxy engine 结果实现。`docs/architecture/engine-contract-test-plan.md` 虽已为 FlClash 固定五类场景和断言，但其执行门禁明确要求先完成上游真实 proof，之后才在相应 `engine-*` 中实现；测试计划不能替代可执行 adapter 契约证据。
+- 本轮仅检查 XToolpro 受版本控制的 module 文件和 Phase 02 测试计划，没有修改 engine、SDK、缓存、上游源码归档、构建产物或设备状态。该结果符合当前“暂不进入正式 engine 集成”范围，但意味着 XToolpro 自身尚未能运行五类 Proxy engine 契约测试。
+- 后续仅在 Phase 02 gate 准许的前提下，才可先实现受签名 native manifest 核验、版本化公开 contract、最小化 capability/health 和稳定脱敏结果映射，再用完整、缺失/不可用、取消、受控崩溃和版本错配的隔离 test fixture 执行五类测试。在此之前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android native core/bridge 版本不匹配边界静态审计（2026-09-08）
 
 - 在固定 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72` 的隔离源码归档中，`android/core/src/main/cpp/CMakeLists.txt` 只有在当前 `${ANDROID_ABI}` 同时存在 `jniLibs/<ABI>/libclash.so`、`cpp/includes/<ABI>/libclash.h` 与 `bride.h` 时才定义 `LIBCLASH`、加入 include/link 路径并链接 `clash`；缺少任一输入时仍构建 `core`，但不链接 `libclash.so`。
