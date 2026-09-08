@@ -1241,6 +1241,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Android `GlobalState.kt` 使用 `Log.d("FlClash", text)`；`ServicePlugin.kt` 可将原始 `error.message` 经 MethodChannel 返回，`ServiceState.kt` 在 setup 失败时将原始 message 写入 Android log 并 Toast。固定模块引用 Firebase Analytics 与 Crashlytics NDK；Dart 默认关闭 Crashlytics collection，但“上次崩溃”查询仍初始化 Firebase，manifest 未提供静态默认禁用声明。未发现直接将 `commonPrint`、URI 或配置字段提交给 Crashlytics 的调用，也未进行 SDK 自动采集/上传或 logcat 验证。
 - 本轮未执行 ADB，未读取日志正文、请求/连接正文、规则或配置、通知内容、崩溃报告、订阅 URL、凭据、Cookie、数据库、文件、地址、路由、DNS 或流量内容；未触发 crash、网络请求、日志导出或遥测上传。结论仅证明固定源码的数据流与隐私边界，不构成运行时字段泄露或崩溃诊断能力的 success proof。future `engine-proxy` 必须在边界处最小化并脱敏 process/host/IP/rule/chains 等字段，统一稳定错误码，默认不初始化或上传遥测，显式同意后才启用；日志与请求队列需有可核验的 drain/drop 生命周期，导出使用最小 SAF grant，所有 success、unavailable、cancel、crash、version mismatch 均需逐项持久 terminal receipt。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09）
+
+- focused commit `a9842d9` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-08）
 
 - focused commits 的远端备份暂未完成：对 `origin/codex/phase02-flclash-direct-logs` 的三次 push 均未返回远端更新，随后 `ls-remote` 未返回该 ref 的可核验 hash。未备份路径仅为 `AGENTS.md`、`docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；未纳入任何其他既有工作区改动或临时产物。待远端可用时必须先推送并核验这些 focused commits，之后才能将本检查点描述为远端备份。
