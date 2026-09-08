@@ -676,6 +676,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 小米 10S（`bf353dda`，API 33）在停止基线仅确认 `tun0=0`、dev 进程数为 0、`POST_NOTIFICATION` 为允许后，使用正常 Android 权限操作 `pm revoke com.follow.clash.dev android.permission.POST_NOTIFICATIONS` 临时撤销该单一权限。撤销后 UID 层 app-op 显示 `POST_NOTIFICATION: ignore`；同次 package 层查询仍显示 `allow`，故本证据保留两个原始状态层级，不把它们合并为单一授权结论。
 - 随后强停 dev 变体，并以已解析的 `com.follow.clash.dev/com.follow.clash.QuickActionActivity` 与 `com.follow.clash.dev.action.START` 发起冷启动。第 7 秒和第 14 秒仅确认 `tun0` 仍不存在、dev 进程存在；未读取系统 VPN、通知正文或 extras、日志、配置、节点、订阅 URL、凭据、Cookie、请求、数据库或文件，亦未发送任何流量。
+- 为排除冷启动本身作为充分解释，在再次正常撤销同一权限后，先启动 dev `MainActivity` 并等待 8 秒，再发出同一精确 START action；第 7 秒和第 14 秒仍仅确认 `tun0` 不存在、dev 进程存在。该轮同样只观察 TUN、进程与 permission/app-op 层状态，不读取 Flutter/MethodChannel 内部状态或任何受限内容。
 - 同一精确 STOP action 后 5 秒仍无 `tun0`、dev 进程存在。最后以正常 `pm grant` 恢复 `POST_NOTIFICATIONS`，package 层 app-op 显示 `allow`；设备没有遗留 TUN。该还原只恢复本轮开始时的允许状态，并不改变用户的其他设置。
 - 结果仅证明这个冷启动原生入口在本设备已撤销态的观察窗口内没有建立 TUN；它不能证明上游实际走过 permission callback、前台通知可见、系统 VPN 是否曾短暂请求、用户能看到稳定 unavailable/cancel 状态，或完整 core 健康。结合 callback 忽略 `grantResults` 的固定源码，XToolpro 仍须将实际授权结果、Activity 可用性及前台通知可见性作为可等待门控，并以拒绝、撤销、进程重建和可见性契约测试验证稳定状态。在完成前该能力保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
