@@ -1039,6 +1039,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本地固定归档仍只观察到 `arm64-v8a` 的 `libclash.so`、`libclash.h` 与 `bride.h`；本轮未构建、修改、复制或删除任何上游/SDK/缓存/产物。因而只能确定上游源码声明的三 ABI 构建面，不能声称另外两种 ABI 的实际产物、符号集、hash、安装或设备行为已通过。
 - XToolpro future `engine-proxy` 的受签名 native manifest、artifact hash、符号/健康握手、版本不匹配拒绝和回滚均必须逐个已发布 ABI 执行；未纳入发布的 ABI 应明确 `Unavailable`，不得回落到空 JNI bridge。仍需在各支持 ABI 的隔离构建和目标设备上运行完整/缺失/错配 artifact 的五类契约测试；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android ABI 构建声明与发布投递边界静态审计（2026-09-08）
+
+- 固定 `.github/workflows/build.yaml` 的唯一 Android matrix job 调用未带 `--arch` 的 `dart setup.dart android`；`setup.dart` 会启用 Flutter `split-per-abi`，而固定 buildkit 的默认 Android target 解析为 `armeabi-v7a`、`arm64-v8a`、`x86_64`。因此 CI 源码声明的是三 ABI 构建输入，而不是单一 arm64 构建。
+- 同一固定 workflow 的 F-Droid 后处理只复制名称匹配 `*android-arm64-v8a*` 的文件；固定 `release_telegram.py` 的 release 附件关键字同样只列出 `android-arm64`。这两个筛选点仅描述下游投递选择：未读取任一 release、artifact 或外部服务，不能据此断言其他 ABI 是否生成、上传、发布或缺失，更不能把它们外推为逐 ABI native 配对已经通过。
+- 固定归档及既有 proof 仍只有 arm64 的 `libclash.so`、头文件、bridge pair/hash/symbol 观察；CI 的默认目标和投递文件名均不携带 FlClash/Clash.Meta commit、engine API、bridge revision、逐 artifact hash、符号集或健康结果。它们不能填补每个已发布 ABI 的受签名 manifest 缺口，也不能防止空 JNI fallback 被误判为完整 core。
+- 本轮只读固定上游归档的 workflow、setup 和 build-tool 源文件；未触发构建或发布，未修改 SDK、缓存、上游源码归档或构建产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须把支持 ABI 明确列入受签名 manifest，并逐 ABI 验证完整/缺失/错配 artifact 的 hash、bridge、commit/API、健康与五类结果；未发布 ABI 必须稳定返回 `Unavailable`。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
