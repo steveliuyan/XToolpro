@@ -1346,6 +1346,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定路径未提供 artifact provenance/hash manifest、last-known-good 保留、原子替换、回滚触发器或更新失败 terminal receipt；不能把应用更新检查、外部源码链接、`System.loadLibrary` 成功或既有 APK hash 当作内核更新能力。
 - 本轮只读复核固定源码与既有脱敏 UI 证据，未点击更新/源码链接、未下载或替换任何 native artifact，未读取构建产物、SDK、缓存、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。该项继续标记 `Unavailable`；future `engine-proxy` 必须随受签名版本 manifest 提供 core/bridge/ABI/hash 校验、staging + 原子发布、last-known-good rollback，并以脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt 覆盖升级、失败、取消和回滚。Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash native core/bridge 配对与 `VersionMismatch` 拒绝边界复核（2026-09-09）
+
+- 固定 `android/core/src/main/cpp/CMakeLists.txt` 只有在当前 ABI 同时存在 `libclash.so`、`libclash.h` 与 `bride.h` 时才定义 `LIBCLASH` 并链接完整 core；缺少任一输入仍构建同名 `libcore.so`。对应 `core.cpp` 的 fallback 保留 Kotlin JNI 表面，但 `startTun`、`stopTun`、`quickSetup`、事件、DNS 等为空操作，流量查询返回 `{}`，因此构建成功或 JNI 可加载不能证明完整 core 已配对。
+- 既有 arm64 APK/AAR 的 SHA-256、ELF 架构和 Go/JNI 符号检查只证明这一 artifact pair 的存在性与链接关系。固定 bridge/API 未查询或核验 FlClash/Clash.Meta commit、ABI、engine API、bridge revision、必需符号集合与 artifact hash 的受签名 provenance manifest；其余声明 ABI 也没有逐项实际产物和健康证据。
+- `Core.kt` 无条件调用 `System.loadLibrary("core")`。`UnsatisfiedLinkError`、`ExceptionInInitializerError` 等 `LinkageError` 未被 service 的 `catch (Exception)` 明确映射，外层可能只得到泛化的 `0L`/`false`；fallback 又可能不抛错且不回调 `quickSetup`，造成静默假成功或无界等待。固定路径没有稳定脱敏的 `VersionMismatch`、`EngineCrashed`、加载/符号失败、健康超时或 terminal receipt。
+- 本轮仅做固定源码与既有校验记录的静态复核，未构建、加载、替换或删除 native artifact，未读取 SDK、缓存、构建产物、配置、日志或任何敏感数据，未使用 ADB。future `engine-proxy` 必须在配置写入、导出或 VPN 请求前核验受签名 manifest 的 commit/API/ABI/bridge/symbol/hash；任一缺失、错配或不一致立即阻止启动并返回脱敏 `Unavailable`/`VersionMismatch`，加载/回调/运行健康失败分别返回 `EngineCrashed` 或 `Unavailable`。实际完整 core 与刻意缺失/错配 artifact 的五类隔离契约测试尚未执行，保持 `Partial`、Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
+#### 本检查点远端备份状态（2026-09-09，native core/bridge 配对审计）
+
+- 本次 focused commit（当前 `HEAD`）尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，内核更新审计）
 
 - focused commit `2835b57` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
