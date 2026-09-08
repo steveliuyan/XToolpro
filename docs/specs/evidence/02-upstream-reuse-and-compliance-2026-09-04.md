@@ -1207,6 +1207,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定路径未见视频/音频容器、编码、字幕内容、缩略图、description、嵌入 metadata 或副作用的 read-back、hash、原子发布、逐输出 terminal receipt 与 rollback。stdout、history、notification、log 与异常路径还可能携带标题、URL、路径、命令或原始错误，不能作为 XToolpro 的隐私安全合同。
 - 本轮只读固定隔离上游归档中的 parser、request builder 和 worker 源码；未运行 yt-dlp、FFmpeg 或媒体任务，未解析/下载任何 URL，未读写媒体、缩略图、字幕、metadata、日志、Cookie、设备数据或用户文件。future `engine-media` 必须以经用户确认的格式任务为单位，使用临时输出、逐输出 read-back 与原子提交；以脱敏、可持久的 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` receipt 覆盖媒体和每类辅助输出。完成真实设备格式/输出、部分成功、取消/失败清理与隐私验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis 容器、编码、分辨率、帧率、音质与语言选择边界静态审计（2026-09-08）
+
+- 固定 `arrays.xml` 声明 audio/video container 与音视频质量档；`DownloadViewModel` 和 `FormatUtil` 根据 format ID、container、codec、resolution、size、DRC、音频/字幕语言等 SharedPreferences 与解析到的 format 列表选择或排序。`YTDLPUtil` 把音频偏好组装为 `-x`、`-f`、`--audio-format` 及 `-S`（`abr`、`acodec`、`aext` 等）；视频路径组装带音轨 language filter 的 `-f` fallback，并以 `-S` 注入 video/audio codec、resolution、container、size 或 worst-quality 的 `+br,+res,+fps` 排序。因此固定上游具有有限 format preference 与 fallback 请求能力。
+- 选择基于当次解析 JSON 与用户偏好；源码没有为 source 所支持的 format、container/codec mux 组合、精确 fps/分辨率/码率/语言、实际 fallback 原因或设备解码性建立稳定 capability declaration。视频 language 排序分支在固定 request builder 中仍被注释，音轨选择是 `language^=` filter 后再 fallback；任何 provider 变化、format 消失或 runtime/version 差异均不能由静态偏好推断成功。
+- `DownloadWorker` 只从首个最终媒体文件记录 extension、大小和 Android 媒体时长，未对请求的 container、codec、fps、resolution、bitrate、audio/subtitle language、merge/recode 结果做 read-back、hash、逐输出 receipt 或 unsupported/fallback terminal state。因此 UI 资源与 request string 不是实际可用能力、兼容性提示或输出一致性的证明。
+- 本轮仅只读固定隔离上游的资源、view model、format utility、request builder 和 worker 源码；未解析/下载 URL、运行 yt-dlp/FFmpeg、读取日志/配置/媒体/设备数据或修改任何用户数据。future `engine-media` 必须在明确用户选择后对可用 format 建立版本化 snapshot，明确选择与 fallback，提交前 read-back 实际 stream/container/codec/resolution/fps/bitrate/language，并以脱敏持久 receipt 覆盖 unsupported、unavailable、cancel、crash 与 version mismatch。完成真实 source/format、合并、fallback 和目标设备兼容性验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。

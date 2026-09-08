@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=52`、`Pending=31`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=53`、`Pending=30`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -99,7 +99,7 @@
 | 播放列表/频道、部分选择、增量下载 | `YTDLPUtil.kt`、`ResultDao.kt`、`DownloadWorker.kt` | 队列拆分、跳过已下载和进度 | Partial（静态）：固定解析可保存 playlist title/URL/index，结果表支持按 playlist 过滤；单项构建时可向 yt-dlp 传 `--match-filter` 或 `-I`，并可选 `--download-archive` 跳过已下载。其没有不可变成员快照、页码/版本/etag、每成员授权或统一部分成功结果；archive 命中仅由“无 final paths”显示为已存在，无法区分跳过、空产出与失败。playlist URL、标题、成员 metadata、filter 和命令仍会进 Room/history/log。XToolpro 必须在显式用户选择后持久化可审计成员快照和逐项状态，稳定区分 skipped/success/failed/cancelled，默认脱敏敏感 source；真实 playlist/channel、增量、部分选择、并发变更和取消验证前保持 `Partial` |
 | 标题、作者、封面、时长、描述、章节、元数据 | yt-dlp/NewPipe extractor | 真实详情页和任务快照 | Pending |
 | 视频、音频、缩略图、字幕、元数据下载 | `YTDLPUtil.kt`、`DownloadWorker.kt`、yt-dlp/FFmpeg | 格式任务和输出验证 | Partial（静态）：固定解析读取 title、author、duration、thumbnail、chapters 和 available subtitles；请求构造可传 `--write-thumbnail`、`--write-description`、`--write-subs`/`--write-auto-subs`、`--embed-subs`、`--sub-format`、`--convert-subtitles`、`--sub-langs`、`--embed-thumbnail` 与 `--embed-metadata`。但 worker 仅由 stdout/迁移路径推导 `finalPaths`，随后明确排除缩略图、字幕、description 和 txt；history 仅对首个媒体文件读大小、扩展名和时长，执行成功后仍可能无媒体输出，且没有逐类输出 terminal result、文件/容器/metadata read-back、hash、post-process 原子性或部分成功 receipt。真实格式、输出、取消/失败清理与隐私契约验证前保持 `Partial` |
-| 容器、编码、分辨率、帧率、音质、语言选择 | yt-dlp format selection | 格式选择器和能力提示 | Pending |
+| 容器、编码、分辨率、帧率、音质、语言选择 | `YTDLPUtil.kt`、`FormatUtil.kt`、`DownloadViewModel.kt`、yt-dlp | 格式选择器和能力提示 | Partial（静态）：固定资源与选择逻辑声明音频/视频 container、约 2160p 至 240p 分辨率、约 192kbps 至 64kbps 音频、codec、DRC 和语言偏好；请求会组合 `-f`、`-S`、`--audio-format` 与音轨 language filter，并以 best/worst fallback 继续。它不验证每个 source/版本实际提供的 format、codec/container 兼容性、fps/分辨率/码率/语言是否与选择一致、设备解码性或 fallback 原因；worker 也没有逐输出 format read-back/receipt。真实可用格式、unsupported/fallback、音视频合并与设备兼容性验证前保持 `Partial` |
 | 音视频合并、音频提取、转码 | FFmpeg | 后处理任务、取消和恢复 | Pending |
 | 嵌入封面/字幕、元数据写入、时间裁剪 | FFmpeg/yt-dlp | 后处理选项和结果验证 | Pending |
 | Cookie 文件、浏览器 Cookie、登录会话 | `app/` session flow | 加密本地存储、撤销、删除和授权提示 | Partial（静态）：固定 ytdlnis `CookieItem` Room entity 直接保存 `url`、`content`、`description` 与 enabled 标记；`DBManager` 使用普通 `Room.databaseBuilder`，对固定源码/Gradle 的针对性检索未见 SQLCipher、EncryptedSharedPreferences 或 Android Keystore 的 Cookie 数据库保护。`CookieViewModel.updateCookiesFile()` 将启用项组合为 Netscape 格式并写入 `context.cacheDir/cookies.txt`，解析/下载与终端路径在 `use_cookies` 为真时把该文件路径传给 yt-dlp `--cookies`。同一 ViewModel 可将全文读入系统剪贴板或复制到导出目录；设置备份序列化全部 Cookie entity 为 JSON。删除全部 Cookie 会删除 Room 行并把当前缓存文件写空，但固定代码没有涵盖已复制到剪贴板、导出或备份文件的撤销/安全擦除。该审计未导入、读取或使用真实 Cookie/session，不能据此断言特定设备上的文件权限或泄露。XToolpro 必须以 Keystore 绑定的加密 vault 保存会话，仅在短生命周期、最小权限内部文件中生成受控 yt-dlp 输入；默认禁止原始 Cookie 的日志、剪贴板和通用备份/导出，并将授权、删除、撤销及遗留文件清理纳入有界、可验证 contract。在真机授权 session、加密/删除/恢复和隐私审查完成前保持 `Partial` |
