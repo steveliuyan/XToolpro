@@ -938,6 +938,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮先以允许范围内 ADB 只读复核小米 10S `bf353dda`：设备连接、`tun0=0`、dev 进程计数为 1、`POST_NOTIFICATION=allow`；随后只读固定公开 `AppPlugin.kt` 与 `ServiceState.kt`。未写入设备或上游源码，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须为 permission/consent transaction 定义可恢复或显式取消的生命周期合同，并以真机覆盖配置变更期间的 notification permission、VPN consent、STOP、retry、deny/revoke 与实际 TUN/前台通知状态；未证实前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 通知权限撤销后 BACK 取消尝试真机验证（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）先强停 dev 变体并以正常 `pm revoke` 临时撤销其单一 `POST_NOTIFICATIONS` permission。撤销后 UID 层 `POST_NOTIFICATION` 为 `ignore`，同次 package 层仍显示 `allow`；开始时 `tun0=0`、dev 进程计数为 0。
+- 随后从 launcher 启动 dev 主界面，等待 5 秒后对精确 `QuickActionActivity` 发送 `com.follow.clash.dev.action.START`。2 秒后仅以普通 Android BACK keyevent 发送取消尝试，未读取任何窗口、permission dialog 或通知内容。第 7 秒和第 14 秒只确认 `tun0=0`、dev 进程存在；再发送同一精确 STOP action 后 5 秒仍为 `tun0=0`、进程存在。
+- 本轮未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL，也未发送流量。最后以正常 `pm grant` 恢复 `POST_NOTIFICATIONS`，package 层 app-op 显示 `allow`；设备没有遗留 TUN。因取消发生时的可见窗口内容未被读取，本轮不能证明系统 permission dialog 当时存在、BACK 实际触发 permission callback，或 UI 已显示稳定 `Cancelled`/`Unavailable`。
+- 结果仅补充“已撤销态 attached-activity + BACK 取消尝试”观察窗口内未形成 TUN；它不能替代对实际 callback result、前台通知可见性、permission dialog 生命周期或完整 VPN/core health 的真机契约。XToolpro future `engine-proxy` 仍须以逐请求、可观察的真实授权结果和一次性 `Cancelled` completion 作为启动门控；完成 deny/revoke/retry/recreate/visibility 设备契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
