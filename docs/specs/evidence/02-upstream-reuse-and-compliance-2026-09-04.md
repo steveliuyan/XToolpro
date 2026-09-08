@@ -966,6 +966,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅只读固定公开 `QuickActionActivity.kt`、`TilePlugin.kt`、`MainActivity.kt` 与 `ServiceState.kt`；此前的正常允许状态设备基线经 ADB 复核为强停后 `tun0=0`、进程计数为 0、`POST_NOTIFICATION=allow`。未启动 VPN、未写入上游源码/SDK/缓存/产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须将快捷入口命令持久化或交给可 await 的串行 dispatcher，并以 delivery acknowledgement/timeout 确认 Flutter/engine path；未交付时只能明确 `Cancelled`/`Unavailable` 或安全 native fallback，不能隐式丢弃。还需真机覆盖 listener 未就绪、engine detach/recreate、START/STOP racing 与实际 TUN/health 回执。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash QuickAction 异步异常完成边界静态审计（2026-09-08）
+
+- 固定 `GlobalState` 委托给 `CoroutineScope(SupervisorJob() + Dispatchers.Default)`，没有由 Activity、QuickAction request 或 service lifecycle 管理的 parent job。`QuickActionActivity.onCreate()` 用该 scope 的 `launch` 分派 START/STOP/TOGGLE，然后立即 `finish()`，未保留 `Job`、Deferred 或可观测 completion。
+- `SupervisorJob` 可避免某一 child failure 自动取消同级任务，但不会把 child exception 变为 QuickAction 调用方可识别的稳定结果。固定 activity 也没有 completion callback、超时、一次性取消记录或异常类别映射；因此 action 中的 setup/service/native 失败不能由这一入口本身可靠区分为 `Cancelled`、`Unavailable` 或 `EngineCrashed`。该结果不推断特定异常已在设备发生。
+- 本轮只读固定公开 `GlobalState.kt` 并关联此前已审计 `QuickActionActivity.kt`/`ServiceState.kt`；未使用 ADB、未启动 VPN、未写入上游源码/SDK/缓存/构建产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须令每个外部/快捷入口命令经受监督且可取消的 transaction 执行，返回一次性、脱敏的稳定结果并以 timeout/health/TUN 回执关闭；还需验证 setup、permission、native failure、engine detach 与相反命令 racing。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
