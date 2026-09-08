@@ -1583,6 +1583,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `config.go` 默认 `ExternalControllerCors` 为 `AllowOrigins=["*"]` 和 `AllowPrivateNetwork=true`；debug 模式还会挂载 `/debug` profiler。配置模型虽支持 external-controller、TLS、Unix/pipe、CORS、client-auth、routing mark 和 secret，固定 Flutter `lib/common/task.dart:115` 只把 external-controller 地址写入 raw config，未提供 XToolpro 所需的最小 bind scope、管理面 allowlist、TLS/client-cert 健康回执或稳定错误类别。
 - 结论：该上游管理面具备 secret Bearer/query-token 认证和多种本地传输入口，但默认 CORS/私网策略宽泛，空 secret 会关闭鉴权，且 Android bridge 未形成可验证的 controller 绑定范围、secret 生命周期、权限分级或 terminal health contract。对应 parity 行保持 `Partial`，不得将 external-controller 认证外推到 mixed proxy inbound 或 LAN sharing。
 
+### FlClash proxy-provider 订阅、健康检查与 API 字段边界静态审计（2026-09-09）
+
+- 审计对象仍为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未发起订阅请求、未读取节点/配置/设备数据、未使用 ADB。相关源码为 `core/Clash.Meta/adapter/provider/provider.go`、`core/Clash.Meta/adapter/provider/healthcheck.go`、`core/Clash.Meta/hub/route/provider.go`。
+- `adapter/provider/provider.go` 使用 `resource.Fetcher[[]C.Proxy]`，更新 context 可取消；parser 成功后才由 `setProxies` 在 RWMutex 下替换代理列表并递增 version，解析失败保留旧列表。HTTP response header 的 `subscription-userinfo` 会写入 cachefile 并解析为 upload/download/total/expire 摘要。
+- `providerForApi` 的 JSON 包含完整 `[]C.Proxy`、provider `testUrl`、expected status、更新时间和 subscription info；`hub/route/provider.go` 暴露 `GET /providers/proxies`、单 provider `GET`、`PUT` 更新、healthcheck 及单节点 healthcheck 路由。更新失败返回 `503` 和原始 `err.Error()`，健康检查只返回空正文成功，不提供逐节点 `Success`/`Cancelled`/`Timeout`/`EngineCrashed` 回执。
+- `healthcheck.go` 使用 provider 级 singleflight 防重复，errgroup 最多 10 个并发，单代理使用 context timeout（默认 5 秒）；自动检查 ticker、lazy touch 和 extra URL/filter 会改变执行集合。日志直接拼接 proxy name、测试 URL、alive 和 delay，固定路径未见字段最小化、URL 脱敏或日志开关边界。
+- 结论：上游具备可取消拉取、解析后替换、RWMutex/version 和并发健康探测，但管理 API 和日志仍会暴露节点对象、测试 URL、subscription usage 与原始错误/探测字段，且缺少稳定的逐节点 terminal contract。对应 parity 行保持 `Partial`，不得将 provider version、healthcheck HTTP 204 或 API JSON 当作 XToolpro 的 engine health proof。
+
 #### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
 
 - focused commit `7c23efa` 已创建但尚未 push；随后将以 evidence-only commit 固化本 hash 与未 push 状态。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
