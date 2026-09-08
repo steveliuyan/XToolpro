@@ -881,6 +881,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `handleToggleAction()` 先读取 `isRunningRequested()` 再委托 start/stop；本轮没有读取该值、任何内部调度或短时间状态。因此结果仅与“连续两次切换最终回到停止态”相符，不能证明各 action 线性化、期间从未启动，或运行态快速双 TOGGLE 同样安全。
 - XToolpro future `engine-proxy` 不得以并发读取后切换作为唯一命令模型，必须以线性化的显式目标状态和实际 TUN/core health 回执完成；仍需无敏感字段的快速双切换、重复请求、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 快速双 TOGGLE 运行态收敛真机验证（2026-09-08）
+
+- 先以已解析的 dev START action 建立运行态；第 7 秒仅确认 `tun0` 存在、dev 进程存在。紧接着连续发出两个正确 dev TOGGLE action；第 5 秒和第 10 秒均为 `tun0` 存在、dev 进程存在。
+- 随后单独发出正确 dev STOP action；5 秒后 `tun0` 不存在、dev 进程存在，恢复停止基线。全程未发送流量，未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。
+- 此结果与运行态偶数次切换最终保持运行相符。但本轮不读取 `isRunningRequested()`、短时间 TUN 状态、协程调度或资源计数，不能证明 action 逐个线性化、期间没有反向状态或不存在并发资源竞争。
+- XToolpro future `engine-proxy` 必须以线性化的显式目标状态、去重/取消语义和实际 TUN/core health 回执替代并发“读取后切换”；仍需无敏感字段的快速双切换、重复请求、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
