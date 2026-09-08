@@ -1422,6 +1422,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `profiles.dart:66-84` 的 `updateProfile()` 先把旧 profile 放回 provider，再调用网络 `Profile.update()`；后者拉取响应后执行 `saveFile()`，成功后才返回更新元数据。文件提交与 provider/数据库更新不在同一事务，进程中断、文件复制成功但元数据写回失败等中间态没有恢复标记或回滚。既有 `saveFile()` 的临时文件清理、原子发布和校验边界缺口会叠加到自动更新路径。
 - 本轮只读固定隔离归档源码与既有证据，未发送订阅 URL、未执行更新、未读取配置/日志/数据库/文件/凭据/Cookie/设备内容，未使用 ADB。future `engine-proxy` 必须以持久化任务状态机记录 next-run、in-flight、cancelled、部分成功和失败原因，使用有界网络/文件事务、条件版本或 snapshot 校验、原子发布与回滚，并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt 收敛每个 profile；真实调度、取消、进程重建、网络失败和版本冲突契约完成前，矩阵订阅生命周期行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash profile 下载请求与响应边界静态审计（2026-09-09）
+
+- 固定 `lib/common/request.dart:18-50` 的 `_clashDio` 使用 `IOHttpClientAdapter` 和应用代理回调，`getFileResponseForUrl()` 直接按传入 URL 请求 `ResponseType.bytes`。固定构造未设置该请求的显式 connect/receive/send timeout、响应字节上限、Content-Type/长度预检、来源绑定或重定向策略；响应可能先完整驻留内存，再进入配置校验和临时文件路径。
+- 请求异常在 `:39-49` 先将原始 `DioException.toString()` 写入 `commonPrint`，随后只把部分 Dio 类型转换为本地化网络错误，不能保证 URL、代理信息或底层错误字段已从日志路径移除。未见 profile 下载请求的独立取消 token；自动更新和手动更新均依赖上层 Future 完成。
+- 本轮只读固定隔离归档源码与既有证据，未发送订阅 URL、未发起网络请求、未读取配置/日志/数据库/文件/凭据/Cookie/设备内容，未使用 ADB。future `engine-proxy` 必须在受限网络客户端中声明允许的 scheme/redirect、超时、最大响应大小、Content-Type 与配置来源校验，并支持有界取消；请求异常必须归一为脱敏类别，禁止 URL、认证信息和响应正文进入 UI/日志/导出。完成受控 HTTP fixture 的成功、超限、错误状态、超时、取消、重定向和版本错配契约前，矩阵导入/订阅生命周期行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，自动更新调度审计）
 
 - focused commit `dfc64a2` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
