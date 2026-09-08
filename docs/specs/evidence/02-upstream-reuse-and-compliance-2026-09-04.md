@@ -903,6 +903,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定源码表明动态快捷方式和 `TileService` 共用该 TOGGLE action；本轮只证明这个共享 action 在撤销态观察窗口没有形成 TUN，不能外推至桌面快捷方式/系统磁贴 UI、前台通知可见性、Android permission callback、用户可见 unavailable/cancel、core 健康或流量。未发送流量，未读取系统 VPN、通知正文或 extras、日志、配置、节点、订阅 URL、凭据、Cookie、请求、数据库或文件。
 - XToolpro 未来必须使所有 VPN 入口在真实授权结果不可用时一致收敛为可恢复且脱敏的未启动状态；用相同的有界 completion/health 回执覆盖 direct start、toggle、notification 和 tile 路径。在完整 adapter 与五类契约测试完成前，该行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android 13 通知权限 callback 并发语义静态审计（2026-09-08）
+
+- 对固定 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72` 的公开 `android/app/.../plugins/AppPlugin.kt` 逐行复核：`requestNotificationPermission` 只保存一个 `requestNotificationCallback`。每个新请求会先向旧槽位回调 `false`，再覆盖为新 callback；若 `isRequestingNotificationPermission` 已为 true，新请求不调用 Android 权限 API、直接返回，等待正在进行的系统 dialog。
+- 系统 listener 只检查 request code，随后设置进程内 `skipNotificationPermissionRequest=true`，并对当前槽位无条件回调 `true`，不读取 `permissions` 或 `grantResults`。因此正在等待的第二个启动意图可接收第一个 dialog 的无条件成功回调，而原始 callback 已先收到 `false`；该实现没有逐请求 transaction、真实授权结果对应关系或稳定的拒绝/取消/不可用映射。activity 或 engine detach 仅以 `false` 结束当时的当前槽位。
+- 本轮仅通过公开固定提交的只读源码审计完成；未下载、写入或修改上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须为每次 permission request 保留可取消、可归因的 completion，读取实际 grant result，并将 denied/revoked/no-activity/detach 统一收敛为脱敏且可恢复的未启动结果；还需以单/并发请求、拒绝、撤销、process recreation 与通知可见性真机契约覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
