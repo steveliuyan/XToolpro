@@ -1297,6 +1297,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定路径未提供握手、连接、TLS 或响应阶段的延迟分解，也未给出超时、取消、core 拒绝、无结果或部分结果的稳定脱敏映射；因此不能证明“统一延迟”语义已去除额外握手时间，或其结果会按预期影响排序。未发起网络请求，未读取日志、请求、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
 - future `engine-proxy` 必须把参数应用、测速样本和排序结果绑定到可追踪 task ID，以脱敏 terminal receipt 区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并在受控同节点/同网络 fixture 下分别验证开关两态、握手排除、超时/取消和失败收敛。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，统一延迟审计）
+
+- focused commit `eeb6c1a` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，TCP 并发审计）
 
 - focused commit `311d17d` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
