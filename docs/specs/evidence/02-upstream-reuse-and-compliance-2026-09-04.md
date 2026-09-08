@@ -1285,6 +1285,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机证据只覆盖本机 loopback HTTP/SOCKS5 TCP、有限并发和 wildcard 监听计数；没有跨设备连接、凭据输入、认证成功/拒绝、UDP、性能、异常关闭或端口复用验证。本轮未启动或停止 VPN、未切换 LAN 开关、未发送流量、未读取配置、节点、请求/响应、日志、通知正文、订阅 URL、凭据、Cookie、数据库或设备文件，未使用 ADB。
 - future `engine-proxy` 必须默认 loopback，并在用户明确确认后以版本化配置声明 bind scope、协议集合、认证方式、LAN allow/deny 规则和风险状态；mixed 入站与 controller 管理面必须分别建模和测试，认证缺失/拒绝、LAN 不可用、UDP 不支持、端口冲突、取消、crash 与 version mismatch 均返回脱敏 terminal receipt。完成受控跨设备 fixture 与上述契约测试前，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash mixed listener TCP/UDP 协议范围静态复核（2026-09-09）
+
+- 固定上游在 mixed 入站之外保留独立的 TCP listener 与 UDP relay/association 处理路径；配置中的 `mixed-port` 表示共享端口入口，但不自动构成 TCP、UDP、DNS 或不同代理协议均已可用的单一健康信号。
+- Android bridge 仅向系统发布 loopback HTTP `ProxyInfo`，既有 device proof 也只验证 HTTP/SOCKS5 TCP；固定 bridge 没有暴露 UDP association 的能力查询、会话计数、超时/取消回执或逐协议错误分类。因而不能由 TCP `204` 响应、wildcard 监听或 `tun0` 存在推断 UDP relay 已建立或停止后已清理。
+- 本轮只读复核固定源码与既有脱敏计数证据，未生成 UDP 流量、未读取 DNS/请求/响应/配置/节点/订阅 URL、凭据、Cookie、日志、数据库或设备文件，未使用 ADB。future `engine-proxy` 必须把 HTTP、SOCKS5 TCP、SOCKS5 UDP、DNS 和 TUN 能力拆成可探测 capability，分别报告 unsupported、timeout、cancel、crash 与 version mismatch，并在 stop 时等待 TCP/UDP 会话收敛。
+- 在受控协议 fixture、LAN scope、端口冲突和停止清理契约完成前，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 ### FlClash 查找进程模式与请求归因边界静态审计（2026-09-09）
 
 - 固定 `FindProcessItem` 仅把 UI 开关映射为 `FindProcessMode.always/off`，再经 `UpdateParams.findProcessMode` 写入 `find-process-mode`；该路径没有 per-request attribution result、能力探测、权限/不可用分类、性能预算或回滚 receipt。开关持久化不等于 Clash.Meta 已完成进程识别。
