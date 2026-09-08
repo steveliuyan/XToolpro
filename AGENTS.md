@@ -55,6 +55,12 @@ Feature modules must never read another feature's internals, database tables, ro
 - File operations use SAF/MediaStore where possible and follow preflight, temporary output or recovery staging, atomic commit, and result verification.
 - Never log or upload proxy credentials, subscription URLs, cookies, media URLs, file contents, or unredacted diagnostics by default.
 
+## ADB Test Authorization
+
+For connected test devices, ADB may be used for Phase 02 and later Android verification when it is necessary to control an in-scope test package or confirm a non-sensitive device state. This includes package launch/force-stop, lifecycle actions, VPN/TUN and process-state checks, and checking or exercising normal Android permission and settings flows.
+
+This authorization does not permit root access, bypassing Android permission or security controls, reading application or system logs, configuration contents, notification bodies, nodes, requests, databases, files, credentials, cookies, subscription URLs, or other sensitive content. Any such access requires a separate explicit, narrowly scoped user request and must still comply with the product privacy rules.
+
 ## UI Source Contract
 
 - `design/open-design/DESIGN.md` and `design/open-design/colors_and_type.css` define the visual tokens and motion rules.
