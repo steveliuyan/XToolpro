@@ -1415,6 +1415,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `lib/models/common.dart:637-660` 的 `Script.content` 会整体读取内部 JS 文件；`save()` 使用普通 `writeAsString()` 覆盖，`saveWithPath()` 调用 `File(copyPath).copy(copyPath)` 将源路径复制到自身，疑似无法导入。两条保存路径均未见原子写入、fsync、read-back、大小/hash/版本绑定或失败回滚。未执行脚本、未读取设备文件/配置、未使用 ADB；结论仅限固定源码静态边界。
 - future `engine-proxy` 必须在受限 runtime 中绑定脚本来源、版本和 hash，预检输入大小与 schema，禁止未授权网络/文件/环境访问，支持有界 timeout/cancellation，归一化并脱敏错误；脚本失败、取消、runtime 崩溃、版本错配及配置发布失败都必须清理临时状态并返回可持久的 terminal receipt。完成受控 fixture 与五类契约测试前，矩阵新增脚本覆写行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，脚本覆写审计）
+
+- focused commit `c3aa4af` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，配置导入/恢复审计）
 
 - 本次 focused commit `78b6f97` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
