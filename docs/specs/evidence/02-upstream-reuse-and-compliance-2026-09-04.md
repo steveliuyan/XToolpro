@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=39`、`Pending=44`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=40`、`Pending=43`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1132,6 +1132,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Paddle 只通过 `det.onnx`、`rec.onnx`、`cls.onnx` 与 dictionary 文件的存在性决定模型可用，Tesseract 只检查目标 `.traineddata` 是否存在；两条下载路径都没有预期长度或 SHA-256 验证，也未在固定代码中发现逐模型许可证/provenance manifest。Paddle ZIP 解包前未做完整性验证；Tesseract 语言模型允许导出，并在导入 ZIP 时直接以 entry name 相对 `filesDir/tesseract` 创建输出，未先作 canonical-path containment 检查，故该边界不能接受未审计导入包。
 - 缺失数据分别返回 `NoData`/`NoPaddleData`，其他识别异常作为带原始 throwable 的 `Error` 返回；批量文字输出会写入其 message，UI 也可显示通用 failure。该路径没有把 missing、cancel、损坏/版本错配、ONNX/Tesseract load 或运行异常收敛为脱敏稳定 terminal result。本轮只读隔离上游源码，未下载模型、导入语言包、处理图像或读取任何文本内容。
 - future `engine-image` 必须固定每个 OCR bundle/训练数据的来源、许可证、版本、长度与 SHA-256，校验 archive 及其 canonical 解包目标，并默认避免将原始 OCR 文本或 throwable 写入诊断/批量输出。完成真实模型的 success、unavailable、cancel、crash、version-mismatch 和隐私输出契约前，OCR 矩阵项从 `Pending` 调整为 `Partial`；Image 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ImageToolbox EXIF/metadata 输出与诊断边界静态审计（2026-09-08）
+
+- 固定 `core:data`、`feature:edit-exif` 与 `feature:delete-exif` 支持读取、编辑、预设标签删除和全 metadata 清理；删除流程把原图复制到新 save/cache 目标，携带经 `clearAttributes()` 处理的 metadata，并以 `keepOriginalMetadata=false` 调用 file controller。该 controller 在无保留 metadata 的分支执行 `clearAllAttributes()`，可选仅复制日期标签；固定源码还含 metadata round-trip instrumented tests，但本轮未构建或运行，不能把测试源视为格式/SAF 行为已验证。
+- `AndroidFileController` 在 save/move/read/copy metadata 链路将 URI、完整 initial/source/destination metadata 和异常以 `makeLog` 传出；OCR 工作流还可将识别文本写进 `MetadataTag.UserComment` 后调用 `writeMetadata`。这些位置、设备、注释或 OCR 文本字段在固定路径未见统一脱敏；本轮不读取任一图片、metadata、日志或输出文件，故不声称实际设备上发生泄露。固定源码同样没有本轮可用的输出 read-back、SAF 格式覆盖、cache/share 副本清理或取消/崩溃恢复实证。
+- XToolpro future `engine-image` 必须默认隐藏并禁止记录敏感 metadata，采用临时输出、原子提交和格式化 read-back 验证，并分别对 SAF 不可写、用户取消、metadata/codec crash 与格式/版本不匹配给出脱敏稳定结果。完成真实设备与五类 contract 后才能提升状态；本项从 `Pending` 调整为 `Partial`，Image 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
