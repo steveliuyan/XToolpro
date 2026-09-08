@@ -1311,6 +1311,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定源码未提供 Fake-IP、Host 重写或流量嗅探的独立 capability/health 查询，也没有为 DNS 失败、IPv6 不可用、Fake-IP 冲突、嗅探超时或取消建立稳定脱敏分类。未读取生成配置、DNS/路由正文、请求、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
 - 本轮只读复核固定源码与既有脱敏计数证据，未切换设置、启动 VPN、发送新流量或执行包级 DNS/嗅探验证。future `engine-proxy` 必须将 DNS、IPv6、Fake-IP、Host 和 sniffing 拆成可探测 capability，默认最小化 DNS/host 字段，区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 并以受控 fixture 覆盖地址/路由、解析、冲突、超时和取消；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash 按应用代理与 VPN bypass 契约边界静态审计（2026-09-09）
+
+- 固定 `AccessView` 只在初始化时请求一次 `getPackages()`；Android `PackageResolver` 使用 `getInstalledPackages(GET_PERMISSIONS)` 生成含包名、标签、系统/网络标记与更新时间的完整 JSON 列表。空列表直接进入“无数据”渲染，未见可区分权限、查询失败、解析失败或暂时不可用的稳定结果/重试合同。
+- 选择列表与 Android VPN bypass 是独立输入：启动 shared state 会携带 access-control accept/reject 包名列表，`VpnOptions.allowBypass` 则在建 VPN 时调用 `VpnService.Builder.allowBypass()`。固定路径没有把列表加载、选择写入、profile 应用、VPN 建立和每应用实际路由连接成可 await 的原子结果或版本/回滚 receipt。
+- 既有真机 proof 只确认 allow-bypass 开关可跨进程保留，并在关闭态建立/停止过 TUN；当时没有可用应用列表，也未选择应用、读取清单、发送按应用流量或读取路由/请求字段。因此不能把 `QUERY_ALL_PACKAGES` 声明、系统 API 调用或 TUN 存在当作任一应用已按预期代理/绕过的证明。
+- 本轮只读复核固定源码与既有脱敏证据，未读取应用清单、包名、标签、权限、配置、日志、请求、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未切换 bypass 或路由设置。future `engine-proxy` 必须在用户进入该流程后最小化且仅内存内处理应用标识，使用版本化选择快照和可撤销 apply，逐项以脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 收敛；受控 fixture 还需覆盖权限缺失、空/失败列表、安装包变化、取消、崩溃与实际 bypass 路由。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，DNS/IPv6 审计）
 
 - focused commit `48c4606` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
