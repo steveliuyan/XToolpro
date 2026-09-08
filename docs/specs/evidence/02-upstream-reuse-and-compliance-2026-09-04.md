@@ -819,6 +819,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮没有发送流量、读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件，也没有改动持久化配置。该实际最终状态不等价于 Flutter `ServicePlugin.stop()` 的同步回执，亦不能证明 service destroy completion、core health、流量/请求缓存清理、失败/超时、reboot、always-on/lockdown、竞争 VPN 或 permission revoke 行为。
 - XToolpro 的 future `engine-proxy` 仍须将“停止请求已提交”和“实际停止已核验”区分为可 await 状态，并以脱敏错误、TUN/服务/core 分别断言覆盖 success、unavailable、cancel、timeout、crash、process death、reboot、permission revoke 与 version mismatch；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev TOGGLE 共享 action 真机验证（2026-09-08）
+
+- 停止基线下仅检查到 `tun0` 不存在。向已解析的 dev `QuickActionActivity` 发出 `com.follow.clash.dev.action.TOGGLE` 后，第 7 秒 `tun0` 存在且 dev 进程存在。
+- 在该运行态向同一组件发出同一 TOGGLE action。第 5 秒、第 10 秒均检查到 `tun0` 不存在，dev 进程仍存在。该轮证明共享 action 在目标设备上能完成实际的 TUN 启动和停止切换。
+- 固定源码中动态快捷方式的 `toggle` intent 以及 `TileService` 的点击路径均创建/打开 `QuickAction.TOGGLE.quickIntent`；本轮直接验证共享 action，而没有操作系统桌面快捷方式或快捷设置磁贴 UI。因此不外推为系统入口本身已在此轮验证，也不证明 core health、可转发流量、通知状态、异常/超时、reboot、竞争 VPN、permission revoke 或辅助功能表现。
+- 全程未发送流量，未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。XToolpro 未来仍须将该类入口改为受保护的内部状态机命令并 await 实际 TUN/health 回执；完成相应无敏感字段的契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
