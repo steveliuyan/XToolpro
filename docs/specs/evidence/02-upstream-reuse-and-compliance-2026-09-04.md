@@ -910,6 +910,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅通过公开固定提交的只读源码审计完成；未下载、写入或修改上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须为每次 permission request 保留可取消、可归因的 completion，读取实际 grant result，并将 denied/revoked/no-activity/detach 统一收敛为脱敏且可恢复的未启动结果；还需以单/并发请求、拒绝、撤销、process recreation 与通知可见性真机契约覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 通知权限等待期间 STOP 取消收敛静态审计（2026-09-08）
+
+- 固定 `ServiceState.requestStart()` 在调用 `AppPlugin.requestNotificationPermission()` 后立即返回一个 `CompletableDeferred`，但没有将该 Deferred 或 notification callback 登记为可由 `requestStop()` 取消的资源。`AppPlugin` 只提供 `cancelVpnPreparation`，没有对等的 notification-permission cancel API。
+- 若用户/入口在系统通知权限 dialog 未返回前调用 `requestStop()`，`ServiceState.createRequest(false)` 只替换 `latestRequest`，随后异步执行 stop；原 start Deferred 仍等待 AppPlugin 的 callback，直到系统结果或 plugin detach。回调若为当前槽位的无条件 `true`，`start()` 会因 request token 已不再 current 返回 `false`，故可避免该回调继续实际启动；然而不代表原请求获得即时或有界的 `Cancelled` completion，也没有证明 dialog、UI loading 或后续重入会一致收敛。
+- 本轮仅只读审计固定提交的公开 `ServiceState.kt` 与 `AppPlugin.kt`；未写入/下载上游源码、未修改 SDK、缓存或构建产物，未使用 ADB，也未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须令 STOP/生命周期销毁立即取消所有尚未完成的 permission/start transaction，完成一次且仅一次的脱敏 `Cancelled` 结果，并以有界 timeout 防止 UI 或调用方无限等待；还需在真机覆盖 permission dialog 等待期间的 STOP、重复 START、detach/recreate、deny/revoke 与前台通知可见性。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
