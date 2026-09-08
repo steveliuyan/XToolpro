@@ -1248,6 +1248,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅复核固定源码和既有只读系统入口证据；未写入 always-on/lockdown 设置、未重启设备、未杀进程、未触发 VPN revoke 或竞争 VPN，也未读取配置、通知、日志、请求、节点、订阅 URL、凭据、Cookie、数据库或设备文件。因此不能把系统设置入口可达或当前“未配置/未启用”状态当作该能力的 success proof。
 - future `engine-proxy` 必须把 always-on、lockdown、reboot、process death、service loss、VPN revoke 与竞争 VPN 分成可观察的 capability/health 状态；不支持或无法检测时返回脱敏 `Unavailable`，恢复意图和失败原因进入持久状态机，并以真实设备契约验证启动、断线阻止、恢复、取消、crash 与 version mismatch。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，always-on 审计）
+
+- focused commit `8e2bb94` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09）
 
 - focused commit `a9842d9` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
