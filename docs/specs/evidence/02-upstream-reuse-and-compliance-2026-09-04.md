@@ -847,6 +847,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `QuickActionActivity` 为每个 action 各自启动 `GlobalState.launch` 协程。`handleStartAction()` 先进入 `loadPreferencesAndStart()`，仅在 `setupCore()` 成功后创建 running request；`handleStopAction()` 若当前尚无 running request 会直接返回。故存在“STOP 早于 START 建立 request 而被忽略，随后 START 继续”的静态可行顺序，与本轮最终 TUN 观察相容；本轮没有读取内部调度，不能据此断定唯一根因或发生过特定竞态。
 - XToolpro future `engine-proxy` 必须在 command intake 即以单一串行、可取消状态机记录 STOP 意图，使其能取消/覆盖 setup、permission、service-start 与 TUN-start 的任意未完成阶段；仅在实际 TUN/core health 停止核验后才报告停止成功。需以无敏感字段的 rapid-start-stop、rapid-stop-start、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试覆盖该边界；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 快速 STOP→START 启动收敛真机验证（2026-09-08）
+
+- 停止基线仅确认 `tun0` 不存在、dev 进程存在。紧接着连续发出已解析的 dev STOP 与 START action；第 5 秒和第 10 秒均为 `tun0` 存在、dev 进程存在。因此本次快速相反序列最终形成实际 TUN 运行态。
+- 为恢复测试基线，单独再次发出正确 dev STOP action；第 5 秒和第 10 秒均确认 `tun0` 不存在、dev 进程仍存在。全程未发送流量，未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。
+- 本轮只观察最终 TUN/进程状态，未读取内部调度，故不能证明命令经过串行化、旧 STOP 被取消或任何特定协程时序。它仅表明此观察窗口内后到的 START 可收敛为 TUN 运行；与快速 START→STOP 结果一起说明，外部 action 请求本身不是可 await 的实际最终状态回执。
+- XToolpro future `engine-proxy` 必须将相反命令的意图线性化，且在返回最终 running/stopped 前分别核验实际 TUN 与 core health；需以无敏感字段的 rapid-start-stop、rapid-stop-start、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
