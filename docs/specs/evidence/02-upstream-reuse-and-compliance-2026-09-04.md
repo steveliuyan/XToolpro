@@ -1278,6 +1278,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机 proof 仅覆盖本机 `127.0.0.1:7890` 的 HTTP/SOCKS5 TCP 请求和有限并发，以及开关前后的监听计数；未从其他局域网设备连接，也未验证鉴权、跨网段防火墙、UDP、性能、异常关闭或端口复用。wildcard 监听表示网络暴露面扩大，不能直接视为安全共享成功。
 - 本轮只读复核固定源码和既有脱敏计数证据；未启动/停止 VPN、未切换局域网开关、未发送流量、未读取代理配置、节点、请求/响应、日志、通知、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在显式确认后声明 bind scope、认证和协议能力，默认 loopback，针对 LAN 暴露提供风险/不可用状态，并以停止清理、跨设备受控 fixture、UDP/冲突/取消/crash/version mismatch 契约验证。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash mixed listener 与认证绑定边界静态复核（2026-09-09）
+
+- 固定 Clash.Meta 配置模型声明 `mixed-port`（默认 `7890`）、`allow-lan` 与 `bind-address`，并同时保留 `authentication`、`skip-auth-prefixes`、`lan-allowed-ips`、`lan-disallowed-ips` 字段；这些字段说明上游具备配置表达能力，但不等于每个 listener 都消费了相同的访问控制合同。
+- 固定源码中已定位的 authentication middleware 挂接在 external controller/HTTP API 路径；mixed HTTP/SOCKS5 listener 的创建与 TCP/UDP 接受路径未在同一调用链中显示该 middleware 的绑定。因此不能把 controller 鉴权静态外推为 mixed proxy 入站鉴权，也不能把 `allow-lan=true` 或 wildcard `:7890` 监听视为已完成安全 LAN 共享。
+- 既有真机证据只覆盖本机 loopback HTTP/SOCKS5 TCP、有限并发和 wildcard 监听计数；没有跨设备连接、凭据输入、认证成功/拒绝、UDP、性能、异常关闭或端口复用验证。本轮未启动或停止 VPN、未切换 LAN 开关、未发送流量、未读取配置、节点、请求/响应、日志、通知正文、订阅 URL、凭据、Cookie、数据库或设备文件，未使用 ADB。
+- future `engine-proxy` 必须默认 loopback，并在用户明确确认后以版本化配置声明 bind scope、协议集合、认证方式、LAN allow/deny 规则和风险状态；mixed 入站与 controller 管理面必须分别建模和测试，认证缺失/拒绝、LAN 不可用、UDP 不支持、端口冲突、取消、crash 与 version mismatch 均返回脱敏 terminal receipt。完成受控跨设备 fixture 与上述契约测试前，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 ### FlClash 查找进程模式与请求归因边界静态审计（2026-09-09）
 
 - 固定 `FindProcessItem` 仅把 UI 开关映射为 `FindProcessMode.always/off`，再经 `UpdateParams.findProcessMode` 写入 `find-process-mode`；该路径没有 per-request attribution result、能力探测、权限/不可用分类、性能预算或回滚 receipt。开关持久化不等于 Clash.Meta 已完成进程识别。
