@@ -917,6 +917,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅只读审计固定提交的公开 `ServiceState.kt` 与 `AppPlugin.kt`；未写入/下载上游源码、未修改 SDK、缓存或构建产物，未使用 ADB，也未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须令 STOP/生命周期销毁立即取消所有尚未完成的 permission/start transaction，完成一次且仅一次的脱敏 `Cancelled` 结果，并以有界 timeout 防止 UI 或调用方无限等待；还需在真机覆盖 permission dialog 等待期间的 STOP、重复 START、detach/recreate、deny/revoke 与前台通知可见性。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 通知权限 callback 后撤销绕过静态审计（2026-09-08）
+
+- 固定 `AppPlugin` 的 `skipNotificationPermissionRequest` 初始为 `false`，唯一写入点是 notification permission result listener 的无条件 `true` 设置；在同一 plugin/Flutter engine 生命周期中没有将它复位为 `false` 的路径。
+- 后续 `requestNotificationPermission()` 先取得 `ContextCompat.checkSelfPermission`，但条件为“系统已授权 **或** skip flag 为 true”时即回调 success。因此在某次 callback 后，即使 Android 系统随后撤销 `POST_NOTIFICATIONS` 且 `checkSelfPermission` 不再为 granted，后续请求仍会由 skip flag 直接走 success，不会重新请求或返回 unavailable/cancel。该结论是固定源码控制流，不声称设备已复现此序列。
+- 本轮仅通过公开固定提交只读检索 `AppPlugin.kt` 完成；未下载、写入或修改上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须在每次 VPN 启动前重新基于系统授权状态作决定，不得用跨请求/跨撤销的 skip flag 替代权限结果；还需真机验证已允许后撤销、拒绝后重试、process recreation 与通知可见性，并将未授权状态收敛为脱敏、可恢复的未启动结果。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
