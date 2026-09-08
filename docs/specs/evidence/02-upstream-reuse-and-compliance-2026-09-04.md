@@ -1401,6 +1401,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `core/lib.go` 的 `stopTun()` 先关闭 TUN，再在 `isRunning` 时调用 `handleStopListener()`；`setEventListener(nil)` 则释放旧 JNI global reference 并立即覆盖指针。`sendMessageBatch()` 在另一条 batcher goroutine 中直接读取 `eventListener`，未见锁、引用快照、in-flight 等待或与 release 的顺序屏障；停止/解绑期间存在回调读取旧指针、丢弃批次或释放后仍尝试投递的未建模窗口。该静态风险不推断设备已发生崩溃或回调竞态。
 - 本轮仅只读复核固定提交的 `core/message.go`、`core/lib.go` 与既有证据，未构建、注入故障、启动/停止 VPN 或读取日志/请求正文、配置、节点、订阅 URL、凭据、Cookie、数据库、文件或设备内容，未使用 ADB。future `engine-proxy` 必须把停止建模为可等待事务：先阻止新事件，再有界 drain/drop 并返回计数，解绑 listener 后等待 in-flight callback，最后确认 TUN/core 停止；无法完成时返回脱敏 `Cancelled`/`EngineCrashed`/`Unavailable`，不得以 MethodChannel `true` 或 `STOPPED` 状态替代 terminal receipt。实际队列故障注入和五类隔离契约测试尚未执行，保持 `Partial`、Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash 配置导入校验、临时文件与备份恢复路径静态审计（2026-09-09）
+
+- 固定 `lib/models/profile.dart:188-200` 的 `Profile.saveFile()` 将输入写入 `appPath.tempFilePath`，调用 `coreController.validateConfig(path)`，校验成功后用 `tempFile.copy(mFile.path)` 覆盖 profile 文件，再删除临时文件；校验失败、复制失败或协程取消均没有 `finally` 清理。`saveFileWithPath()` 在 `:202-210` 同样校验后直接覆盖目标。固定 `lib/common/file.dart:23-28` 的 `safeWriteAsBytes()` 只是创建后调用 `writeAsBytes()`，未提供 fsync、原子 rename 或 read-back；`lib/common/path.dart:76-79` 的临时路径按调用生成，但不形成提交事务或并发锁。
+- 固定 `core/hub.go:86-93` 的 `handleValidateConfig()` 只读取给定路径并调用 `config.UnmarshalRawConfig`，返回原始错误字符串；它没有 schema/version 上限、资源大小、来源绑定或稳定错误码。`lib/providers/actions/profiles.dart:87-132` 的文件、URL、二维码入口在 profile 保存/更新异常时依赖通用 loading/safe-run 路径，未见每项 terminal receipt 或失败后的临时文件核验。
+- 固定 `lib/common/task.dart:537-552` 的 `_restoreTask()` 将每个 ZIP entry 以 `posix.normalize(file.name)` 拼到 restore 目录后直接写出，未见 canonical-path containment、绝对路径拒绝或条目大小/数量限制；随后 `:590-617` 以并发 `File.copy()` 将 profile/script 迁移到正式目录。该路径存在归档 entry 路径逃逸和部分迁移不可回滚的静态风险；本轮未构造恶意归档、未读取设备文件、未执行恢复。
+- 本轮仅读取固定提交 `62addf738a76b1a492e19af2dbabdb6d572b9e72` 的隔离归档源码与既有文档，未修改上游文件，未启动构建、未导入真实配置/订阅 URL、未读取日志、配置、节点、请求、数据库、凭据、Cookie 或设备文件，未使用 ADB。XToolpro 后续 adapter 必须在受限临时目录内执行大小/条目/格式预检和 canonical containment，验证后再以同目录原子发布；失败、取消、崩溃和版本错配要清理临时输入并返回脱敏 terminal receipt，恢复还必须具备 staging、逐项 read-back 与回滚。实际恶意归档、损坏/超限、取消、部分失败与版本错配契约测试尚未执行，矩阵相关行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
+#### 本检查点远端备份状态（2026-09-09，配置导入/恢复审计）
+
+- 本次 focused commit 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，停止事件队列审计）
 
 - 本次 focused commit（当前 `HEAD`）尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
