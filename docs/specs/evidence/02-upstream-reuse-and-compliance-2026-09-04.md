@@ -1220,6 +1220,16 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 这些参数只是传给受固定 runtime/version/ABI 约束的 yt-dlp/FFmpeg；固定代码没有可审计的 post-process 输入/输出映射、临时 staging、原子发布、container/stream 解码 read-back、hash、目标设备可播放性或逐步骤结果。worker 总体成功并不等于每一 merge/recode/extract 步骤成功，且其 cache 移动与 failure cleanup 不能提供部分成功、取消、native crash 或回滚 receipt。
 - 本轮仅只读固定隔离上游的 request builder 与既有 worker 输出/清理路径；未运行 yt-dlp、FFmpeg 或命令，未下载/读取/写入任何 URL、媒体、日志、配置、Cookie、设备或用户文件。future `engine-media` 必须在受确认任务下记录版本化 post-process plan，以临时输出和逐阶段 read-back/原子提交收敛 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并在真实 ABI/设备上验证合并、提取、转码、取消、crash 与恢复。完成前该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis 真机运行时前置检查（2026-09-08）
+
+- 仓库现有 `AGENTS.md` 的 Phase 02 ADB 授权允许控制范围内测试包的生命周期和检查非敏感设备状态，同时明确禁止 root、日志、配置、通知正文、节点、请求、数据库、文件、凭据、Cookie、订阅 URL 与流量内容读取。本轮按该受限规则只确认一台设备已连接，并对已知 ytdlnis 与 XToolpro dev package 作 `pidof` 进程存在性检查；两者均未运行。
+- 主机亦未发现可执行的 `ffmpeg`、`ffprobe` 或 `yt-dlp`。没有以未知版本的设备安装包或替代 host runtime 冒充固定 ytdlnis `13320bb64f35c8d04f01bebfa782d7947758fb66` 的运行时；未安装、启动、强停或卸载任何 package，未下载/处理测试媒体，未读取任何应用或设备内容。
+- 因此当前只证明真机验证环境的 runtime/commit 可归因性仍不可用，不构成媒体解析、下载、合并或转码 success/unavailable proof，也不改变矩阵状态。future 验证需在版本、ABI、许可证与 artifact hash 均已锁定的隔离 Android 宿主中进行，并在先前定义的受限 ADB 范围内仅记录脱敏 terminal result；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+#### 本检查点远端备份状态（2026-09-08）
+
+- focused commit 的远端备份暂未完成：对 `origin/codex/phase02-flclash-direct-logs` 的两次 push 均未返回远端更新，随后 `ls-remote` 未返回该 ref 的可核验 hash。未备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；未纳入任何其他既有工作区改动或临时产物。待远端可用时必须先推送并核验该 focused commit，之后才能将本检查点描述为远端备份。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
