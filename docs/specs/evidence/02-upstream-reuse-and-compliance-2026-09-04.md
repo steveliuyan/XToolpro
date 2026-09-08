@@ -973,6 +973,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读固定公开 `GlobalState.kt` 并关联此前已审计 `QuickActionActivity.kt`/`ServiceState.kt`；未使用 ADB、未启动 VPN、未写入上游源码/SDK/缓存/构建产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须令每个外部/快捷入口命令经受监督且可取消的 transaction 执行，返回一次性、脱敏的稳定结果并以 timeout/health/TUN 回执关闭；还需验证 setup、permission、native failure、engine detach 与相反命令 racing。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android 13 通知权限人工“允许”与实际授权不一致真机验证（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）停止基线中，以正常 `pm revoke` 临时撤销 dev 变体 `POST_NOTIFICATIONS`，随后强停、从 launcher 打开主界面。主机仅确认初始 `tun0=0`、进程计数为 0、UID 层 `POST_NOTIFICATION=ignore`；未读取屏幕、通知或配置。
+- 用户在设备主界面启动控制后报告选择“允许”。紧接着与 7 秒后的只读核验均为 `tun0=0`、dev 进程计数为 1、`dumpsys package` 当前 runtime permission `granted=false`、UID app-op `POST_NOTIFICATION=ignore`。因此不把用户操作意图、可能的系统窗口或上游 callback 视为实际授权或 VPN 启动成功。
+- 随后以正常 `pm grant` 恢复通知权限，并发送精确 dev STOP action；最终只读基线为 `tun0=0`、进程计数为 1、runtime permission `granted=true`、`POST_NOTIFICATION=allow`。全程未发送流量，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- 由于本轮不读取任何窗口内容，不能将授权状态不变归因于某一特定系统 dialog、用户界面控件或 FlClash callback 分支；它只证明该入口缺少将用户操作、实际 grant/app-op、启动 transaction 与 TUN/health 关联的可验证回执。XToolpro future `engine-proxy` 必须在每个 permission transaction 后重新读取实际授权状态，并以 TUN/health 收敛 `Success` 或脱敏 `Unavailable`/`Cancelled`，不得以点击结果、进程存活或入口返回替代。完成 deny/revoke/retry/recreate/visibility 契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash dev 获准通知权限原生 START 回归边界（2026-09-08）
 
 - 小米 10S（`bf353dda`，API 33）先强停 dev 变体，确认 `tun0=0`、进程计数为 0、`POST_NOTIFICATION=allow`。随后直接发送已解析的 `com.follow.clash.dev.action.START`，第 7 秒和第 14 秒仅确认 `tun0=0`、dev 进程存在，app-op 仍为 allow。
