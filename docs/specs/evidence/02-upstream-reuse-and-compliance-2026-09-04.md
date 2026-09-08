@@ -1568,7 +1568,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 #### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
 
-- focused commit 尚未创建；本次仅修改 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。创建提交后仍不得自动 push，须先获得用户明确确认。
+- focused commit `7c23efa` 已创建但尚未 push；随后将以 evidence-only commit 固化本 hash 与未 push 状态。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
