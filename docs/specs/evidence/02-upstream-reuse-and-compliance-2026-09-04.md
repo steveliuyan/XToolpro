@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=48`、`Pending=35`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=49`、`Pending=34`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1180,6 +1180,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `BackupSettingsUtil` 和 `SettingsViewModel.backup()` 将 history、queued、scheduled、cancelled、error、saved、Cookie、偏好、模板等直接 Gson 序列化进未加密 JSON，并写到备份目录。restore 会先清空 SharedPreferences 或目标表、再逐条插入；整个跨偏好和多表恢复不使用 transaction、staging、备份完整性/签名/版本/来源校验、冲突预览、逐项 receipt 或 rollback。尽管 backup 包含 `scheduled`，固定 `restoreData()` 没有相应 scheduled restore 分支。
 - `HistoryRepository.delete()` 可先删 Room 行、再尝试删除输出文件；底层删除错误被吞掉。cleanup worker 也会清除 cancelled/error 条目及 cache，故记录与输出的可恢复关联没有原子保证。历史、备份及 restore 中的 URL、路径、命令和 Cookie 均未见统一脱敏或加密边界。
 - 本轮只读固定隔离的 Room model/DAO/repository、backup/restore 与 cleanup 源码；未导出、导入、读取或删除任何真实备份、媒体、URL、Cookie、日志或设备数据。future `engine-media` 必须最小化并加密敏感快照，校验 schema/版本/来源，先预览后原子或可回滚恢复，并以脱敏逐项 terminal receipt 覆盖损坏/错配、取消、部分失败和 crash。完成真实备份/恢复契约验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ytdlnis 后台通知、完成动作与开机恢复边界静态审计（2026-09-08）
+
+- 固定 `DownloadWorker` 是 foreground WorkManager worker，`NotificationUtil` 为运行任务提供暂停/取消 action；完成通知可以打开/分享输出，失败通知可重新配置或跳转日志。`ScheduleAlarmReceiver` 也可将有 network constraint 的下载 worker 入队，故上游有有限后台、通知和排程能力。
+- 这些通知以 `VISIBILITY_PUBLIC` 放置下载标题、完成输出路径和失败原始 error；完成/分享动作向外部 app 传 URI。固定路径没有统一对标题、路径、异常、日志或 URI 授权作脱敏、最小化或生命周期撤销。通知权限/通道不可用、receiver/work 异常和 action 处理没有写入同一可持久 terminal receipt。
+- manifest 的 BOOT_COMPLETED/MY_PACKAGE_REPLACED receiver 是 `ObserveBootReceiver`，只重建 observe-source alarms，未恢复下载队列/排程或核验未完成任务。`AlarmScheduler.schedule*()` 创建 broadcast PendingIntent，但 `cancel()` 以 `getService` 寻找，故取消并非可证明的匹配清理路径。未发现下载任务重启、reboot、通知权限变化、定时 alarm 或 worker crash 后的闭环 read-back。
+- 本轮仅只读固定隔离上游的 manifest、worker、notification、alarm 和 receiver 源码；未发通知、启动排程、访问任何设备/用户数据或读取通知正文、日志、URL、Cookie、媒体和数据库。future `engine-media` 必须提供默认最小化、脱敏的通知和最小读 URI 授权，且以持久化状态机和真实设备验证覆盖通知权限、reboot、排程、取消、crash、unavailable 与 version mismatch。完成前该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
