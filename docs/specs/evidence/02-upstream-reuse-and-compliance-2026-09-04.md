@@ -1566,6 +1566,15 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Flutter `GeoResourceAction.updateGeoResource()` 仅把资源名转发到 `coreController.updateGeoData()`；`updateGeoResourceUrl()` 只做 URL 形状校验并写入 patch config，没有稳定的成功、失败、取消或来源验证回执。
 - 结论：该上游具备可配置 URL、超时、hash 去重和内容解析校验，但不满足 XToolpro 要求的有界响应、可取消下载、原子发布、旧数据保留、版本/来源 provenance 与稳定 terminal receipt。对应 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`，不得据此进入正式 engine 集成。
 
+### FlClash rule-provider 更新与命中边界静态审计（2026-09-09）
+
+- 审计对象仍为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未发起网络请求、未读取设备数据、未使用 ADB。相关源码为 `core/Clash.Meta/rules/provider/parse.go`、`core/Clash.Meta/rules/provider/provider.go`、`core/Clash.Meta/component/resource/fetcher.go`、`core/Clash.Meta/component/resource/vehicle.go`、`core/Clash.Meta/rules/provider/rule_set.go`。
+- `rules/provider/parse.go` 的 provider schema 支持 `file`、`http`、`inline` vehicle，以及 HTTP 的 URL、proxy、header、interval、`size-limit`、bundle fallback 和可选安全路径；HTTP 缓存路径默认由 URL hash 派生，显式 `path` 仍经 `C.Path.IsSafePath` 检查。
+- `component/resource/fetcher.go` 为远端 provider 建立可取消 context，按 interval 周期拉取并以 backoff 缩短失败重试；`Initial()` 按本地文件、bundle 文件、远端更新顺序回退。`loadBuf()` 先对完整 buffer 执行 parser，只有解析成功后才调用 vehicle.Write，因此 parser 失败通常不会替换旧规则；相同 hash 只刷新 mtime。关闭 provider 会取消 fetcher context 和 watcher。
+- `component/resource/vehicle.go` 的 HTTP 读取支持 context timeout、2xx 检查和可选 `sizeLimit`，但 `io.LimitReader` 到达上限时不报告截断，且规则 provider 默认配置可不设上限。成功内容仍完整进入内存并由 `safeWrite` 直接 `os.WriteFile` 覆盖，未见临时文件、fsync、原子 rename、read-back、签名/版本 provenance 或旧文件备份。
+- `rules/provider/provider.go` 在更新回调中直接替换 provider strategy 并发出全局 `RuleUpdateCallback`；固定路径未见 provider 级读写锁、逐项 terminal receipt、稳定错误码或 UI 取消状态。`rule_set.go` 在 provider 名称不存在时返回 `(false, "")`，未区分 provider 缺失、未初始化、更新失败和规则未命中。
+- 结论：上游 rule-provider 具备 parser-before-write、bundle/local fallback、取消 context 和失败 backoff，但仍缺少严格超限检测、原子发布、来源/版本证明、命中原因回执及缺失/失败状态分类。对应 parity 行继续保持 `Partial`，不得把 provider API JSON 的 `ruleCount/updatedAt` 视为经过 XToolpro 审计的 terminal receipt。
+
 #### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
 
 - focused commit `7c23efa` 已创建但尚未 push；随后将以 evidence-only commit 固化本 hash 与未 push 状态。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
