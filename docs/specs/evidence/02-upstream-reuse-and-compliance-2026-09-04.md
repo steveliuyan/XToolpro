@@ -1260,6 +1260,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定模块实际只有 Android library 壳、`implementation(project(":core-model"))` 和空 manifest；没有 Kotlin/Java adapter、native/FlClash 依赖、公开 contract、版本/健康 handshake、任务状态模型或测试源。只读 `Get-FileHash -Algorithm SHA256` 结果为：计划 `20161EFB1E7DFCA70CD31F88CA504328E172B0E534D7275F05E038D1E3BC77F6`，Gradle `5A152141FE75A58515AC09C45ED9A6EEB623767CCB44BF25C4299CE0E7D2CC65`，manifest `571F2735FAF5E857752EE057AC8EF63425576A721616C60B86EE5D4C0A2D682F`，`ModuleId.kt` `80B8B427F487858772F3D9FBEFD3878BDD7855AD4AFDB0FDD06628E87B0610ED`。
 - 本轮未读取或纳入任何 `build/` 产物、SDK、缓存、上游源码归档、凭据或设备数据，也未运行契约测试、构建 adapter、注入故障或启动 VPN。结论是计划与模块源码闭包不完整，不构成任何五类结果执行证据；future `engine-proxy` 必须先提供版本化公开 contract、签名 provenance/health manifest、可取消任务状态机和隔离 success/unavailable/cancel/crash/version-mismatch 测试，再由真实 FlClash proof 绑定。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash URL profile 更新、重命名、删除与持久化边界静态审计（2026-09-09）
+
+- 只读复核固定路径 `lib/views/profiles/profiles.dart`、`lib/views/profiles/edit.dart`、`lib/providers/actions/profiles.dart`、profile service 与此前已记录的 `Profile.normal(url).update()`/`Profile.update()` 调用。URL profile 的“同步”进入 update；编辑页的名称、URL、自动更新间隔仅在确认动作后写回，URL 变化还会触发更新；“复制链接”写入剪贴板，不是 profile clone，未发现用户可见复制/克隆 action。
+- 更新失败路径会把原始异常传给 `commonPrint` 或批量更新 UI；本轮未见统一脱敏错误码、逐项结果、版本冲突处理或回滚 receipt。固定源码与真机入口能证明可达性，但不能证明 URL 下载成功后配置文件、标签、自动更新状态与数据库记录以原子方式提交，也不能证明删除/重命名失败时可恢复。
+- 本轮未发送订阅 URL、未写入剪贴板、未执行同步、重命名、删除或保存，未读取配置、日志、数据库、文件、凭据、Cookie 或设备内容。future `engine-proxy` 必须以显式用户确认和版本化 snapshot 执行更新，先校验再原子提交；删除/重命名需可回滚并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt 收敛。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，契约闭包审计）
 
 - focused commit `7c111b7` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
