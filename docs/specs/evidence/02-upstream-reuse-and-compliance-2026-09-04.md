@@ -1311,6 +1311,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定源码未提供 Fake-IP、Host 重写或流量嗅探的独立 capability/health 查询，也没有为 DNS 失败、IPv6 不可用、Fake-IP 冲突、嗅探超时或取消建立稳定脱敏分类。未读取生成配置、DNS/路由正文、请求、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
 - 本轮只读复核固定源码与既有脱敏计数证据，未切换设置、启动 VPN、发送新流量或执行包级 DNS/嗅探验证。future `engine-proxy` 必须将 DNS、IPv6、Fake-IP、Host 和 sniffing 拆成可探测 capability，默认最小化 DNS/host 字段，区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 并以受控 fixture 覆盖地址/路由、解析、冲突、超时和取消；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，DNS/IPv6 审计）
+
+- focused commit `48c4606` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，测速链接审计）
 
 - focused commit `7c3de45` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
