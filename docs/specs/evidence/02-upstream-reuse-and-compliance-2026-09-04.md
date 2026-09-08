@@ -1339,6 +1339,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 Android 模块引用 Firebase Analytics/Crashlytics NDK；虽然 Dart 默认关闭 collection，启动时的“上次崩溃”查询仍初始化 Firebase，manifest 未提供静态默认禁用声明。未发现直接把 URI/配置交给 Crashlytics 的调用，但静态路径不足以证明 SDK 未自动采集或上传。
 - 本轮只读复核固定源码与既有证据，未触发 crash、未导出日志、未读取 logcat、日志/请求/规则正文、通知、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未发起网络请求。future `engine-proxy` 必须默认不初始化/不上传第三方遥测，按字段最小化并以稳定错误码区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`；日志队列需可核验 drain/drop，崩溃与导出需逐项 terminal receipt。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash 内核版本、更新与回滚不可用边界静态审计（2026-09-09）
+
+- 固定 `lib/views/about.dart` 将版本展示绑定到 `packageInfo.version`；`lib/common/request.dart` 的“检查更新”比较的是 FlClash 应用 Release 元数据；“内核”入口只打开固定上游源码链接。固定源码未见运行时读取 native core 版本或独立的更新/回滚 API。
+- `android/core/src/main/cpp/CMakeLists.txt` 在构建期按 ABI 链接 `libclash.so`，运行时 Kotlin 仅加载已打包的 `core` library。现有关于页真机 proof 只确认应用版本、更新入口和源码链接语义，不构成设备内核版本、替换、回滚或失败恢复 proof。
+- 固定路径未提供 artifact provenance/hash manifest、last-known-good 保留、原子替换、回滚触发器或更新失败 terminal receipt；不能把应用更新检查、外部源码链接、`System.loadLibrary` 成功或既有 APK hash 当作内核更新能力。
+- 本轮只读复核固定源码与既有脱敏 UI 证据，未点击更新/源码链接、未下载或替换任何 native artifact，未读取构建产物、SDK、缓存、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。该项继续标记 `Unavailable`；future `engine-proxy` 必须随受签名版本 manifest 提供 core/bridge/ABI/hash 校验、staging + 原子发布、last-known-good rollback，并以脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt 覆盖升级、失败、取消和回滚。Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，诊断审计）
 
 - focused commit `d7f537b` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
