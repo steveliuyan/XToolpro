@@ -1146,6 +1146,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 静态日志会拼接 SAF path、document URI、可读路径或异常；本轮未运行测试、未访问设备文件、未请求/修改 SAF grant，也没有删除、移动、恢复或读取任何用户数据。固定单元测试源码存在但未执行，不能视为真实 provider 行为或恢复 proof。
 - future `engine-cleaner` 必须在提交前固化用户可核验的预览快照；以可恢复暂存为优先，若系统/provider 仅支持不可逆删除则在确认前明确说明；对 permission loss、provider unavailable、cancel、单项失败/部分成功、crash 与版本差异提供逐项、脱敏、可持久化 terminal result，并分别在真实 SAF provider 上验证。该矩阵项从 `Pending` 调整为 `Partial`；Cleaner 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### sdmaid-se SAF 浏览、mutation 与外部打开边界静态审计（2026-09-08）
+
+- 固定 `SAFGateway` 根据 persisted URI permission 找到最深匹配 scoped tree，提供 `listFiles`、lookup、walk、`canRead/canWrite`、`file`、create 与 delete。SAF 列表是调用时的 provider 快照，失败收敛为 path 关联的 `ReadException`；创建目标时会拒绝把 provider 改名/唯一化后的结果当作原请求成功。`PathMapper.takePermission()` 请求读写 persistable grant；升级失败时只尝试释放本次新增 flags。上述是有限的浏览、权限与创建边界，不证明任意 provider、Android 版本或中途 permission loss 的实机行为。
+- `APathGateway` 和 `GatewaySwitch` 的固定合同并没有 rename、move 或 copy；对 `app-common-io` 的针对性检索也未发现 `DocumentsContract.renameDocument`、`moveDocument` 或 `copyDocument` 调用。因此矩阵所列的 rename/move/copy 不能由该固定上游 SAF 路径声称已覆盖，更没有临时输出、原子发布、内容/metadata read-back、跨 provider 回滚或逐项部分成功结果。
+- `ViewIntentTool` 只接受 `LocalPathLookup`，经 `FileProvider` 构造 `ACTION_VIEW` chooser，并同时设置读/写 URI grants；SAF lookup 直接返回 unsupported。该路径是外部“打开”而非 `ACTION_SEND` 分享或受控导出，固定代码未见对 receiving app、生命周期结束或授权撤销的闭环。grant、path、lookup、URI 和异常会写入静态日志。
+- 本轮只读固定隔离上游源码；未访问、创建、复制、移动、分享、打开或读取任何设备/用户文件，也未修改 SAF grant 或运行测试。future `engine-cleaner` 必须将浏览与 mutation 分离，以同一 scoped grant 内的预检、临时输出、read-back、原子发布和失败清理实现每次 rename/move/copy；外部分享只可授最小只读、最短生命周期 URI，并验证撤销。完成真实 provider 的 success、unavailable、cancel、crash、version-mismatch 和隐私输出验证前，该项从 `Pending` 调整为 `Partial`，Cleaner 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
