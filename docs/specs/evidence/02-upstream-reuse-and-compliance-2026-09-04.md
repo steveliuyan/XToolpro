@@ -1058,6 +1058,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 两次结果均为 `tun0=0`、`com.follow.clash.dev` 进程计数为 1、`POST_NOTIFICATIONS granted=true`、UID `POST_NOTIFICATION=allow`。因此该轮的用户操作与通知授权都不能代替实际 TUN/health 的成功回执；也不能将 TUN 未出现归因于任何具体 UI、permission callback、VPN consent 或 native core 分支。
 - 本轮未发送流量、未改变权限或 VPN 设置，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须把用户命令、权限、VPN establish、TUN 存在和 core health 作为可归因的独立阶段，只有 health/TUN 回执才能产生 `Success`；否则在有界 deadline 后产生脱敏 `Unavailable`/`Cancelled`/`EngineCrashed`。完成完整真机与隔离五类契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android native linkage failure 结果映射静态审计（2026-09-08）
+
+- 固定 `Core.kt` 在 object 初始化时直接 `System.loadLibrary("core")`，没有本地 `try/catch` 或可查询的 load/version result。`VpnService.handleStart()` 在 `Core.startTun()` 周围只捕获 `Exception`，`VpnService.start()` 也只捕获 `Exception`；因此 `UnsatisfiedLinkError`、`ExceptionInInitializerError` 或其他 `LinkageError` 不会在 service 边界变成受控 native error。
+- 上述错误可继续到 `ManagedServiceBinding.useService()` 的 `runCatching`，使 `ServiceController.start()` 记录原始异常字符串、清理 binding 并返回 `0L`；`ServiceState.start()` 仅据该数值设置 `STOPPED` 并返回 `false`。同时固定 `ServicePlugin.start()` 在提交 `ServiceState.requestStart()` 后立即 MethodChannel `success(true)`，不等待这个结果。故这条路径只可能形成异步泛化失败，无法区分缺失 artifact、ABI/bridge/version mismatch 与运行期 core crash，也没有稳定、脱敏的外部 terminal result。
+- 本轮只读固定上游归档的 Kotlin bridge、service/controller/state 源文件；未执行或诱发 native 失败，未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须在加载前完成受签名 manifest 核验；在 throwable 边界把缺失映射为 `Unavailable`、不一致映射为 `VersionMismatch`、加载/运行异常映射为 `EngineCrashed`，并使调用方等待一次性、脱敏的 terminal result。完整/缺失/错配 artifact 的隔离五类契约仍未执行；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
