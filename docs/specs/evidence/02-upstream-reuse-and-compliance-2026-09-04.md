@@ -1306,6 +1306,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅复核固定源码与既有脱敏证据，未连接 controller、未发送管理请求、未读取 secret、配置、节点、订阅 URL、凭据、Cookie、日志、数据库或设备文件，未使用 ADB。future `engine-proxy` 必须默认将管理面限制为 loopback，采用 Keystore 保护的 secret、最小权限 API、明确轮换/撤销和独立健康回执；管理面不可用、鉴权拒绝、端口冲突、取消、crash 与 version mismatch 均需脱敏 terminal receipt。
 - 在 controller 与 mixed 入站分别完成 bind、鉴权、权限、停止清理和异常契约测试前，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash 配置导出 `FilesProvider` 范围与 URI 授权静态复核（2026-09-09）
+
+- 固定 Android manifest/`FilesProvider` 以 `MANAGE_DOCUMENTS` 保护 provider，但将整个 app `filesDir` 作为根目录；canonical path 检查用于阻止越出根目录，普通文件仍可按请求模式打开并标记为可写。该实现约束了路径逃逸，却没有把配置导出限定到专用临时目录或只读文档集合。
+- 既有真机 proof 只确认配置导出 SAF 选择器可达、配置卡片与导出文件名存在对应关系；未打开或读取导出文件，未验证 URI grant 生命周期、撤销、复制传播或 provider 崩溃恢复。因此不能把文件名匹配或 provider 可达性视为最小授权、导出提交或隐私安全的证明。
+- 本轮只读复核固定 manifest/provider 源码和既有脱敏 UI 证据，未发起导出、未读取设备文件、配置、节点、订阅 URL、凭据、Cookie、日志或 URI 正文，未使用 ADB。future `engine-proxy`/配置仓库必须使用专用临时 staging、最小只读 SAF URI、一次性或可撤销 grant，并在成功/取消/失败后验证清理；权限丢失、provider 不可用、取消、crash 与 version mismatch 均返回脱敏 terminal receipt。
+- 在真实 provider 的 grant、复制传播、撤销、部分失败和恢复契约完成前，矩阵新增导出范围行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 ### FlClash 查找进程模式与请求归因边界静态审计（2026-09-09）
 
 - 固定 `FindProcessItem` 仅把 UI 开关映射为 `FindProcessMode.always/off`，再经 `UpdateParams.findProcessMode` 写入 `find-process-mode`；该路径没有 per-request attribution result、能力探测、权限/不可用分类、性能预算或回滚 receipt。开关持久化不等于 Clash.Meta 已完成进程识别。
