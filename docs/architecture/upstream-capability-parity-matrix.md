@@ -109,7 +109,7 @@
 | 历史、取消记录、备份恢复 | Room、设置/备份路径 | 任务历史和可恢复快照 | Pending |
 | 后台通知、完成动作、开机恢复 | WorkManager、intent entry | 后台任务和恢复策略 | Pending |
 | yt-dlp、FFmpeg、Aria2c、Python/JS runtime 管理 | `app/` component management | 版本、来源、校验、更新和回滚 | Pending |
-| 终端和自定义命令 | Termux components、command path | 明确授权、沙箱边界和脱敏输出 | Pending |
+| 终端和自定义命令 | Termux components、command path | 明确授权、沙箱边界和脱敏输出 | Partial（静态）：固定 ytdlnis `MkSession` 创建交互式 shell，会生成带 Python、FFmpeg、Node、Deno、Aria2c 与 yt-dlp 可执行路径的 shell functions；`use_cookies` 时该 yt-dlp function 同时拼接内部 Cookie 文件的 `--cookies` 参数。`TerminalFragment` 直接将选中的 command-template 或 shortcut 文本写入会话；`CommandTemplate` 内容可持久化、剪贴板导入/导出，缺少命令 allowlist、参数结构化或逐次风险确认。`TerminalItem` 与 DAO 又把完整 command 和 terminal log 放入普通 Room 表；固定路径未见针对 URL、Cookie、令牌或输出的统一脱敏。该审计不执行命令、不读取真实终端内容、Cookie、URL、下载、日志或设备文件，不能断言某一命令实际可执行或曾泄露数据。XToolpro 仅能在单独受限环境中，以逐次明确授权、结构化允许参数、最小 SAF scope、可取消进程和默认脱敏输出提供必要补充；不得将上游通用终端或未审计模板直接暴露给产品流程。完成隔离、取消、敏感输出和滥用审查前保持 `Partial` |
 
 ## ImageToolbox：图片能力
 

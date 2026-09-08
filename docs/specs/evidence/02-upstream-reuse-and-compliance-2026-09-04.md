@@ -1107,6 +1107,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `CookieViewModel.updateCookiesFile()` 将所有已启用 Cookie 组合为 Netscape 文本并写入内部 `cacheDir/cookies.txt`；`YTDLPUtil` 和 terminal 会话在 `use_cookies` 开启时将该路径作为 yt-dlp `--cookies` 参数。该 ViewModel 还可以读取该文件至系统剪贴板，或复制到导出目录；`BackupSettingsUtil.backupCookies()` 将实体序列化入 JSON 备份。用户确认删除全部 Cookie 时，固定 UI 会删除 Room 行并将当前 cache 文件写空，但源码不为先前的剪贴板、导出或备份副本提供撤销/安全擦除合同。
 - 本轮仅只读固定隔离上游归档的模型、Room、Cookie、备份与调用路径；未使用、导入、读取或输出任何真实 Cookie/session、私有内容、URL、下载、日志、设备数据库或文件。该结论不能断言任一设备上实际文件权限或数据泄露。future `engine-media` 必须使用 Keystore 绑定的加密会话 vault，只在短生命周期内部文件生成最小 yt-dlp 输入，默认禁止原始 Cookie 进入日志、剪贴板、通用备份或导出；删除、撤销、恢复和授权 session 都需独立脱敏 contract。Media 矩阵相应项从 `Pending` 调整为 `Partial`，Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis 终端与自定义命令边界静态审计（2026-09-08）
+
+- 固定 ytdlnis 的 `MkSession` 创建交互式 shell，并生成 Python、FFmpeg、Node、Deno、Aria2c 与 yt-dlp 的 shell functions；启用 `use_cookies` 时，yt-dlp function 会附带内部 Cookie 文件路径的 `--cookies` 参数。`TerminalFragment` 将用户选中的 command-template 或 shortcut 内容直接写入 session；`CommandTemplate` 以普通 Room entity 持久化完整内容，且可经剪贴板导入/导出。固定路径没有 command allowlist、结构化参数模型或逐次风险确认。
+- `TerminalItem` 与 `TerminalDao` 会在普通 Room 表中保存 command 和 terminal log；对该链路的针对性检索未见 URL、Cookie、令牌或输出的统一脱敏。因此通用交互 shell 既不是受限的 yt-dlp 参数接口，也不能在未隔离时安全继承用户会话边界。
+- 本轮只读固定隔离上游归档的 terminal、template 与 Room 源码；没有执行命令、读取真实终端输出、Cookie、URL、下载、日志、设备数据库或文件。该结论不声称任一命令可执行或曾发生泄露。future `engine-media` 如确需补充命令能力，必须采用独立受限环境、逐次明确授权、结构化允许参数、最小 SAF scope、可取消进程与默认脱敏输出；不得直接暴露上游通用终端或未审计模板。Media 矩阵相应项从 `Pending` 调整为 `Partial`，Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
