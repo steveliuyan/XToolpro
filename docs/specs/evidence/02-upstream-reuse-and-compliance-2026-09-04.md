@@ -795,6 +795,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `lib/providers/actions/common.dart` 的 `toggleRunning()` 只将反转后的布尔值交给 `setRunning()`；后者先执行 `_setLocalRunning(running)`。已初始化的启动分支仅 await `_setCoreRunning()`，之后以不 await 的 debounce 排队 `applyProfile()`；实际 Android profile/core setup 因此不属于该 UI 操作的完成条件。`_setCoreRunning()` 不检查 `setCoreRunning()` 返回的 `startListener()` 布尔结果，故该值不会阻止后续 profile 应用。`ServicePlugin.start()` 同样只提交 `ServiceState.requestStart()` 并立即返回 `true`。直到 `VpnService.handleStart()` 的 `Builder.establish()` 返回 descriptor，代码才设置 `tunRunning` 并调用 `Core.startTun()`。固定路径没有把 UI 请求、listener/service start、profile setup、system establish、TUN 存在及流量可用性合并为单一完成回执。
 - XToolpro 的 future `engine-proxy` 必须将用户请求、`VpnService` establish、TUN 存在、core health 与可转发流量区分为独立、受限且可观测的状态；在无回执、超时或错误时保持可恢复的 unavailable/error 状态，不得呈现“已连接”。完成 success、unavailable、cancel、crash、process-death、竞争 VPN、permission revoke 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash 配置应用失败与启动状态一致性源码审计（2026-09-08）
+
+- 固定 `lib/providers/actions/setup.dart` 的 `_setupConfig()` 把配置写入和 `coreController.setupConfig()` 放入 `globalState.loadingRun(silence: true)`。`lib/state.dart` 中的 `safeRun()` 会捕获任意异常、记录它，并直接把 `e.toString()` 交给通知；随后返回 `null`。`_setupConfig()` 不检查该返回值，仍返回 `completed`。因此，配置应用异常不会经 `_runSetup()` 作为失败结果回传给启动调用者。
+- 初始化启动把 `_interface.setupConfig(params)` 与 `_setCoreRunning()` 放入 `Future.wait`；普通启动则在 `_setCoreRunning()` 后不 await 地 debounce `applyProfile()`。但 `_setCoreRunning()` 的返回类型为 `Future<void>`，其内部只 await `setCoreRunning()`，没有检查 `startListener()` 返回的布尔值。故 listener/service 请求失败及后续配置应用失败均不构成可靠的启动失败回执或自动本地状态回滚。
+- 下层失败传播并非完全缺失：`VpnService.start()` 在 `Builder.establish()` 返回空 descriptor 或 `Core.startTun()` 抛错时会 stop 并抛出；`ServiceController.start()` 会记录失败、清理 binding 并令 runtime 为零；`ServiceState.start()` 据此返回 `false`。但是 `ServicePlugin.start()` 仅调用 `ServiceState.requestStart()`，立即经 MethodChannel 返回 `true`，不 await `Deferred<Boolean>`。这与真机仪表盘请求后未出现 `tun0` 的观察相容，但不能单凭静态路径判定该次失败的具体原因。
+- 本轮只读取固定上游源码，未操作设备，也未读取任何配置、错误文本、日志、通知、请求/连接、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。不能将原始异常文本的存在外推为具体敏感字段已暴露。
+- XToolpro 的 future `engine-proxy` 必须以单一可 await、可取消状态机串联配置写入、core setup、permission、service start、`establish()`、TUN 核验和最小的连通性证明；所有失败、取消和超时必须收敛为稳定、脱敏错误码并回滚本地运行状态。需以无敏感字段的真机契约测试覆盖成功、配置错误、permission deny/revoke、竞争 VPN、`establish()` 拒绝、超时、engine crash、process death 与 version mismatch；在此之前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
