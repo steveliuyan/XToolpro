@@ -1313,6 +1313,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读复核固定 manifest/provider 源码和既有脱敏 UI 证据，未发起导出、未读取设备文件、配置、节点、订阅 URL、凭据、Cookie、日志或 URI 正文，未使用 ADB。future `engine-proxy`/配置仓库必须使用专用临时 staging、最小只读 SAF URI、一次性或可撤销 grant，并在成功/取消/失败后验证清理；权限丢失、provider 不可用、取消、crash 与 version mismatch 均返回脱敏 terminal receipt。
 - 在真实 provider 的 grant、复制传播、撤销、部分失败和恢复契约完成前，矩阵新增导出范围行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash 应用更新 metadata 与 artifact 信任边界静态复核（2026-09-09）
+
+- 固定 `lib/common/request.dart` 的更新动作只读取 FlClash Release metadata，并与 `packageInfo.version` 比较；`about.dart` 的“内核”入口只是打开固定源码链接。真机 proof 仅确认“当前应用已经是最新版”，没有进入下载、安装或外部 artifact 处理。
+- 固定路径未形成 artifact 签名/哈希、来源绑定、兼容性校验、安装前 staging、last-known-good 保留、失败回滚或更新 terminal receipt。因此 metadata 新旧比较、版本展示或下载入口可见性都不能作为更新成功、内核替换或回滚能力证明。
+- 本轮只读复核固定源码与既有脱敏 UI 证据，未请求 release API、下载/安装 artifact、点击外部链接、读取配置、日志、节点、订阅 URL、凭据、Cookie、数据库、文件或设备内容，未使用 ADB。future `engine-proxy` 必须把 app/core 更新拆分为受签名 manifest、hash/ABI/API 校验、staging、原子发布和 last-known-good rollback，并将不可用、取消、崩溃、版本错配分别映射为脱敏 terminal receipt。
+- 在真实 artifact 校验、安装失败恢复、取消和回滚契约完成前，矩阵新增更新信任行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 ### FlClash 查找进程模式与请求归因边界静态审计（2026-09-09）
 
 - 固定 `FindProcessItem` 仅把 UI 开关映射为 `FindProcessMode.always/off`，再经 `UpdateParams.findProcessMode` 写入 `find-process-mode`；该路径没有 per-request attribution result、能力探测、权限/不可用分类、性能预算或回滚 receipt。开关持久化不等于 Clash.Meta 已完成进程识别。
