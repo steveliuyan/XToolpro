@@ -854,6 +854,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只观察最终 TUN/进程状态，未读取内部调度，故不能证明命令经过串行化、旧 STOP 被取消或任何特定协程时序。它仅表明此观察窗口内后到的 START 可收敛为 TUN 运行；与快速 START→STOP 结果一起说明，外部 action 请求本身不是可 await 的实际最终状态回执。
 - XToolpro future `engine-proxy` 必须将相反命令的意图线性化，且在返回最终 running/stopped 前分别核验实际 TUN 与 core health；需以无敏感字段的 rapid-start-stop、rapid-stop-start、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 重复 START 请求真机验证（2026-09-08）
+
+- 停止基线仅确认 `tun0` 不存在、dev 进程存在。紧接着连续发出两个已解析的 dev START action；第 5 秒和第 10 秒均为 `tun0` 存在、dev 进程存在。
+- 随后单独发出正确 dev STOP action；第 5 秒和第 10 秒均确认 `tun0` 不存在、dev 进程仍存在，恢复停止基线。全程未发送流量，未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。
+- 固定 `handleStartAction()` 在 `isRunningRequested()` 为真时返回；但本轮不读取 running request 的创建时间、协程调度、listener/core 次数或资源状态。因此只能证明该一轮重复 action 最终形成且可清理 TUN，不能声称请求严格幂等、仅发生一次启动或无泄漏。
+- XToolpro future `engine-proxy` 必须以单一串行的去重 command contract 处理冗余启动，并在返回成功前核验实际 TUN/core health；还须以无敏感字段的重复启动、rapid-start-stop、rapid-stop-start、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
