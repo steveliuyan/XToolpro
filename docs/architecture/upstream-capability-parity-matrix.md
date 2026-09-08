@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=36`、`Pending=47`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=37`、`Pending=46`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -128,7 +128,7 @@
 | 目标大小/质量压缩和尺寸控制 | `feature:resize-convert`、`core:data` | 压缩预览、估算和结果验证 | Pending |
 | 批量裁剪、缩放、重命名、转换、压缩、水印、滤镜 | batch/tool feature paths | 批量任务、单项重试和汇总 | Pending |
 | 拼图、长图、网格、图片叠加 | collage/composition feature paths | 布局编辑和输出 | Pending |
-| 前景/背景替换、擦除背景 | `feature:erase-background`、`lib:neural-tools` | 模型能力检测、离线处理和结果确认 | Pending |
+| 前景/背景替换、擦除背景 | `feature:erase-background`、`lib:neural-tools`、`core:data` | 模型能力检测、离线处理和结果确认 | Partial（静态）：固定 ImageToolbox `BgRemover` 覆盖 `RMBG1_4`、InSPyReNet、U2NetP/U2Net、BiRefNet、MODNet、ISNet 和 YOLO；U2NetP 从随 APK 的 `assets/u2netp.onnx` 提取，其余模型通过可注入 downloader 从固定 `HF_BASE_URL` 指向的 Hugging Face 路径下载到内部 `filesDir/ai_models`。通用下载器使用临时同级文件和原子 rename，失败/取消后删除临时文件；但每个背景模型的 `checkModel()` 仅把“文件存在且长度大于零”作为已下载，未绑定模型 ID、版本、预期长度或 SHA-256，随后会直接创建 ONNX session。固定源码没有这组模型的逐项许可证/provenance 清单，也没有把下载、校验、ONNX 加载或推理异常映射为稳定的 `Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`；UI 路径会将 `Throwable` 交给通用 failure toast。XToolpro 必须在允许下载或加载前锁定每个模型的来源、许可证、版本、大小与 SHA-256，下载到临时文件后校验再原子发布，并以可取消、脱敏且有界的 contract 分离 unavailable、cancel、load/crash、version mismatch；完成真实模型及五类契约测试前保持 `Partial` |
 | EXIF 查看/编辑/清除、颜色/尺寸信息、哈希 | `core:data`、metadata paths | 元数据策略、信息面板和校验 | Pending |
 | 取色器、调色板、曲线和颜色比较 | `feature:pick-color`、`lib:curves` | 取色、调色和编辑参数 | Pending |
 | 图片转 PDF、PDF 页面转图片 | PDF/tool feature paths | 文件转换任务和输出验证 | Pending |

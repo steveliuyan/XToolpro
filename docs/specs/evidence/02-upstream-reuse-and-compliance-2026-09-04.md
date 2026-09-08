@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=36`、`Pending=47`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=37`、`Pending=46`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1112,6 +1112,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 ytdlnis 的 `MkSession` 创建交互式 shell，并生成 Python、FFmpeg、Node、Deno、Aria2c 与 yt-dlp 的 shell functions；启用 `use_cookies` 时，yt-dlp function 会附带内部 Cookie 文件路径的 `--cookies` 参数。`TerminalFragment` 将用户选中的 command-template 或 shortcut 内容直接写入 session；`CommandTemplate` 以普通 Room entity 持久化完整内容，且可经剪贴板导入/导出。固定路径没有 command allowlist、结构化参数模型或逐次风险确认。
 - `TerminalItem` 与 `TerminalDao` 会在普通 Room 表中保存 command 和 terminal log；对该链路的针对性检索未见 URL、Cookie、令牌或输出的统一脱敏。因此通用交互 shell 既不是受限的 yt-dlp 参数接口，也不能在未隔离时安全继承用户会话边界。
 - 本轮只读固定隔离上游归档的 terminal、template 与 Room 源码；没有执行命令、读取真实终端输出、Cookie、URL、下载、日志、设备数据库或文件。该结论不声称任一命令可执行或曾发生泄露。future `engine-media` 如确需补充命令能力，必须采用独立受限环境、逐次明确授权、结构化允许参数、最小 SAF scope、可取消进程与默认脱敏输出；不得直接暴露上游通用终端或未审计模板。Media 矩阵相应项从 `Pending` 调整为 `Partial`，Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ImageToolbox 背景擦除模型完整性与失败边界静态审计（2026-09-08）
+
+- 固定 ImageToolbox `cb73d7a2e3094fb49e4d32cb07ad2903b62f8ac0` 的 `feature:erase-background` 依赖 `lib:neural-tools`；后者使用 ONNX Runtime 与 `aire`。`BgRemover` 枚举 RMBG1_4、InSPyReNet、U2NetP/U2Net、BiRefNet/BiRefNetTiny、MODNet、ISNet 与 YOLO。U2NetP 随 `lib:neural-tools/src/main/assets/u2netp.onnx` 交付并提取到内部目录；其余 remover 的 model path 由 `HF_BASE_URL`（Hugging Face `T8RIN/imagetoolbox-models`）与模型文件名构成，并经 `NeuralTool` 注入的 downloader 下载至 `context.filesDir/ai_models`。
+- `AndroidDownloadManager.download()` 使用同目录临时文件、下载完成后 `Os.rename` 原子替换目标，并在 failure/cancel 的 finally 路径删除临时文件。可是 `GenericBackgroundRemover.checkModel()` 只检查模型文件存在且长度大于零；下载后同样只调用该检查，未见绑定模型 ID、版本、预期长度或 SHA-256 的完整性校验。固定背景擦除路径中也未发现该模型集合的逐项许可证/provenance manifest。非空但错误或过期的模型会被视为已下载并直接交给 ONNX Runtime 创建 session。
+- `BgRemover.removeBackground()` 以 `runCatching` 返回结果，而 feature 的 `AndroidAutoBackgroundRemover` 把任意 failure 交给通用 `makeLog()`/failure toast；没有稳定区分网络不可用、用户取消、文件/版本不匹配和 ONNX load/inference crash 的 engine terminal result。该审计未发起模型下载、未加载模型、未处理图像，且未修改 SDK、缓存、上游归档或构建产物。
+- XToolpro future `engine-image` 必须锁定每个模型的来源、许可证、版本、大小与 SHA-256，下载至临时文件后校验再原子发布；以可取消、脱敏、有界的 contract 区分 `Unavailable`、`Cancelled`、`EngineCrashed` 与 `VersionMismatch`，并用真实模型完成五类场景。背景擦除矩阵项从 `Pending` 调整为 `Partial`；Image 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
