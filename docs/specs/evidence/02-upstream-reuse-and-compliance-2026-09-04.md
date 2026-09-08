@@ -1304,6 +1304,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `proxyDelayTest` 的失败日志模板包含代理名和原始异常对象；本轮未见稳定的 URL 脱敏、目标范围限制、请求与 task ID 绑定或逐节点 terminal receipt。静态路径不能据此断言任意 URL 一定泄露，也不能证明任意 URL 均被安全拒绝或仅访问用户预期目标。
 - 本轮只读复核固定源码与既有脱敏 proof；未发起新的网络请求、未运行测速、未读取日志/请求/配置/节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须默认禁止敏感 URL 进入日志/遥测，采用受控允许范围和稳定脱敏错误码，并在同一 fixture 下覆盖 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 及逐节点结果完整性；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，测速链接审计）
+
+- focused commit `7c3de45` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，统一延迟审计）
 
 - focused commit `eeb6c1a` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
