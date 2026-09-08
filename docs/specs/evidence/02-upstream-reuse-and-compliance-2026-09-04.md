@@ -1248,6 +1248,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅复核固定源码和既有只读系统入口证据；未写入 always-on/lockdown 设置、未重启设备、未杀进程、未触发 VPN revoke 或竞争 VPN，也未读取配置、通知、日志、请求、节点、订阅 URL、凭据、Cookie、数据库或设备文件。因此不能把系统设置入口可达或当前“未配置/未启用”状态当作该能力的 success proof。
 - future `engine-proxy` 必须把 always-on、lockdown、reboot、process death、service loss、VPN revoke 与竞争 VPN 分成可观察的 capability/health 状态；不支持或无法检测时返回脱敏 `Unavailable`，恢复意图和失败原因进入持久状态机，并以真实设备契约验证启动、断线阻止、恢复、取消、crash 与 version mismatch。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash always-on/lockdown 受限 ADB 停止基线复核（2026-09-09）
+
+- 仅执行 `adb devices`、目标包 `pidof`、`cmd appops get com.follow.clash.dev POST_NOTIFICATION`、`settings get secure always_on_vpn_app`、`settings get secure vpn_lockdown`，以及设备端计数命令 `dumpsys connectivity | grep -c 'VPN CONNECTED'`、`grep -c 'tun' /proc/net/dev`。设备 `bf353dda` 在线；`com.follow.clash.dev` 与 `com.steveliuyan.xtoolpro` 均无进程，`POST_NOTIFICATION` 为 `allow`，always-on/lockdown 均为 `null`，VPN 标记计数为 `0`，TUN 计数为 `0`。
+- `adb shell ip -o link show type tun` 被设备 shell 返回 `Permission denied`；`pm check-permission` 不是该设备 shell 的可用命令。未 root、未绕过权限、未读取完整 connectivity 输出或接口正文，不据此推断更多状态。
+- 本轮未写入 always-on/lockdown、未启动/停止/杀除应用、未重启设备、未触发 revoke 或竞争 VPN，也未读取配置、通知正文、日志、请求、节点、订阅 URL、凭据、Cookie、数据库、文件或流量内容。结果只是停止态状态复核，不构成 always-on、lockdown、reboot、process-death 或恢复 success proof；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，always-on 审计）
 
 - focused commit `8e2bb94` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
