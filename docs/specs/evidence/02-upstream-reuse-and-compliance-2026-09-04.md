@@ -924,6 +924,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅通过公开固定提交只读检索 `AppPlugin.kt` 完成；未下载、写入或修改上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须在每次 VPN 启动前重新基于系统授权状态作决定，不得用跨请求/跨撤销的 skip flag 替代权限结果；还需真机验证已允许后撤销、拒绝后重试、process recreation 与通知可见性，并将未授权状态收敛为脱敏、可恢复的未启动结果。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash VPN 授权等待期间 STOP 取消收敛静态审计（2026-09-08）
+
+- 固定 `ServiceState.start()` 在 `startPreparationLock` 内 await `prepareVpn()`。后者借 `suspendCancellableCoroutine` 把 `AppPlugin.prepareVpn()` 的 callback 转为 Boolean；只有该 coroutine 自身被取消时，才会调用 `AppPlugin.cancelVpnPreparation(callback)`。
+- `ServiceState.requestStop()` 不持有或取消正在执行的 start coroutine，只以新的停止 `RunRequest` 替换 token 后异步执行 stop。因此若 Android `VpnService.prepare()` 已展示/等待系统 consent，STOP 不会立即触发 `cancelVpnPreparation` 或完成原 start Deferred；等待会持续至系统 result、plugin detach 或其他上游完成。若 token 已失效，随后 `start()` 会在锁中拒绝继续启动，但这不是有界的 `Cancelled` completion，也不证明 consent UI 或调用方 loading state 已收敛。
+- 本轮仅只读审计固定公开 `ServiceState.kt` 与此前已读取的 `AppPlugin.kt`；未下载、写入或修改上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须以单一可取消 transaction 绑定通知权限、VPN consent、core setup 与 service start；STOP、detach 和 timeout 都必须令每个等待者一次性完成脱敏 `Cancelled`/`Unavailable`，再以真机验证 consent 等待期间的 STOP、deny/revoke、竞争 VPN、detach/recreate 与实际 TUN 清理。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
