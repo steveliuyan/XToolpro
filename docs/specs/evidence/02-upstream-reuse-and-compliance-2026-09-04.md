@@ -1266,6 +1266,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 更新失败路径会把原始异常传给 `commonPrint` 或批量更新 UI；本轮未见统一脱敏错误码、逐项结果、版本冲突处理或回滚 receipt。固定源码与真机入口能证明可达性，但不能证明 URL 下载成功后配置文件、标签、自动更新状态与数据库记录以原子方式提交，也不能证明删除/重命名失败时可恢复。
 - 本轮未发送订阅 URL、未写入剪贴板、未执行同步、重命名、删除或保存，未读取配置、日志、数据库、文件、凭据、Cookie 或设备内容。future `engine-proxy` 必须以显式用户确认和版本化 snapshot 执行更新，先校验再原子提交；删除/重命名需可回滚并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt 收敛。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash 竞争 VPN 与 establish 冲突处理静态审计（2026-09-09）
+
+- 固定启动链只通过 Android `VpnService.prepare()` 等待系统授权，再由 `VpnService.Builder.establish()` 取得 descriptor；未见 active VPN 查询、竞争 VPN 仲裁、保留原 VPN 的策略或独立 conflict capability。`ServiceController`/`ServiceState` 的运行状态由 service 调用和 request token 驱动，不以系统已有 VPN、TUN、core health 或流量回执作最终条件。
+- `Builder.establish()` 返回空或抛出时，底层 service 有 stop/异常传播路径，但 `ServicePlugin.start()` 仍可先向 MethodChannel 返回 `true`，且上层错误容易退化为原始异常或普通布尔失败；未发现稳定脱敏 `Unavailable`/`Cancelled` 分类来说明“竞争 VPN 占用”或恢复条件。该静态结论不推断 Android 系统在任意具体冲突场景的实际选择结果。
+- 本轮仅复核固定源码及既有停止态证据；未启动第二个 VPN、未修改系统 VPN、未发送流量、未读取系统 VPN 正文、日志、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在 prepare/establish 前后读取受限的系统能力摘要，显式区分 conflict、permission deny、unavailable、cancel 和 engine failure，保留其他 VPN 状态并以 TUN/health 回执确认最终结果；真实竞争 VPN、首次授权拒绝、取消、crash 与 version mismatch 契约完成前，Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`。
+
 #### 本检查点远端备份状态（2026-09-09，profile 生命周期审计）
 
 - focused commit `2762655` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
