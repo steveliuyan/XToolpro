@@ -1200,6 +1200,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 上游没有不可变成员快照、source/version/etag、成员授权决定或每成员状态/部分成功 receipt；成员变动时不提供一致性模型。archive 开启且 final paths 为空时仅显示“already exists”，不能稳定区分 archive skip、空产出、输出迁移失败或执行失败。playlist URL、标题、成员 metadata、filter 和 command 又会进入 Room/history/log 路径。
 - 本轮仅只读固定隔离上游的 parser、request builder、结果 DAO 和 worker 源码；未解析或访问任何真实播放列表、频道、媒体、URL、Cookie、日志或设备数据。future `engine-media` 必须在明确用户选择后持久化可审计成员快照与逐项状态，以脱敏稳定结果区分 skipped/success/failed/cancelled，并在真实 playlist/channel、增量、部分选择、成员变动、取消与版本错配上验证。完成前该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis 视频、音频、缩略图、字幕与元数据输出边界静态审计（2026-09-08）
+
+- 固定 `YTDLPUtil` 的结果解析读取 title、author、duration、thumbnail、chapters 与 available subtitles。构建下载请求时可组合 yt-dlp `--write-thumbnail`、`--convert-thumbnails`、`--write-description`、`--write-subs`、`--write-auto-subs`、`--embed-subs`、`--sub-format`、`--convert-subtitles`、`--sub-langs`、`--embed-thumbnail` 与 `--embed-metadata`；音频、视频路径还可分别配置缩略图/metadata 嵌入，故固定上游有有限的媒体及辅助输出请求能力。
+- `DownloadWorker` 的成功链仅从 stdout 中特定的 `/storage` 文本或 cache-to-destination 迁移返回值推导 `finalPaths`。随后它有意过滤 thumbnail container、subtitle format、`description` 和 `txt`，并只对首个剩余媒体路径读取大小、扩展名及 Android 媒体时长；若执行成功但没有可保留的媒体路径，仍会删除队列、发完成通知且不写历史。迁移异常仅展示/打印而继续后续路径，worker 总体仍返回 `Result.success()`；失败和取消没有逐输出的最终状态或可核验部分结果。
+- 固定路径未见视频/音频容器、编码、字幕内容、缩略图、description、嵌入 metadata 或副作用的 read-back、hash、原子发布、逐输出 terminal receipt 与 rollback。stdout、history、notification、log 与异常路径还可能携带标题、URL、路径、命令或原始错误，不能作为 XToolpro 的隐私安全合同。
+- 本轮只读固定隔离上游归档中的 parser、request builder 和 worker 源码；未运行 yt-dlp、FFmpeg 或媒体任务，未解析/下载任何 URL，未读写媒体、缩略图、字幕、metadata、日志、Cookie、设备数据或用户文件。future `engine-media` 必须以经用户确认的格式任务为单位，使用临时输出、逐输出 read-back 与原子提交；以脱敏、可持久的 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` receipt 覆盖媒体和每类辅助输出。完成真实设备格式/输出、部分成功、取消/失败清理与隐私验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
