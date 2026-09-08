@@ -1353,6 +1353,16 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `Core.kt` 无条件调用 `System.loadLibrary("core")`。`UnsatisfiedLinkError`、`ExceptionInInitializerError` 等 `LinkageError` 未被 service 的 `catch (Exception)` 明确映射，外层可能只得到泛化的 `0L`/`false`；fallback 又可能不抛错且不回调 `quickSetup`，造成静默假成功或无界等待。固定路径没有稳定脱敏的 `VersionMismatch`、`EngineCrashed`、加载/符号失败、健康超时或 terminal receipt。
 - 本轮仅做固定源码与既有校验记录的静态复核，未构建、加载、替换或删除 native artifact，未读取 SDK、缓存、构建产物、配置、日志或任何敏感数据，未使用 ADB。future `engine-proxy` 必须在配置写入、导出或 VPN 请求前核验受签名 manifest 的 commit/API/ABI/bridge/symbol/hash；任一缺失、错配或不一致立即阻止启动并返回脱敏 `Unavailable`/`VersionMismatch`，加载/回调/运行健康失败分别返回 `EngineCrashed` 或 `Unavailable`。实际完整 core 与刻意缺失/错配 artifact 的五类隔离契约测试尚未执行，保持 `Partial`、Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash 停止时事件队列 drain/drop 与 listener 解绑顺序静态复核（2026-09-09）
+
+- 固定 `core/message.go` 在包初始化时启动常驻 batcher；priority 与 bulk 两个 256 容量 channel 只按类别丢弃最旧事件，未提供 stop/close、drain、drop count 或 flush receipt。batcher 仅在两个输入 channel 都关闭后退出，而固定 `stopTun()`/`handleStopListener()` 路径没有关闭这些全局 channel 的动作，因此停止 core listener 不等于停止事件生产或清空排队消息。
+- 固定 `core/lib.go` 的 `stopTun()` 先关闭 TUN，再在 `isRunning` 时调用 `handleStopListener()`；`setEventListener(nil)` 则释放旧 JNI global reference 并立即覆盖指针。`sendMessageBatch()` 在另一条 batcher goroutine 中直接读取 `eventListener`，未见锁、引用快照、in-flight 等待或与 release 的顺序屏障；停止/解绑期间存在回调读取旧指针、丢弃批次或释放后仍尝试投递的未建模窗口。该静态风险不推断设备已发生崩溃或回调竞态。
+- 本轮仅只读复核固定提交的 `core/message.go`、`core/lib.go` 与既有证据，未构建、注入故障、启动/停止 VPN 或读取日志/请求正文、配置、节点、订阅 URL、凭据、Cookie、数据库、文件或设备内容，未使用 ADB。future `engine-proxy` 必须把停止建模为可等待事务：先阻止新事件，再有界 drain/drop 并返回计数，解绑 listener 后等待 in-flight callback，最后确认 TUN/core 停止；无法完成时返回脱敏 `Cancelled`/`EngineCrashed`/`Unavailable`，不得以 MethodChannel `true` 或 `STOPPED` 状态替代 terminal receipt。实际队列故障注入和五类隔离契约测试尚未执行，保持 `Partial`、Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
+#### 本检查点远端备份状态（2026-09-09，停止事件队列审计）
+
+- 本次 focused commit（当前 `HEAD`）尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，native core/bridge 配对审计）
 
 - 本次 focused commit（当前 `HEAD`）尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
