@@ -1415,6 +1415,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `lib/models/common.dart:637-660` 的 `Script.content` 会整体读取内部 JS 文件；`save()` 使用普通 `writeAsString()` 覆盖，`saveWithPath()` 调用 `File(copyPath).copy(copyPath)` 将源路径复制到自身，疑似无法导入。两条保存路径均未见原子写入、fsync、read-back、大小/hash/版本绑定或失败回滚。未执行脚本、未读取设备文件/配置、未使用 ADB；结论仅限固定源码静态边界。
 - future `engine-proxy` 必须在受限 runtime 中绑定脚本来源、版本和 hash，预检输入大小与 schema，禁止未授权网络/文件/环境访问，支持有界 timeout/cancellation，归一化并脱敏错误；脚本失败、取消、runtime 崩溃、版本错配及配置发布失败都必须清理临时状态并返回可持久的 terminal receipt。完成受控 fixture 与五类契约测试前，矩阵新增脚本覆写行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash URL profile 自动更新调度与失败收敛边界静态审计（2026-09-09）
+
+- 固定 `lib/application.dart:86-90` 只在 Flutter application 完成 attach 后建立固定 20 分钟的 one-shot `Timer`；callback 必须先完整等待 `autoUpdateProfiles()`，再递归安排下一轮。未见 WorkManager/Alarm、持久化 next-run、网络约束、跨进程恢复或 `finally` 重排程，因此进程死亡、detach 或 callback 外层异常都可能让后续自动更新静默停止；`dispose()` 仅取消当前 timer。
+- 固定 `lib/providers/actions/profiles.dart:36-50` 顺序遍历当前 profile 快照，依据 `autoUpdate`、`lastUpdateDate + autoUpdateDuration` 和 URL 类型筛选，每项调用 `updateProfile()` 没有取消令牌、超时、并发去重、条件请求/版本冲突或逐项 terminal receipt；异常原文直接写入 warning log。`updateProfiles()` 的批量路径同样顺序 await，未提供部分成功/失败汇总。
+- 固定 `profiles.dart:66-84` 的 `updateProfile()` 先把旧 profile 放回 provider，再调用网络 `Profile.update()`；后者拉取响应后执行 `saveFile()`，成功后才返回更新元数据。文件提交与 provider/数据库更新不在同一事务，进程中断、文件复制成功但元数据写回失败等中间态没有恢复标记或回滚。既有 `saveFile()` 的临时文件清理、原子发布和校验边界缺口会叠加到自动更新路径。
+- 本轮只读固定隔离归档源码与既有证据，未发送订阅 URL、未执行更新、未读取配置/日志/数据库/文件/凭据/Cookie/设备内容，未使用 ADB。future `engine-proxy` 必须以持久化任务状态机记录 next-run、in-flight、cancelled、部分成功和失败原因，使用有界网络/文件事务、条件版本或 snapshot 校验、原子发布与回滚，并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt 收敛每个 profile；真实调度、取消、进程重建、网络失败和版本冲突契约完成前，矩阵订阅生命周期行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，脚本覆写审计）
 
 - focused commit `c3aa4af` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
