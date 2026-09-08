@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=40`、`Pending=43`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=46`、`Pending=37`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1159,6 +1159,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `YTDLUpdater` 从 stable/nightly/master release API 的 JSON 读取 tag 和按 asset name 匹配的 `browser_download_url`，将文件下载到 `cacheDir` 临时文件。它不验证下载资产的 SHA-256、签名、长度、provenance 或运行时兼容性；安装时先删除现有 yt-dlp 目录、再新建并复制临时文件，非 staging 校验后的原子切换。复制失败会删除目录并调用 `initYTDLP()` 恢复内置 resource，但不保留/验证上一已知可用的已更新版本；版本标签/名称仅写入 SharedPreferences。
 - `RuntimeManager` 会把 `IOException` 包装为带原始原因的 `ExecuteException`，`YTDLUpdater.fetchJsonFromUrl()` 直接记录 exception；不存在稳定的 unavailable、cancel、bad asset/version mismatch、native/process crash 或 rollback result。Python/FFmpeg/Aria2c/Node/Deno/QuickJS 的实际下载/更新 artifact 在本轮没有解析或运行，因此不能用 yt-dlp updater 推断它们的供应链闭包。
 - 本轮仅只读固定隔离源码和 Gradle 声明，未请求 release API、下载/执行/更新 runtime、读取日志、URL、媒体、Cookie、设备文件或构建 artifact。future `engine-media` 必须对每个实际 ABI/runtime 使用签名或 SHA-256 锁定 manifest、来源、许可证、兼容矩阵及 SBOM；在隔离 staging 校验后原子发布，保留可验证 last-known-good rollback，并以脱敏、可取消 contract 覆盖 success、unavailable、cancel、crash、version mismatch。该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ytdlnis 下载任务并发、终止、恢复与重试边界静态审计（2026-09-08）
+
+- 固定 ytdlnis `DownloadRepository.startDownloadWorker()` 用时间戳作 unique work 名，并以 `ExistingWorkPolicy.REPLACE` 提交 tagged `DownloadWorker`；worker 在前台运行，从 Room 读取 `Queued/Active/Paused/Error/Cancelled` 状态。`concurrent_downloads` 限制本轮可启动数量，设置下载间隔时以 mutex 串行化；但同一队列没有稳定、持久的批次标识或逐项 completion receipt，`REPLACE` 也不是完整并发/排队结果模型。
+- 用户级暂停、恢复与取消确有有限实现：暂停/取消 receiver 和 ViewModel 会取消 tagged work、通过内存 `RuntimeManager.idProcessMap` 尝试终止子进程，再异步改写 Room 状态；恢复把 paused 项重置为 queued 后重新排队。该 map 不持久化，进程死亡、重启或 map 缺项时无法归因；receiver/worker 多处 `runCatching` 吞掉异常，暂停全部依赖一秒延时后写状态，取消/暂停没有可持久验证的进程终止、数据库写入和输出清理 completion receipt。
+- `YTDLPUtil.buildYTDLRequest()` 可向 yt-dlp 传递用户设置的 `--retries` 与 `--fragment-retries`，且默认不加 `--no-part`；然而任务开始时和 failure 路径均直接删除 cache 输出目录。worker 对某一下载失败标为 `Error` 后自身仍整体返回 `Result.success()`；取消类异常直接返回而不收敛逐项状态。恢复路径不做已产出文件的 read-back、hash/容器完整性或部分成功核验。命令、URL 和原始异常还能进入 log/notification 相关路径，不能作为 XToolpro 的隐私安全合同。
+- 本轮仅只读固定隔离上游归档中的 Worker、Room repository/viewmodel、receiver、runtime 和 request-builder 源码；未执行下载、请求、命令、媒体处理、文件操作、日志读取、Cookie/session 访问或设备操作。future `engine-media` 必须提供可持久化的每项状态机及终止 receipt，以脱敏、稳定的 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 收敛并发、暂停、恢复、取消、重试和断点；还须在真机验证真实断点、输出完整性、部分成功和进程重启恢复。该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 

@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=43`、`Pending=40`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=46`、`Pending=37`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -104,7 +104,7 @@
 | 嵌入封面/字幕、元数据写入、时间裁剪 | FFmpeg/yt-dlp | 后处理选项和结果验证 | Pending |
 | Cookie 文件、浏览器 Cookie、登录会话 | `app/` session flow | 加密本地存储、撤销、删除和授权提示 | Partial（静态）：固定 ytdlnis `CookieItem` Room entity 直接保存 `url`、`content`、`description` 与 enabled 标记；`DBManager` 使用普通 `Room.databaseBuilder`，对固定源码/Gradle 的针对性检索未见 SQLCipher、EncryptedSharedPreferences 或 Android Keystore 的 Cookie 数据库保护。`CookieViewModel.updateCookiesFile()` 将启用项组合为 Netscape 格式并写入 `context.cacheDir/cookies.txt`，解析/下载与终端路径在 `use_cookies` 为真时把该文件路径传给 yt-dlp `--cookies`。同一 ViewModel 可将全文读入系统剪贴板或复制到导出目录；设置备份序列化全部 Cookie entity 为 JSON。删除全部 Cookie 会删除 Room 行并把当前缓存文件写空，但固定代码没有涵盖已复制到剪贴板、导出或备份文件的撤销/安全擦除。该审计未导入、读取或使用真实 Cookie/session，不能据此断言特定设备上的文件权限或泄露。XToolpro 必须以 Keystore 绑定的加密 vault 保存会话，仅在短生命周期、最小权限内部文件中生成受控 yt-dlp 输入；默认禁止原始 Cookie 的日志、剪贴板和通用备份/导出，并将授权、删除、撤销及遗留文件清理纳入有界、可验证 contract。在真机授权 session、加密/删除/恢复和隐私审查完成前保持 `Partial` |
 | 用户授权的私有、付费和高级格式 | yt-dlp authenticated path | 会话任务；仅限用户有权访问内容 | Pending |
-| 并发、暂停、恢复、取消、重试、断点 | WorkManager、Room、task flow | 持久任务状态机和通知 | Pending |
+| 并发、暂停、恢复、取消、重试、断点 | `DownloadWorker.kt`、`DownloadRepository.kt`、`DownloadViewModel.kt`、`RuntimeManager.kt`、notification receivers、yt-dlp request | 持久任务状态机和通知 | Partial（静态）：固定 ytdlnis 有 Room `Queued/Active/Paused/Error/Cancelled` 状态、前台 `DownloadWorker`、`concurrent_downloads` 上限及延迟时的单任务 mutex；每次 start 以时间戳为唯一 work 名、`ExistingWorkPolicy.REPLACE` 入队，暂停/恢复/取消会分别取消 tagged work、终止内存 process map 中的子进程并改写 Room 状态。请求可传入 yt-dlp `--retries`、`--fragment-retries`，默认可保留 `.part`，但 cache 输出目录在任务开始和失败时均直接删除；Worker 对单个下载失败最终仍返回 `Result.success()`，并且 worker/receiver 多处吞异常或仅以 1 秒延时改写状态。进程 map 不持久化，进程死亡后不能据此归因；取消/暂停没有持久 completion receipt，恢复没有输出 read-back、文件完整性或部分成功收敛，且 error/log/notification 路径可携带原始异常或命令/URL。XToolpro 必须采用可持久化的任务状态机和每项 terminal receipt，以稳定脱敏结果区分 success、unavailable、cancel、crash、version mismatch；真实断点、并发、恢复、取消、重试及输出完整性验证完成前保持 `Partial` |
 | 命名/路径模板、冲突策略、按列表分目录 | `app/` settings/template flow | 模板预览、SAF 输出和原子提交 | Pending |
 | 历史、取消记录、备份恢复 | Room、设置/备份路径 | 任务历史和可恢复快照 | Pending |
 | 后台通知、完成动作、开机恢复 | WorkManager、intent entry | 后台任务和恢复策略 | Pending |
