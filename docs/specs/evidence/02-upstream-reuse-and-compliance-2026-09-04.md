@@ -1299,6 +1299,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读复核固定源码与既有脱敏状态证据，未启动/停止 VPN、未切换系统代理、未发送流量、未读取配置、请求、日志、通知、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未使用 ADB。future `engine-proxy` 必须把 system-proxy 注入、应用遵循、绕过域名和撤销分别建模，在 API 不支持、设置失败、冲突、取消、crash 与 version mismatch 时返回脱敏 terminal receipt。
 - 完成受控 API 版本、应用类型、绕过域名和停止撤销契约测试前，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash external controller 管理面鉴权与监听边界静态复核（2026-09-09）
+
+- 固定 Clash.Meta external controller 使用独立 HTTP 管理 listener，并在 controller 路径挂接 authentication middleware；该管理面与 mixed HTTP/SOCKS5 proxy listener 分离，不能用 controller 的鉴权实现证明代理入站已鉴权。
+- 固定 Android bridge 未提供 controller bind scope、secret 轮换、权限分级、管理 API capability/health 查询或停止时的 controller listener 回执。配置模型中的 `authentication`/secret 字段存在，不等于固定 Android 包已启用、已安全存储或已覆盖所有管理方法。
+- 本轮仅复核固定源码与既有脱敏证据，未连接 controller、未发送管理请求、未读取 secret、配置、节点、订阅 URL、凭据、Cookie、日志、数据库或设备文件，未使用 ADB。future `engine-proxy` 必须默认将管理面限制为 loopback，采用 Keystore 保护的 secret、最小权限 API、明确轮换/撤销和独立健康回执；管理面不可用、鉴权拒绝、端口冲突、取消、crash 与 version mismatch 均需脱敏 terminal receipt。
+- 在 controller 与 mixed 入站分别完成 bind、鉴权、权限、停止清理和异常契约测试前，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 ### FlClash 查找进程模式与请求归因边界静态审计（2026-09-09）
 
 - 固定 `FindProcessItem` 仅把 UI 开关映射为 `FindProcessMode.always/off`，再经 `UpdateParams.findProcessMode` 写入 `find-process-mode`；该路径没有 per-request attribution result、能力探测、权限/不可用分类、性能预算或回滚 receipt。开关持久化不等于 Clash.Meta 已完成进程识别。
