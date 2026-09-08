@@ -1095,6 +1095,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - STOP 与系统 VPN 标记从 1 收敛到 0 相符，但操作前已没有任何 TUN 类型接口，故不能把这次结果表述为实际 TUN 清理成功，也不能归因于某一 UI、permission、service 或 native core 分支。它进一步说明系统 VPN 标记、进程存活、权限允许和 TUN/engine health 是彼此独立的回执层级。
 - 本轮没有读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容；没有修改配置、生成流量或进入 engine 集成。future `engine-proxy` 必须只在可归因的 TUN 与独立健康回执均满足时产生 `Success`，其余情况在有界 deadline 内返回稳定、脱敏的 terminal result。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### 已授权 START→STOP action 的 TUN 配对复核（2026-09-08）
+
+- 在同一小米 10S（`bf353dda`，API 33）停止基线下，受限汇总为 `vpn_connected_markers=0`、`tun0=0`、dev 进程 `1`、UID `POST_NOTIFICATION=allow`。向已解析 dev component 发送 `com.follow.clash.dev.action.START` 后等待 7 秒，汇总为 `vpn_connected_markers=1`、`tun0=1`、dev 进程仍为 `1`、app-op 不变；随即发送同一 component 的 STOP action，7 秒后为 `vpn_connected_markers=0`、`tun0=0`、dev 进程仍为 `1`、app-op 不变。
+- 为避免将受限读操作失败误记成阴性结果，曾尝试的 TUN 类型总数查询返回权限错误，未纳入本轮结果；本证据只依赖无内容的 `tun0` 存在性检查。该配对支持“本次正确 action 可建立并清理 TUN”的有限结论，但不能以 VPN 标记、进程或 notification app-op 替代 native health/readiness，也不能证明 core health、可转发性、通知可见性或实际 permission callback。
+- 本轮没有读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容；没有修改配置、生成流量或进入 engine 集成。future `engine-proxy` 仍须以可归因的 TUN 与独立、脱敏 health handshake 共同决定 `Success`，并覆盖五类 terminal result；矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
