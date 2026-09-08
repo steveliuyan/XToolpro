@@ -1101,6 +1101,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 为避免将受限读操作失败误记成阴性结果，曾尝试的 TUN 类型总数查询返回权限错误，未纳入本轮结果；本证据只依赖无内容的 `tun0` 存在性检查。该配对支持“本次正确 action 可建立并清理 TUN”的有限结论，但不能以 VPN 标记、进程或 notification app-op 替代 native health/readiness，也不能证明 core health、可转发性、通知可见性或实际 permission callback。
 - 本轮没有读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容；没有修改配置、生成流量或进入 engine 集成。future `engine-proxy` 仍须以可归因的 TUN 与独立、脱敏 health handshake 共同决定 `Success`，并覆盖五类 terminal result；矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### ytdlnis Cookie/session 本地存储与导出边界静态审计（2026-09-08）
+
+- 固定 ytdlnis `13320bb64f35c8d04f01bebfa782d7947758fb66` 的 `CookieItem` 是含 `url`、`content`、`description`、enabled 的普通 Room entity；`DBManager` 以 `Room.databaseBuilder(..., "YTDLnisDatabase")` 创建数据库。对 app 源码和 Gradle 的针对性检索未发现 SQLCipher、EncryptedSharedPreferences 或 Keystore 对 Cookie 数据库的保护。
+- `CookieViewModel.updateCookiesFile()` 将所有已启用 Cookie 组合为 Netscape 文本并写入内部 `cacheDir/cookies.txt`；`YTDLPUtil` 和 terminal 会话在 `use_cookies` 开启时将该路径作为 yt-dlp `--cookies` 参数。该 ViewModel 还可以读取该文件至系统剪贴板，或复制到导出目录；`BackupSettingsUtil.backupCookies()` 将实体序列化入 JSON 备份。用户确认删除全部 Cookie 时，固定 UI 会删除 Room 行并将当前 cache 文件写空，但源码不为先前的剪贴板、导出或备份副本提供撤销/安全擦除合同。
+- 本轮仅只读固定隔离上游归档的模型、Room、Cookie、备份与调用路径；未使用、导入、读取或输出任何真实 Cookie/session、私有内容、URL、下载、日志、设备数据库或文件。该结论不能断言任一设备上实际文件权限或数据泄露。future `engine-media` 必须使用 Keystore 绑定的加密会话 vault，只在短生命周期内部文件生成最小 yt-dlp 输入，默认禁止原始 Cookie 进入日志、剪贴板、通用备份或导出；删除、撤销、恢复和授权 session 都需独立脱敏 contract。Media 矩阵相应项从 `Pending` 调整为 `Partial`，Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。

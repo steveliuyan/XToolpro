@@ -102,7 +102,7 @@
 | 容器、编码、分辨率、帧率、音质、语言选择 | yt-dlp format selection | 格式选择器和能力提示 | Pending |
 | 音视频合并、音频提取、转码 | FFmpeg | 后处理任务、取消和恢复 | Pending |
 | 嵌入封面/字幕、元数据写入、时间裁剪 | FFmpeg/yt-dlp | 后处理选项和结果验证 | Pending |
-| Cookie 文件、浏览器 Cookie、登录会话 | `app/` session flow | 加密本地存储、撤销、删除和授权提示 | Pending |
+| Cookie 文件、浏览器 Cookie、登录会话 | `app/` session flow | 加密本地存储、撤销、删除和授权提示 | Partial（静态）：固定 ytdlnis `CookieItem` Room entity 直接保存 `url`、`content`、`description` 与 enabled 标记；`DBManager` 使用普通 `Room.databaseBuilder`，对固定源码/Gradle 的针对性检索未见 SQLCipher、EncryptedSharedPreferences 或 Android Keystore 的 Cookie 数据库保护。`CookieViewModel.updateCookiesFile()` 将启用项组合为 Netscape 格式并写入 `context.cacheDir/cookies.txt`，解析/下载与终端路径在 `use_cookies` 为真时把该文件路径传给 yt-dlp `--cookies`。同一 ViewModel 可将全文读入系统剪贴板或复制到导出目录；设置备份序列化全部 Cookie entity 为 JSON。删除全部 Cookie 会删除 Room 行并把当前缓存文件写空，但固定代码没有涵盖已复制到剪贴板、导出或备份文件的撤销/安全擦除。该审计未导入、读取或使用真实 Cookie/session，不能据此断言特定设备上的文件权限或泄露。XToolpro 必须以 Keystore 绑定的加密 vault 保存会话，仅在短生命周期、最小权限内部文件中生成受控 yt-dlp 输入；默认禁止原始 Cookie 的日志、剪贴板和通用备份/导出，并将授权、删除、撤销及遗留文件清理纳入有界、可验证 contract。在真机授权 session、加密/删除/恢复和隐私审查完成前保持 `Partial` |
 | 用户授权的私有、付费和高级格式 | yt-dlp authenticated path | 会话任务；仅限用户有权访问内容 | Pending |
 | 并发、暂停、恢复、取消、重试、断点 | WorkManager、Room、task flow | 持久任务状态机和通知 | Pending |
 | 命名/路径模板、冲突策略、按列表分目录 | `app/` settings/template flow | 模板预览、SAF 输出和原子提交 | Pending |
