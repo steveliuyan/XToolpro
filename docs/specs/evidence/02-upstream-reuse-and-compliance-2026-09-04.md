@@ -867,6 +867,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `handleStartAction()` 在 `isRunningRequested()` 为真时返回；但本轮不读取 running request 的创建时间、协程调度、listener/core 次数或资源状态。因此只能证明该一轮重复 action 最终形成且可清理 TUN，不能声称请求严格幂等、仅发生一次启动或无泄漏。
 - XToolpro future `engine-proxy` 必须以单一串行的去重 command contract 处理冗余启动，并在返回成功前核验实际 TUN/core health；还须以无敏感字段的重复启动、rapid-start-stop、rapid-stop-start、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 重复 STOP 请求真机验证（2026-09-08）
+
+- 通过已解析的 dev START action 建立运行态；第 7 秒仅确认 `tun0` 存在、dev 进程存在。随后连续发出两个正确 dev STOP action；第 5 秒和第 10 秒均为 `tun0` 不存在、dev 进程存在。
+- 本轮最终恢复停止基线。全程未发送流量，未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。
+- 固定 `handleStopAction()` 在 `isRunningRequested()` 为假时返回；本轮没有读取 running request 的清除时机、service/core stop 次数、callback 或资源销毁状态。因此只能证明此轮实际 TUN 最终清理，不能声称两条 STOP 严格幂等、各自均完成或不存在重复释放风险。
+- XToolpro future `engine-proxy` 必须以单一串行的停止 contract 合并冗余 STOP，并在回报停止前核验实际 TUN/core health；还须以无敏感字段的重复停止、rapid-start-stop、rapid-stop-start、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试覆盖。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash dev 快速双 TOGGLE 停止态收敛真机验证（2026-09-08）
 
 - 停止基线仅确认 `tun0` 不存在、dev 进程存在。紧接着连续发出两个已解析的 dev TOGGLE action；第 5 秒和第 10 秒均为 `tun0` 不存在、dev 进程存在。
