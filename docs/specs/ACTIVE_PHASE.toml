@@ -1,0 +1,6 @@
+phase = "02"
+status = "Investigating"
+spec = "02-upstream-reuse-and-compliance.md"
+
+# Update this file when the active phase changes. The phase spec remains the
+# authoritative source for acceptance criteria and required evidence.
