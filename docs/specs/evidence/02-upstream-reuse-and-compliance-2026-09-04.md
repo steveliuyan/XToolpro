@@ -1272,6 +1272,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `Builder.establish()` 返回空或抛出时，底层 service 有 stop/异常传播路径，但 `ServicePlugin.start()` 仍可先向 MethodChannel 返回 `true`，且上层错误容易退化为原始异常或普通布尔失败；未发现稳定脱敏 `Unavailable`/`Cancelled` 分类来说明“竞争 VPN 占用”或恢复条件。该静态结论不推断 Android 系统在任意具体冲突场景的实际选择结果。
 - 本轮仅复核固定源码及既有停止态证据；未启动第二个 VPN、未修改系统 VPN、未发送流量、未读取系统 VPN 正文、日志、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在 prepare/establish 前后读取受限的系统能力摘要，显式区分 conflict、permission deny、unavailable、cancel 和 engine failure，保留其他 VPN 状态并以 TUN/health 回执确认最终结果；真实竞争 VPN、首次授权拒绝、取消、crash 与 version mismatch 契约完成前，Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`。
 
+### FlClash TUN、系统代理与局域网监听范围静态审计（2026-09-09）
+
+- 固定路径将 Android `VpnService.Builder.establish()` 的 TUN 生命周期与 core mixed proxy 监听分开处理；“局域网代理”开关改变监听范围，关闭态只保留 loopback，开启态允许 wildcard `:7890`。停止路径可撤销该监听，但未见独立的 LAN 客户端 allowlist、认证策略、UDP 能力声明或跨设备健康回执。
+- 既有真机 proof 仅覆盖本机 `127.0.0.1:7890` 的 HTTP/SOCKS5 TCP 请求和有限并发，以及开关前后的监听计数；未从其他局域网设备连接，也未验证鉴权、跨网段防火墙、UDP、性能、异常关闭或端口复用。wildcard 监听表示网络暴露面扩大，不能直接视为安全共享成功。
+- 本轮只读复核固定源码和既有脱敏计数证据；未启动/停止 VPN、未切换局域网开关、未发送流量、未读取代理配置、节点、请求/响应、日志、通知、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在显式确认后声明 bind scope、认证和协议能力，默认 loopback，针对 LAN 暴露提供风险/不可用状态，并以停止清理、跨设备受控 fixture、UDP/冲突/取消/crash/version mismatch 契约验证。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，VPN 冲突审计）
 
 - focused commit `f47e736` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
