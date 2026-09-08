@@ -1318,6 +1318,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机 proof 只确认 allow-bypass 开关可跨进程保留，并在关闭态建立/停止过 TUN；当时没有可用应用列表，也未选择应用、读取清单、发送按应用流量或读取路由/请求字段。因此不能把 `QUERY_ALL_PACKAGES` 声明、系统 API 调用或 TUN 存在当作任一应用已按预期代理/绕过的证明。
 - 本轮只读复核固定源码与既有脱敏证据，未读取应用清单、包名、标签、权限、配置、日志、请求、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未切换 bypass 或路由设置。future `engine-proxy` 必须在用户进入该流程后最小化且仅内存内处理应用标识，使用版本化选择快照和可撤销 apply，逐项以脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 收敛；受控 fixture 还需覆盖权限缺失、空/失败列表、安装包变化、取消、崩溃与实际 bypass 路由。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，按应用 bypass 审计）
+
+- focused commit `b9a4b96` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，DNS/IPv6 审计）
 
 - focused commit `48c4606` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
