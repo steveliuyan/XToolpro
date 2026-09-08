@@ -1260,6 +1260,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定模块实际只有 Android library 壳、`implementation(project(":core-model"))` 和空 manifest；没有 Kotlin/Java adapter、native/FlClash 依赖、公开 contract、版本/健康 handshake、任务状态模型或测试源。只读 `Get-FileHash -Algorithm SHA256` 结果为：计划 `20161EFB1E7DFCA70CD31F88CA504328E172B0E534D7275F05E038D1E3BC77F6`，Gradle `5A152141FE75A58515AC09C45ED9A6EEB623767CCB44BF25C4299CE0E7D2CC65`，manifest `571F2735FAF5E857752EE057AC8EF63425576A721616C60B86EE5D4C0A2D682F`，`ModuleId.kt` `80B8B427F487858772F3D9FBEFD3878BDD7855AD4AFDB0FDD06628E87B0610ED`。
 - 本轮未读取或纳入任何 `build/` 产物、SDK、缓存、上游源码归档、凭据或设备数据，也未运行契约测试、构建 adapter、注入故障或启动 VPN。结论是计划与模块源码闭包不完整，不构成任何五类结果执行证据；future `engine-proxy` 必须先提供版本化公开 contract、签名 provenance/health manifest、可取消任务状态机和隔离 success/unavailable/cancel/crash/version-mismatch 测试，再由真实 FlClash proof 绑定。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，契约闭包审计）
+
+- focused commit `7c111b7` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，ADB 基线）
 
 - focused commit `1656a16` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
