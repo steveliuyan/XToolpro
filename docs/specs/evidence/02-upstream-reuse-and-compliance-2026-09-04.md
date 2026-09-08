@@ -903,6 +903,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅静态读取隔离归档；未触发缺库、错 ABI 或崩溃，未修改 SDK、缓存、上游源码归档或构建产物，也未使用 ADB。该审计不声称任何特定设备已发生上述情况。
 - XToolpro future `engine-proxy` 必须先验证受签名 native manifest，再以限定 timeout 包装初始化/回调和健康握手；将 hash/ABI/API/commit 不一致映射为 `VersionMismatch`，缺失组件映射为 `Unavailable`，加载、符号或运行健康失败映射为 `EngineCrashed`，在任何配置写入、导出或 VPN 请求前拒绝执行。仍需隔离的完整/缺失/错配 artifact 契约测试和真机健康回执；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android ABI 构建面与逐 ABI 验证边界静态审计（2026-09-08）
+
+- 固定 `plugins/setup/buildkit/build_tool` 的 `Target` 定义三个 Android c-shared 目标：`armeabi-v7a`、`arm64-v8a`、`x86_64`；未传 `--arch` 或 `--target-platform` 时会选中全部三个。`plugins/setup/buildkit/gradle/plugin.gradle` 将 Go core task 设为 `:core` 的 CMake configure、external native build 与 merge native libs 的前置依赖，说明这是原生桥接的构建输入链，而不是 Flutter APK split 的单独展示设置。
+- `setup.dart` 同时启用 Android `split-per-abi`，并允许请求单一 arm/arm64/amd64 目标。这表示发布策略可减少单个 APK 的 ABI 范围，但不允许把一个 ABI 的 `libclash.so`、生成头、bridge 或健康结果外推为其他已发布 ABI 已验证。
+- 本地固定归档仍只观察到 `arm64-v8a` 的 `libclash.so`、`libclash.h` 与 `bride.h`；本轮未构建、修改、复制或删除任何上游/SDK/缓存/产物。因而只能确定上游源码声明的三 ABI 构建面，不能声称另外两种 ABI 的实际产物、符号集、hash、安装或设备行为已通过。
+- XToolpro future `engine-proxy` 的受签名 native manifest、artifact hash、符号/健康握手、版本不匹配拒绝和回滚均必须逐个已发布 ABI 执行；未纳入发布的 ABI 应明确 `Unavailable`，不得回落到空 JNI bridge。仍需在各支持 ABI 的隔离构建和目标设备上运行完整/缺失/错配 artifact 的五类契约测试；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
