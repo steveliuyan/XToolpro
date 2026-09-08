@@ -1332,6 +1332,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机 proof 仅确认请求页/连接页入口和脱敏计数，不读取任何连接正文、地址、应用或规则字段；本轮未执行关闭、停止、重启、导出或搜索行为。因此不能把 UI 可达性或列表计数当作字段安全、清理完成或关闭成功证明。
 - 本轮只读复核固定源码与既有证据，未读取请求/连接、日志、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未发起流量。future `engine-proxy` 必须默认关闭诊断、按字段最小化并提供用户清除；单条/批量关闭和 stop/restart 清理需 await、可重试且能报告部分失败，所有结果使用脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt。完成字段、搜索、清理与关闭契约测试前，Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash 日志、请求事件与崩溃诊断导出边界静态审计（2026-09-09）
+
+- 固定 core log/request/crash 事件经容量 256、批量 32 的 bulk queue 投递，满载丢弃同类最旧事件；无 listener 时整批丢弃，有 listener 时 JSON 序列化后回调 Dart。该策略没有对 XToolpro 暴露队列深度、丢弃计数、drain completion 或 crash terminal receipt。
+- `openLogs` 仅控制 core log capture；app attach 后 `commonPrint` 仍写入 `debugPrint` 和最多 500 项内存日志，日志页可显示可选择正文并将全部 `Log.toString()` 交给 SAF 导出。请求详情仍可能携带 process、host、源/目的地址、规则 payload、DNS、代理链等字段，固定路径未见统一字段脱敏层。
+- 固定 Android 模块引用 Firebase Analytics/Crashlytics NDK；虽然 Dart 默认关闭 collection，启动时的“上次崩溃”查询仍初始化 Firebase，manifest 未提供静态默认禁用声明。未发现直接把 URI/配置交给 Crashlytics 的调用，但静态路径不足以证明 SDK 未自动采集或上传。
+- 本轮只读复核固定源码与既有证据，未触发 crash、未导出日志、未读取 logcat、日志/请求/规则正文、通知、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未发起网络请求。future `engine-proxy` 必须默认不初始化/不上传第三方遥测，按字段最小化并以稳定错误码区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`；日志队列需可核验 drain/drop，崩溃与导出需逐项 terminal receipt。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，请求详情审计）
 
 - focused commit `58ddd9d` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
