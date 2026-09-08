@@ -1603,6 +1603,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `2b38353` 已创建但尚未 push；本次仅修改 parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+#### 本检查点远端备份状态（2026-09-09，proxy-provider 订阅与健康检查静态审计）
+
+- focused commit `0856859` 已创建但尚未 push；本次仅修改 parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
