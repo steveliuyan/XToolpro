@@ -805,6 +805,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读取固定上游源码，未操作设备，也未读取任何配置、错误文本、日志、通知、请求/连接、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。不能将原始异常文本的存在外推为具体敏感字段已暴露。
 - XToolpro 的 future `engine-proxy` 必须以单一可 await、可取消状态机串联配置写入、core setup、permission、service start、`establish()`、TUN 核验和最小的连通性证明；所有失败、取消和超时必须收敛为稳定、脱敏错误码并回滚本地运行状态。需以无敏感字段的真机契约测试覆盖成功、配置错误、permission deny/revoke、竞争 VPN、`establish()` 拒绝、超时、engine crash、process death 与 version mismatch；在此之前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 原生 START、强停与重开恢复真机验证（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）先以无内容 ADB 检查确认 `tun0` 不存在、dev 进程存在。设备同时安装默认与 dev 包；对默认包的 `.QuickActionActivity` 调用返回“不存在”，未触及应用状态。随后仅解析 dev 变体的 `com.follow.clash.dev.action.START`，得到组件 `com.follow.clash.dev/com.follow.clash.QuickActionActivity`。固定 `QuickAction.action` 以运行时 `applicationId` 组成 action，故这一步避免把错误变体的 component/action 当成能力结果。
+- 调用已解析的 dev `START` action 后，仅检查 `/sys/class/net/tun0` 的存在性和 dev 进程：第 7 秒与第 14 秒均为 `tun0` 存在、dev 进程存在。没有发送流量，也没有读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。
+- 随后执行 `am force-stop com.follow.clash.dev`；第 5 秒 `tun0` 不存在且 dev 进程不存在。再解析并打开 dev `MainActivity`，第 8 秒 dev 进程存在而 `tun0` 仍不存在，证明此轮强停后的正常打开没有在没有新的启动请求时恢复 TUN。
+- 该 evidence 证明正确变体的原生显式启动可建立 TUN，并覆盖一次运行态 force-stop 清理和无意自动恢复边界；它不证明 core health、可转发流量、系统重启、always-on/lockdown、竞争 VPN、通知权限撤销或 service callback 的恢复行为。XToolpro 的 future `engine-proxy` 仍须以独立持久状态机、脱敏稳定错误和 TUN/健康/流量分别核验；完成 success、unavailable、cancel、crash、reboot、permission revoke 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
