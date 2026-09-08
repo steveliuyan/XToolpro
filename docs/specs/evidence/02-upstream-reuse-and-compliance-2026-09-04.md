@@ -952,6 +952,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 发送同一精确 STOP action 后 5 秒仍无 TUN、进程存在；最后以正常 `pm grant` 恢复 `POST_NOTIFICATIONS`，package 层显示 `allow`。全程未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL，亦未发送流量。
 - 该检查仅证明本次撤销态下的强停会留下无 TUN/无进程状态，并且后续观察窗口未见自动 TUN 恢复；它不替代实际 permission callback、前台通知可见性、用户可见 unavailable/cancel、VPN consent 或 core health 验证。XToolpro future `engine-proxy` 必须把 process death/recreate 期间的每个等待 transaction 显式收敛为可恢复、脱敏结果，并以真机覆盖 deny/revoke/recreate/visibility 与 TUN 清理；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash VpnService native Error 清理边界静态审计（2026-09-08）
+
+- 固定 `VpnService.handleStart()` 在 `Builder.establish()` 成功后立即调用 `detachFd()`，再在同一 service 进程中设 `tunRunning=true` 并调用 `Core.startTun()`。如 `establish()` 返回空，代码抛出 `Exception`，外层 `start()` 会调用 `stop()`；这一已知分支有显式清理尝试。
+- 但 `Core.startTun()` 周围和 `start()` 外层都只捕获 `Exception`。`UnsatisfiedLinkError`、`ExceptionInInitializerError` 或其他 `Error` 在 descriptor 已脱离 Java 管理后会绕过这两个 service 内 catch。`ServiceController.useService()` 的 `runCatching` 能把异常感知为失败并尝试 `stopIfConnected()`，但补偿 `cleanup()` 仍需调用同一 `Core.stopTun()`，没有稳定 `EngineCrashed`/`Unavailable` 映射、独立 descriptor 清理，或可等待的 TUN 已消失回执。
+- 本审计不声称上述 Error 已发生、descriptor 已泄漏或系统 TUN 必然遗留：固定源码不足以证明 native fd 所有权和系统最终回收。它只确认错误类别、清理路径与回执之间不存在可验证的隔离合同。未修改/下载上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须在建立 VPN 前完成 native manifest/health 验证，并以 `Throwable` 安全边界、明确 fd/TUN 所有权和实际 TUN 清理回执映射加载/符号/运行失败；随后用受控 native error、缺失 artifact、version mismatch、cancel 和 success fixture 做隔离/真机契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
