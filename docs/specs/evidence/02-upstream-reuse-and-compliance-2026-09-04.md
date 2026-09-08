@@ -1254,6 +1254,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `adb shell ip -o link show type tun` 被设备 shell 返回 `Permission denied`；`pm check-permission` 不是该设备 shell 的可用命令。未 root、未绕过权限、未读取完整 connectivity 输出或接口正文，不据此推断更多状态。
 - 本轮未写入 always-on/lockdown、未启动/停止/杀除应用、未重启设备、未触发 revoke 或竞争 VPN，也未读取配置、通知正文、日志、请求、节点、订阅 URL、凭据、Cookie、数据库、文件或流量内容。结果只是停止态状态复核，不构成 always-on、lockdown、reboot、process-death 或恢复 success proof；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，ADB 基线）
+
+- focused commit `1656a16` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，always-on 审计）
 
 - focused commit `8e2bb94` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
