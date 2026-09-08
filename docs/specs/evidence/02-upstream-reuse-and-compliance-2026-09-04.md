@@ -973,6 +973,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮只读固定公开 `GlobalState.kt` 并关联此前已审计 `QuickActionActivity.kt`/`ServiceState.kt`；未使用 ADB、未启动 VPN、未写入上游源码/SDK/缓存/构建产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须令每个外部/快捷入口命令经受监督且可取消的 transaction 执行，返回一次性、脱敏的稳定结果并以 timeout/health/TUN 回执关闭；还需验证 setup、permission、native failure、engine detach 与相反命令 racing。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 获准通知权限原生 START 回归边界（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）先强停 dev 变体，确认 `tun0=0`、进程计数为 0、`POST_NOTIFICATION=allow`。随后直接发送已解析的 `com.follow.clash.dev.action.START`，第 7 秒和第 14 秒仅确认 `tun0=0`、dev 进程存在，app-op 仍为 allow。
+- 随后发送同一精确 STOP action，5 秒后仍为 `tun0=0`、dev 进程存在。全程未发送流量，未读取系统 VPN、通知正文或 extras、日志、配置、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- 本轮与此前获准态可形成 TUN 的正向 proof 不一致；由于不读取 core、系统 VPN 或日志内容，不能判定是配置、native health、服务时序或设备状态差异。该结果只证明获准通知权限并不足以构成可复现的 TUN 启动回执，原生 START/STOP 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- XToolpro future `engine-proxy` 必须把 permission allow、service start、native health 和实际 TUN 建立分成可等待、可诊断的阶段，并在任一阶段失败时返回稳定脱敏结果；不得以 permission allow、进程存在或系统入口返回成功替代 TUN/health 回执。在完成重复 success、unavailable、cancel、crash、version-mismatch 和设备重测前，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
