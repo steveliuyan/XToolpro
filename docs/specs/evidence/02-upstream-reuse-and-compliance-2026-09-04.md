@@ -1228,7 +1228,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 #### 本检查点远端备份状态（2026-09-08）
 
-- focused commit 的远端备份暂未完成：对 `origin/codex/phase02-flclash-direct-logs` 的两次 push 均未返回远端更新，随后 `ls-remote` 未返回该 ref 的可核验 hash。未备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；未纳入任何其他既有工作区改动或临时产物。待远端可用时必须先推送并核验该 focused commit，之后才能将本检查点描述为远端备份。
+- focused commits 的远端备份暂未完成：对 `origin/codex/phase02-flclash-direct-logs` 的三次 push 均未返回远端更新，随后 `ls-remote` 未返回该 ref 的可核验 hash。未备份路径仅为 `AGENTS.md`、`docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；未纳入任何其他既有工作区改动或临时产物。待远端可用时必须先推送并核验这些 focused commits，之后才能将本检查点描述为远端备份。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
