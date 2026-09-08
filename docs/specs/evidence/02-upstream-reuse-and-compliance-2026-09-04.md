@@ -1325,6 +1325,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 日志/请求字段可能包含 host、地址、规则 payload、代理链等敏感诊断数据；本轮不据静态字段推断设备实际泄露，但确认固定路径没有统一脱敏或最小化结果合同。未发起流量、未读取日志/请求/配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
 - future `engine-proxy` 必须对规则集来源/版本和每次匹配提供最小化、可审计但不含原始目标的结果，明确 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并以受控 fixture 覆盖规则优先级、域名/IP/GeoIP 命中、无命中、更新失败、取消和日志队列清理。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash 请求/连接详情、筛选与清理契约静态审计（2026-09-09）
+
+- 固定 `TrackerInfo`/`Metadata` 对外携带 UID、进程/路径、host、源/目的地址与端口、规则及 payload、GeoIP/ASN、DNS、special rules、remote destination 和代理链；详情页直接渲染这些字段，而搜索只覆盖 network、host、destination IP、process 和 proxy chains，未建立字段最小化或搜索/详情一致性合同。
+- 请求事件会进入容量受限但未脱敏的常驻内存 `requestsProvider`。`fullSetup()` 只在 Profile ID 变化时重置；普通 stop、VPN 配置重启和 core restart 的固定调用链不清空 requests。单条关闭未将结果映射到稳定状态，“关闭全部”不 await，core 对部分关闭错误仍可能返回成功。
+- 既有真机 proof 仅确认请求页/连接页入口和脱敏计数，不读取任何连接正文、地址、应用或规则字段；本轮未执行关闭、停止、重启、导出或搜索行为。因此不能把 UI 可达性或列表计数当作字段安全、清理完成或关闭成功证明。
+- 本轮只读复核固定源码与既有证据，未读取请求/连接、日志、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未发起流量。future `engine-proxy` 必须默认关闭诊断、按字段最小化并提供用户清除；单条/批量关闭和 stop/restart 清理需 await、可重试且能报告部分失败，所有结果使用脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt。完成字段、搜索、清理与关闭契约测试前，Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，规则命中审计）
 
 - focused commit `5ea564c` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
