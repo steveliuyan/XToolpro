@@ -1083,6 +1083,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 该组合说明系统层 VPN 标记可能存在而实际 TUN 接口不存在；本轮未读取连接详情、通知、日志、配置、节点、请求或数据库，不能据此归因具体 service/core 分支。它只强化了“系统 VPN 标记、进程存活、权限允许均不是 engine readiness 的充分回执”的边界。
 - XToolpro future `engine-proxy` 必须分别记录系统 VPN consent/establish、TUN 存在、native health/readiness 和可转发性，并在这些阶段不一致时阻止 `Success`，返回稳定、脱敏的 terminal result。完成对应真机与隔离契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### 已授权启动窗口的全 TUN 类型接口复核（2026-09-08）
+
+- 为排除只检查固定名称 `tun0` 的歧义，本轮仅统计 `ip` 所报告的 TUN 类型接口总数，并重取此前允许的系统 VPN 连接标记、`tun0` 存在性和目标进程计数；结果为 `all_tun_interfaces=0`、`tun0=0`、`vpn_connected_markers=1`、dev 进程 `1`。
+- 未输出任何接口地址、路由、DNS、连接详情、配置或流量内容。该结果只能说明当前没有任何内核报告的 TUN 类型接口，不能归因 FlClash 的具体 service/core/UI 分支；它排除了单纯“接口不是 tun0”的解释，但不替代 core health 或可转发性验证。
+- XToolpro future `engine-proxy` 仍必须将系统 VPN 状态与 TUN/engine health 分离，并以最小化、脱敏、可测试的 health/TUN 回执决定 `Success`。完成对应五类契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
