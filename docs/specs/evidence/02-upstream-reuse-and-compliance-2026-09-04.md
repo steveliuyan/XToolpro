@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=47`、`Pending=36`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=48`、`Pending=35`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1173,6 +1173,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `FileUtil.moveFile()` 的直接文件系统分支以 move/copy 后删除源；SAF fallback 经 `DocumentsContract.createDocument` 创建最终目标并以 input/output stream 直接拷贝，再删除源。该链路没有同目录临时 staging、fsync、长度/hash/容器或 metadata read-back、原子 publish、跨 provider rollback 或可持久化的逐项 commit receipt。移动的 per-file exception 仅记录后继续，最后仍返回累积路径并扫描媒体；failure fallback 和 `keepCache=false` 均会递归删源目录。独立 `MoveCacheFilesWorker` 对 API 26+ 使用 `REPLACE_EXISTING`，完成后递归删除缓存子目录，也未提供中断/部分成功/恢复模型。
 - 路径格式化会把 tree URI 转为路径样式文本；打开/分享由 FileProvider 或现有 DocumentFile URI 给外部 app 授予 URI 权限，固定路径还会将路径和异常写入日志。该审计不能断言实际 provider 行为或任何设备上发生泄露。
 - 本轮只读固定隔离上游的目录设置、request builder、文件迁移和 cache worker 源码；未发起 SAF picker、访问/创建/移动/删除/分享用户文件，也未读取日志、URL、Cookie、媒体或设备数据。future `engine-media` 必须在最小 scoped grant 内使用预检、临时输出、read-back、原子提交和失败清理，并以脱敏、逐项持久 receipt 覆盖 provider unavailable、冲突、permission loss、cancel、crash 和 version mismatch。完成真实 provider 与输出完整性验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ytdlnis 历史、取消记录与备份恢复边界静态审计（2026-09-08）
+
+- 固定 Room history 保存 URL、标题、作者、缩略图、输出路径、format、文件大小和 command；`DownloadDao` 还保留 queued/scheduled/cancelled/error/saved 状态集合，固定 UI/repository 能分页列出和再入队未完成任务。任务成功时可插入 history，因此上游确有有限历史及取消记录能力。
+- `BackupSettingsUtil` 和 `SettingsViewModel.backup()` 将 history、queued、scheduled、cancelled、error、saved、Cookie、偏好、模板等直接 Gson 序列化进未加密 JSON，并写到备份目录。restore 会先清空 SharedPreferences 或目标表、再逐条插入；整个跨偏好和多表恢复不使用 transaction、staging、备份完整性/签名/版本/来源校验、冲突预览、逐项 receipt 或 rollback。尽管 backup 包含 `scheduled`，固定 `restoreData()` 没有相应 scheduled restore 分支。
+- `HistoryRepository.delete()` 可先删 Room 行、再尝试删除输出文件；底层删除错误被吞掉。cleanup worker 也会清除 cancelled/error 条目及 cache，故记录与输出的可恢复关联没有原子保证。历史、备份及 restore 中的 URL、路径、命令和 Cookie 均未见统一脱敏或加密边界。
+- 本轮只读固定隔离的 Room model/DAO/repository、backup/restore 与 cleanup 源码；未导出、导入、读取或删除任何真实备份、媒体、URL、Cookie、日志或设备数据。future `engine-media` 必须最小化并加密敏感快照，校验 schema/版本/来源，先预览后原子或可回滚恢复，并以脱敏逐项 terminal receipt 覆盖损坏/错配、取消、部分失败和 crash。完成真实备份/恢复契约验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
