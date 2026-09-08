@@ -1332,6 +1332,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机 proof 仅确认请求页/连接页入口和脱敏计数，不读取任何连接正文、地址、应用或规则字段；本轮未执行关闭、停止、重启、导出或搜索行为。因此不能把 UI 可达性或列表计数当作字段安全、清理完成或关闭成功证明。
 - 本轮只读复核固定源码与既有证据，未读取请求/连接、日志、配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未发起流量。future `engine-proxy` 必须默认关闭诊断、按字段最小化并提供用户清除；单条/批量关闭和 stop/restart 清理需 await、可重试且能报告部分失败，所有结果使用脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt。完成字段、搜索、清理与关闭契约测试前，Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，请求详情审计）
+
+- focused commit `58ddd9d` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，规则命中审计）
 
 - focused commit `5ea564c` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
