@@ -959,6 +959,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本审计不声称上述 Error 已发生、descriptor 已泄漏或系统 TUN 必然遗留：固定源码不足以证明 native fd 所有权和系统最终回收。它只确认错误类别、清理路径与回执之间不存在可验证的隔离合同。未修改/下载上游源码、SDK、缓存或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 - XToolpro future `engine-proxy` 必须在建立 VPN 前完成 native manifest/health 验证，并以 `Throwable` 安全边界、明确 fd/TUN 所有权和实际 TUN 清理回执映射加载/符号/运行失败；随后用受控 native error、缺失 artifact、version mismatch、cancel 和 success fixture 做隔离/真机契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash QuickAction 已附着 engine 的无确认投递边界静态审计（2026-09-08）
+
+- 固定 `QuickActionActivity` 对 START/STOP/TOGGLE 均在 `GlobalState` coroutine 中委托 `ServiceState` 后立即 `finish()`。当 `TilePlugin` 已由 `MainActivity.configureFlutterEngine()` 附着时，`ServiceState.handleStartAction()`/`handleStopAction()` 不会走 native preference/core/service 路径，而只调用 `TilePlugin.handleStart()`/`handleStop()`。
+- `TilePlugin` 将这两个调用实现为单向 `MethodChannel.invokeMethodOnMainThread("start"/"stop")`：没有 MethodChannel result、Dart acknowledgement、内存/持久队列、重试或 engine detach 后重放。`onDetachedFromEngine()` 只清理 native method-call handler，`ServiceState.detachFlutterEngine()` 也只清空 engine 引用。因此在 Flutter/Dart listener 未就绪、Activity/engine 销毁或投递竞争时，固定 Android 层没有可验证的“已交付、已取消或回退 native start/stop”合同。
+- 本轮仅只读固定公开 `QuickActionActivity.kt`、`TilePlugin.kt`、`MainActivity.kt` 与 `ServiceState.kt`；此前的正常允许状态设备基线经 ADB 复核为强停后 `tun0=0`、进程计数为 0、`POST_NOTIFICATION=allow`。未启动 VPN、未写入上游源码/SDK/缓存/产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须将快捷入口命令持久化或交给可 await 的串行 dispatcher，并以 delivery acknowledgement/timeout 确认 Flutter/engine path；未交付时只能明确 `Cancelled`/`Unavailable` 或安全 native fallback，不能隐式丢弃。还需真机覆盖 listener 未就绪、engine detach/recreate、START/STOP racing 与实际 TUN/health 回执。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
