@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=37`、`Pending=46`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=38`、`Pending=45`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1119,6 +1119,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `AndroidDownloadManager.download()` 使用同目录临时文件、下载完成后 `Os.rename` 原子替换目标，并在 failure/cancel 的 finally 路径删除临时文件。可是 `GenericBackgroundRemover.checkModel()` 只检查模型文件存在且长度大于零；下载后同样只调用该检查，未见绑定模型 ID、版本、预期长度或 SHA-256 的完整性校验。固定背景擦除路径中也未发现该模型集合的逐项许可证/provenance manifest。非空但错误或过期的模型会被视为已下载并直接交给 ONNX Runtime 创建 session。
 - `BgRemover.removeBackground()` 以 `runCatching` 返回结果，而 feature 的 `AndroidAutoBackgroundRemover` 把任意 failure 交给通用 `makeLog()`/failure toast；没有稳定区分网络不可用、用户取消、文件/版本不匹配和 ONNX load/inference crash 的 engine terminal result。该审计未发起模型下载、未加载模型、未处理图像，且未修改 SDK、缓存、上游归档或构建产物。
 - XToolpro future `engine-image` 必须锁定每个模型的来源、许可证、版本、大小与 SHA-256，下载至临时文件后校验再原子发布；以可取消、脱敏、有界的 contract 区分 `Unavailable`、`Cancelled`、`EngineCrashed` 与 `VersionMismatch`，并用真实模型完成五类场景。背景擦除矩阵项从 `Pending` 调整为 `Partial`；Image 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ImageToolbox native/GPU/AI 运行时闭包静态审计（2026-09-08）
+
+- 固定 ImageToolbox version catalog 声明 OpenCV `5.0.0.1`、ONNX Runtime Android `1.29.0`、`aire` `0.18.1` 与 ImageToolboxLibs `8.0.6`。`lib:opencv-tools` 导出 OpenCV；`lib:neural-tools` 导出 ONNX Runtime 并依赖 aire；多个 feature 依赖 OpenCV/GPUImage。ImageToolboxLibs 的固定版本坐标包含 GPUImage、GIF/APNG、JP2、QOI、awebp、PSD、DjVu、RAW、TIFF、GMIC、archive 与其他 codec/processor 模块，不能由根仓库 Apache-2.0 许可替代其各自许可证审查。
+- `app/build.gradle.kts` 仅声明 `armeabi-v7a`、`arm64-v8a` 与 `x86_64`；非 app bundle 构建启用 split ABI 和 universal APK，JNI packaging 对 `libcoder.so` 使用 `pickFirst`，并保留 debug symbols。`market` flavor 另加入 ML Kit subject/selfie segmentation，`foss` flavor 不包含该依赖。固定归档本身没有 app `jniLibs` 目录，因此真实 native 库来自尚未解析的第三方 artifact。
+- 本轮未解析或下载任何依赖，未构建 AAR/APK，未加载 native library 或处理图像；因此没有逐 ABI/variant 的库清单、SHA-256、符号/加载、内存、GPU fallback、设备兼容性、许可证/NOTICE/SBOM 或 rollback 证据。XToolpro future `engine-image` 必须为每个实际交付 artifact/ABI/flavor 锁定来源、许可证与 hash，并真实执行 GPU/CPU fallback、unsupported ABI、cancel、native crash 与 version-mismatch contract。矩阵 native/GPU/AI 项从 `Pending` 调整为 `Partial`；Image 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
