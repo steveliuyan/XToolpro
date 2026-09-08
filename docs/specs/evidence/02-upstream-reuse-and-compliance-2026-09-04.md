@@ -1278,6 +1278,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机 proof 仅覆盖本机 `127.0.0.1:7890` 的 HTTP/SOCKS5 TCP 请求和有限并发，以及开关前后的监听计数；未从其他局域网设备连接，也未验证鉴权、跨网段防火墙、UDP、性能、异常关闭或端口复用。wildcard 监听表示网络暴露面扩大，不能直接视为安全共享成功。
 - 本轮只读复核固定源码和既有脱敏计数证据；未启动/停止 VPN、未切换局域网开关、未发送流量、未读取代理配置、节点、请求/响应、日志、通知、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须在显式确认后声明 bind scope、认证和协议能力，默认 loopback，针对 LAN 暴露提供风险/不可用状态，并以停止清理、跨设备受控 fixture、UDP/冲突/取消/crash/version mismatch 契约验证。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，LAN 暴露审计）
+
+- focused commit `ee898ba` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，VPN 冲突审计）
 
 - focused commit `f47e736` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
