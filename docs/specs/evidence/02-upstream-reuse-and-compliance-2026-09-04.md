@@ -1410,7 +1410,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 #### 本检查点远端备份状态（2026-09-09，配置导入/恢复审计）
 
-- 本次 focused commit 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+- 本次 focused commit `78b6f97` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
 #### 本检查点远端备份状态（2026-09-09，停止事件队列审计）
 
