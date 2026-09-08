@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=40`、`Pending=43`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=41`、`Pending=42`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -80,7 +80,7 @@
 | 存储目录树、类型分布、最大/最近文件 | `app-tool-analyzer` | 存储分析图表、列表和定位 | Pending |
 | 路径搜索、排序、最近文件和收藏保护 | `app-tool-analyzer`、common data | 搜索、排序、保护规则 | Pending |
 | SAF 范围内浏览、重命名、移动、复制、分享 | `app-common-io`、`app-common-shell` | 文件操作事务和结果验证 | Pending |
-| SAF 删除、回收站、恢复、安全擦除 | `app-common-io`、清理工具 | 预览、暂存、恢复和不可恢复提示 | Pending |
+| SAF 删除、回收站、恢复、安全擦除 | `app-common-io`、`app-tool-deduplicator` | 预览、暂存、恢复和不可恢复提示 | Partial（静态）：固定 `SAFGateway.delete()` 先按持久化 URI permission 定位文档，保留 `CancellationException`，并在 provider 返回 `false` 时以 `existsStrict()` 核验；目录删除优先直接级联，失败后按后序逐项删除。重复项 UI 在提交 `DeduplicatorDeleteTask` 前会产生预览/确认事件，实际 deleter 逐项调用 `dupe.path.delete(gatewaySwitch)`。但 `SAFDocFile.delete()` 直接调用 `DocumentsContract.deleteDocument`，固定源码未发现由该删除链产生的回收站、内容恢复或安全擦除实现；批量删除没有逐项 `Success`/`Failed`/`Cancelled` 结果，单项异常可中止任务，而 task success 只含最终受影响集合。URI、路径和异常也会进入日志。XToolpro 必须在提交前锁定预览快照，采用可恢复暂存或明确不可恢复的系统/provider 语义，以逐项、可取消且脱敏的结果收敛 permission loss、部分成功、provider crash 与版本差异；完成真实 SAF 五类契约与恢复/不可恢复验证前保持 `Partial` |
 | 已安装/系统应用列表与信息导出 | `app-tool-appcleaner`、`app-common-pkgs` | 应用信息页和显式导出 | Pending |
 | 冻结、停用等高风险操作 | `app-tool-appcleaner`、Root/Shizuku 路径 | 权限门禁、二次确认和回滚状态 | Pending |
 | Root、Shizuku、ADB 可选增强 | `app-common-root`、`app-common-adb` | 能力检测；无权限时不得伪造成功 | Pending |

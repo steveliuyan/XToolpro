@@ -1139,6 +1139,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `AndroidFileController` 在 save/move/read/copy metadata 链路将 URI、完整 initial/source/destination metadata 和异常以 `makeLog` 传出；OCR 工作流还可将识别文本写进 `MetadataTag.UserComment` 后调用 `writeMetadata`。这些位置、设备、注释或 OCR 文本字段在固定路径未见统一脱敏；本轮不读取任一图片、metadata、日志或输出文件，故不声称实际设备上发生泄露。固定源码同样没有本轮可用的输出 read-back、SAF 格式覆盖、cache/share 副本清理或取消/崩溃恢复实证。
 - XToolpro future `engine-image` 必须默认隐藏并禁止记录敏感 metadata，采用临时输出、原子提交和格式化 read-back 验证，并分别对 SAF 不可写、用户取消、metadata/codec crash 与格式/版本不匹配给出脱敏稳定结果。完成真实设备与五类 contract 后才能提升状态；本项从 `Pending` 调整为 `Partial`，Image 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### sdmaid-se SAF 删除与恢复边界静态审计（2026-09-08）
+
+- 固定 sdmaid-se `b9b01ee0af648fa6af25d388bb39bacde8d5b7a9` 的 `SAFGateway` 按 persisted URI permission 定位 `SAFDocFile`；无匹配 grant 时抛出 `MissingUriPermissionException`，删除入口会把非取消异常归一为带目标 path 的 `WriteException`。`delete()` 保留 `CancellationException`，非空目录的非递归删除先检查子项；递归删除先请求 provider 对目录直接级联删除，若失败且目录仍存在则后序枚举子项逐个删除。`SAFDocFile.delete()` 实际调用 `DocumentsContract.deleteDocument`；其返回 `false` 时网关仅在 `existsStrict()` 明确证明目标已经消失时才当作成功，避免把 provider 不可达误记为已删。
+- 重复项路径的 `DeduplicatorDetailsViewModel` 在未确认时发出 `ConfirmDeletion`，`PreviewDeletionDialog` 展示删除确认与预览；确认后才提交 `DeduplicatorDeleteTask`。`DuplicatesDeleter` 按选中项逐个执行 `dupe.path.delete(gatewaySwitch)` 并在本地路径通知 MediaStore。固定代码未在此删除链发现回收站移动、文件内容恢复、undo delete 或安全擦除；现有 `undoExclude` 仅撤销扫描排除规则，不能恢复已删除文件。删除循环没有逐项异常封装或失败结果集合，某一项抛出异常会中断任务，而 `DeduplicatorDeleteTask.Success` 仅在完成后报告受影响路径/空间；取消虽在网关保留，却没有独立、持久化的部分成功/取消收敛模型。
+- 静态日志会拼接 SAF path、document URI、可读路径或异常；本轮未运行测试、未访问设备文件、未请求/修改 SAF grant，也没有删除、移动、恢复或读取任何用户数据。固定单元测试源码存在但未执行，不能视为真实 provider 行为或恢复 proof。
+- future `engine-cleaner` 必须在提交前固化用户可核验的预览快照；以可恢复暂存为优先，若系统/provider 仅支持不可逆删除则在确认前明确说明；对 permission loss、provider unavailable、cancel、单项失败/部分成功、crash 与版本差异提供逐项、脱敏、可持久化 terminal result，并分别在真实 SAF provider 上验证。该矩阵项从 `Pending` 调整为 `Partial`；Cleaner 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
