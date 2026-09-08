@@ -82,6 +82,7 @@ This authorization does not permit root access, bypassing Android permission or 
 - Use explicit loading, empty, success, unavailable, and error states. Never fabricate device, connection, task, or storage facts.
 - Keep documentation in Chinese when it describes product decisions; technical identifiers and code remain English.
 - Preserve user changes and unrelated files. Do not reset, delete, or overwrite content outside the active task.
+- Phase 02 FlClash proof exception (explicit user authorization): ADB may send only pre-resolved dev-package START, STOP, or TOGGLE actions and may grant/revoke `POST_NOTIFICATIONS` to execute permission/VPN lifecycle checks. Before and after each mutation, capture only the permitted state summary (runtime permission/app-op, target-process presence, system VPN marker count, and TUN interface count). Do not use ADB to read logs, configurations, notification text or extras, nodes, request contents, databases, files, credentials, cookies, subscription URLs, addresses, routes, DNS, or traffic content. Record each mutation and sanitised result in the active Phase 02 evidence; this exception does not authorize engine integration, configuration changes, traffic generation, or any other device mutation.
 
 ## GitHub Checkpoints
 

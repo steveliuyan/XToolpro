@@ -1089,6 +1089,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 未输出任何接口地址、路由、DNS、连接详情、配置或流量内容。该结果只能说明当前没有任何内核报告的 TUN 类型接口，不能归因 FlClash 的具体 service/core/UI 分支；它排除了单纯“接口不是 tun0”的解释，但不替代 core health 或可转发性验证。
 - XToolpro future `engine-proxy` 仍必须将系统 VPN 状态与 TUN/engine health 分离，并以最小化、脱敏、可测试的 health/TUN 回执决定 `Success`。完成对应五类契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### 已授权 STOP action 的系统 VPN 标记收敛复核（2026-09-08）
+
+- 根据用户明确授权的受限 ADB action 规则，对已解析 dev component `com.follow.clash.dev/com.follow.clash.QuickActionActivity` 发送 `com.follow.clash.dev.action.STOP`。操作前只读汇总为 `vpn_connected_markers=1`、`all_tun_interfaces=0`、dev 进程 `1`、`POST_NOTIFICATIONS granted=true`、UID `POST_NOTIFICATION=allow`；操作后等待 7 秒，汇总为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程 `1`，permission/app-op 不变。
+- STOP 与系统 VPN 标记从 1 收敛到 0 相符，但操作前已没有任何 TUN 类型接口，故不能把这次结果表述为实际 TUN 清理成功，也不能归因于某一 UI、permission、service 或 native core 分支。它进一步说明系统 VPN 标记、进程存活、权限允许和 TUN/engine health 是彼此独立的回执层级。
+- 本轮没有读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容；没有修改配置、生成流量或进入 engine 集成。future `engine-proxy` 必须只在可归因的 TUN 与独立健康回执均满足时产生 `Success`，其余情况在有界 deadline 内返回稳定、脱敏的 terminal result。矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
