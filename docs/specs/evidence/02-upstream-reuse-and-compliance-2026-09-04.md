@@ -1318,6 +1318,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 既有真机 proof 只确认 allow-bypass 开关可跨进程保留，并在关闭态建立/停止过 TUN；当时没有可用应用列表，也未选择应用、读取清单、发送按应用流量或读取路由/请求字段。因此不能把 `QUERY_ALL_PACKAGES` 声明、系统 API 调用或 TUN 存在当作任一应用已按预期代理/绕过的证明。
 - 本轮只读复核固定源码与既有脱敏证据，未读取应用清单、包名、标签、权限、配置、日志、请求、节点、订阅 URL、凭据、Cookie、数据库或设备文件，未切换 bypass 或路由设置。future `engine-proxy` 必须在用户进入该流程后最小化且仅内存内处理应用标识，使用版本化选择快照和可撤销 apply，逐项以脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 收敛；受控 fixture 还需覆盖权限缺失、空/失败列表、安装包变化、取消、崩溃与实际 bypass 路由。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash 规则集、命中归因与日志事件边界静态审计（2026-09-09）
+
+- 固定请求/连接模型包含 `rule`、`rulePayload`、special rules 等规则相关字段，日志事件则经独立 bulk queue 进入 Dart 日志状态；固定源码未见规则版本、匹配阶段、命中原因或请求事件与规则事件之间的稳定关联 ID/terminal receipt。
+- 既有真机 proof 只确认附加规则入口、规则模式下公开 HTTPS 成功，以及启用日志捕获后日志页出现新增记录；ADB 未读取规则、日志或请求正文，也未验证某一域名/IP/GeoIP 条目命中、优先级、fallback 或命中后路由选择。
+- 日志/请求字段可能包含 host、地址、规则 payload、代理链等敏感诊断数据；本轮不据静态字段推断设备实际泄露，但确认固定路径没有统一脱敏或最小化结果合同。未发起流量、未读取日志/请求/配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
+- future `engine-proxy` 必须对规则集来源/版本和每次匹配提供最小化、可审计但不含原始目标的结果，明确 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并以受控 fixture 覆盖规则优先级、域名/IP/GeoIP 命中、无命中、更新失败、取消和日志队列清理。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，按应用 bypass 审计）
 
 - focused commit `b9a4b96` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
