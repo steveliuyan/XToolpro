@@ -1224,6 +1224,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 仓库现有 `AGENTS.md` 的 Phase 02 ADB 授权允许控制范围内测试包的生命周期和检查非敏感设备状态，同时明确禁止 root、日志、配置、通知正文、节点、请求、数据库、文件、凭据、Cookie、订阅 URL 与流量内容读取。本轮按该受限规则只确认一台设备已连接，并对已知 ytdlnis 与 XToolpro dev package 作 `pidof` 进程存在性检查；两者均未运行。
 - 主机亦未发现可执行的 `ffmpeg`、`ffprobe` 或 `yt-dlp`。没有以未知版本的设备安装包或替代 host runtime 冒充固定 ytdlnis `13320bb64f35c8d04f01bebfa782d7947758fb66` 的运行时；未安装、启动、强停或卸载任何 package，未下载/处理测试媒体，未读取任何应用或设备内容。
+- 真机 ABI/API 只读结果为 arm64-v8a/API 33，符合固定 app `minSdk 24`。但固定归档的 `settings.gradle` 声明 `:common`、`:app`、`:library`、`:ffmpeg`，归档中实际缺少 `library` 与 `ffmpeg` module；因此不能把该不完整归档直接构建为可归因的固定提交 APK，更不能以临时替换的未知 artifact 声称 runtime parity。
 - 因此当前只证明真机验证环境的 runtime/commit 可归因性仍不可用，不构成媒体解析、下载、合并或转码 success/unavailable proof，也不改变矩阵状态。future 验证需在版本、ABI、许可证与 artifact hash 均已锁定的隔离 Android 宿主中进行，并在先前定义的受限 ADB 范围内仅记录脱敏 terminal result；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 本检查点远端备份状态（2026-09-08）
