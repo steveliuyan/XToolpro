@@ -812,6 +812,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 随后执行 `am force-stop com.follow.clash.dev`；第 5 秒 `tun0` 不存在且 dev 进程不存在。再解析并打开 dev `MainActivity`，第 8 秒 dev 进程存在而 `tun0` 仍不存在，证明此轮强停后的正常打开没有在没有新的启动请求时恢复 TUN。
 - 该 evidence 证明正确变体的原生显式启动可建立 TUN，并覆盖一次运行态 force-stop 清理和无意自动恢复边界；它不证明 core health、可转发流量、系统重启、always-on/lockdown、竞争 VPN、通知权限撤销或 service callback 的恢复行为。XToolpro 的 future `engine-proxy` 仍须以独立持久状态机、脱敏稳定错误和 TUN/健康/流量分别核验；完成 success、unavailable、cancel、crash、reboot、permission revoke 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 运行态 `am kill` 边界真机观察（2026-09-08）
+
+- 通过已解析的 dev START action 建立运行态；第 7 秒仅确认 `tun0` 存在、dev 进程存在。随后发出 `am kill com.follow.clash.dev`；第 5 秒和第 10 秒仍均为 `tun0` 存在、dev 进程存在。
+- 因此前台进程和 TUN 未被该命令终止，本轮没有制造实际 process death 或 crash，不能把它记录为恢复能力通过。随后单独正确 dev STOP action 在第 5 秒和第 10 秒均使 `tun0` 不存在、dev 进程存在，恢复停止基线。
+- 全程未发送流量，未读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件。仍需专门、可恢复的 engine crash/process-death、reboot、always-on、permission revoke 与 version-mismatch 真机契约测试；在此之前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash dev 原生 STOP 与实际 TUN 清理真机验证（2026-09-08）
 
 - 通过已解析的 `com.follow.clash.dev/com.follow.clash.QuickActionActivity` 和 `com.follow.clash.dev.action.START` 建立运行态；第 7 秒仅检查到 `tun0` 存在、dev 进程存在。
