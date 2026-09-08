@@ -1266,6 +1266,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 更新失败路径会把原始异常传给 `commonPrint` 或批量更新 UI；本轮未见统一脱敏错误码、逐项结果、版本冲突处理或回滚 receipt。固定源码与真机入口能证明可达性，但不能证明 URL 下载成功后配置文件、标签、自动更新状态与数据库记录以原子方式提交，也不能证明删除/重命名失败时可恢复。
 - 本轮未发送订阅 URL、未写入剪贴板、未执行同步、重命名、删除或保存，未读取配置、日志、数据库、文件、凭据、Cookie 或设备内容。future `engine-proxy` 必须以显式用户确认和版本化 snapshot 执行更新，先校验再原子提交；删除/重命名需可回滚并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt 收敛。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，profile 生命周期审计）
+
+- focused commit `2762655` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，契约闭包审计）
 
 - focused commit `7c111b7` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
