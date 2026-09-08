@@ -1153,6 +1153,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `ViewIntentTool` 只接受 `LocalPathLookup`，经 `FileProvider` 构造 `ACTION_VIEW` chooser，并同时设置读/写 URI grants；SAF lookup 直接返回 unsupported。该路径是外部“打开”而非 `ACTION_SEND` 分享或受控导出，固定代码未见对 receiving app、生命周期结束或授权撤销的闭环。grant、path、lookup、URI 和异常会写入静态日志。
 - 本轮只读固定隔离上游源码；未访问、创建、复制、移动、分享、打开或读取任何设备/用户文件，也未修改 SAF grant 或运行测试。future `engine-cleaner` 必须将浏览与 mutation 分离，以同一 scoped grant 内的预检、临时输出、read-back、原子发布和失败清理实现每次 rename/move/copy；外部分享只可授最小只读、最短生命周期 URI，并验证撤销。完成真实 provider 的 success、unavailable、cancel、crash、version-mismatch 和隐私输出验证前，该项从 `Pending` 调整为 `Partial`，Cleaner 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis runtime 组件更新与回滚边界静态审计（2026-09-08）
+
+- 固定 ytdlnis `13320bb64f35c8d04f01bebfa782d7947758fb66` 的 `app/build.gradle` 声明 youtubedl-android library/Aria2c `0.18.1` 与 FFmpeg `0.17.2`；`RuntimeManager` 列出 Python、FFmpeg、Aria2c、NodeJS、Deno、QuickJS 和 yt-dlp，并在 no-backup/internal 目录初始化路径和运行环境。初始 yt-dlp 可由 APK resource `R.raw.ytdlp` 写入；运行时以 latch 在命令构造时等待 update 完成。固定源码尚不能证明任一实际 APK 的 ABI、native artifact、许可证、NOTICE、SBOM 或加载结果。
+- `YTDLUpdater` 从 stable/nightly/master release API 的 JSON 读取 tag 和按 asset name 匹配的 `browser_download_url`，将文件下载到 `cacheDir` 临时文件。它不验证下载资产的 SHA-256、签名、长度、provenance 或运行时兼容性；安装时先删除现有 yt-dlp 目录、再新建并复制临时文件，非 staging 校验后的原子切换。复制失败会删除目录并调用 `initYTDLP()` 恢复内置 resource，但不保留/验证上一已知可用的已更新版本；版本标签/名称仅写入 SharedPreferences。
+- `RuntimeManager` 会把 `IOException` 包装为带原始原因的 `ExecuteException`，`YTDLUpdater.fetchJsonFromUrl()` 直接记录 exception；不存在稳定的 unavailable、cancel、bad asset/version mismatch、native/process crash 或 rollback result。Python/FFmpeg/Aria2c/Node/Deno/QuickJS 的实际下载/更新 artifact 在本轮没有解析或运行，因此不能用 yt-dlp updater 推断它们的供应链闭包。
+- 本轮仅只读固定隔离源码和 Gradle 声明，未请求 release API、下载/执行/更新 runtime、读取日志、URL、媒体、Cookie、设备文件或构建 artifact。future `engine-media` 必须对每个实际 ABI/runtime 使用签名或 SHA-256 锁定 manifest、来源、许可证、兼容矩阵及 SBOM；在隔离 staging 校验后原子发布，保留可验证 last-known-good rollback，并以脱敏、可取消 contract 覆盖 success、unavailable、cancel、crash、version mismatch。该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。

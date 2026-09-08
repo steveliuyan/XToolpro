@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=42`、`Pending=41`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=43`、`Pending=40`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -108,7 +108,7 @@
 | 命名/路径模板、冲突策略、按列表分目录 | `app/` settings/template flow | 模板预览、SAF 输出和原子提交 | Pending |
 | 历史、取消记录、备份恢复 | Room、设置/备份路径 | 任务历史和可恢复快照 | Pending |
 | 后台通知、完成动作、开机恢复 | WorkManager、intent entry | 后台任务和恢复策略 | Pending |
-| yt-dlp、FFmpeg、Aria2c、Python/JS runtime 管理 | `app/` component management | 版本、来源、校验、更新和回滚 | Pending |
+| yt-dlp、FFmpeg、Aria2c、Python/JS runtime 管理 | `core/RuntimeManager.kt`、`YTDLUpdater.kt`、`core/packages` | 版本、来源、校验、更新和回滚 | Partial（静态）：固定构建声明 youtubedl-android library/Aria2c `0.18.1`、FFmpeg `0.17.2`；`RuntimeManager` 管理 Python、FFmpeg、Aria2c、NodeJS、Deno、QuickJS 与 APK resource 初始化的 yt-dlp，并用 update latch 阻止命令与更新并发。yt-dlp updater 从 release API 取得 tag/asset URL，下载到 cache 临时文件后却先删除现有运行目录再复制；固定路径没有 SHA-256、签名、资产长度、许可证/NOTICE/SBOM 或兼容性验证，也不保留上一已知可用版本。复制失败只删除新目录并重新初始化内置 yt-dlp，不能作为版本化 rollback；版本仅写入 SharedPreferences，错误会带原始 exception。XToolpro 必须为每一实际 ABI/runtime 建立签名或 SHA-256 锁定 manifest、许可证和兼容矩阵，先校验 staging artifact 再原子切换，保留可验证 last-known-good rollback，并以脱敏 contract 覆盖 unavailable、cancel、crash 与 version mismatch；完成真实更新/回滚五类验证前保持 `Partial` |
 | 终端和自定义命令 | Termux components、command path | 明确授权、沙箱边界和脱敏输出 | Partial（静态）：固定 ytdlnis `MkSession` 创建交互式 shell，会生成带 Python、FFmpeg、Node、Deno、Aria2c 与 yt-dlp 可执行路径的 shell functions；`use_cookies` 时该 yt-dlp function 同时拼接内部 Cookie 文件的 `--cookies` 参数。`TerminalFragment` 直接将选中的 command-template 或 shortcut 文本写入会话；`CommandTemplate` 内容可持久化、剪贴板导入/导出，缺少命令 allowlist、参数结构化或逐次风险确认。`TerminalItem` 与 DAO 又把完整 command 和 terminal log 放入普通 Room 表；固定路径未见针对 URL、Cookie、令牌或输出的统一脱敏。该审计不执行命令、不读取真实终端内容、Cookie、URL、下载、日志或设备文件，不能断言某一命令实际可执行或曾泄露数据。XToolpro 仅能在单独受限环境中，以逐次明确授权、结构化允许参数、最小 SAF scope、可取消进程和默认脱敏输出提供必要补充；不得将上游通用终端或未审计模板直接暴露给产品流程。完成隔离、取消、敏感输出和滥用审查前保持 `Partial` |
 
 ## ImageToolbox：图片能力
