@@ -1241,6 +1241,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Android `GlobalState.kt` 使用 `Log.d("FlClash", text)`；`ServicePlugin.kt` 可将原始 `error.message` 经 MethodChannel 返回，`ServiceState.kt` 在 setup 失败时将原始 message 写入 Android log 并 Toast。固定模块引用 Firebase Analytics 与 Crashlytics NDK；Dart 默认关闭 Crashlytics collection，但“上次崩溃”查询仍初始化 Firebase，manifest 未提供静态默认禁用声明。未发现直接将 `commonPrint`、URI 或配置字段提交给 Crashlytics 的调用，也未进行 SDK 自动采集/上传或 logcat 验证。
 - 本轮未执行 ADB，未读取日志正文、请求/连接正文、规则或配置、通知内容、崩溃报告、订阅 URL、凭据、Cookie、数据库、文件、地址、路由、DNS 或流量内容；未触发 crash、网络请求、日志导出或遥测上传。结论仅证明固定源码的数据流与隐私边界，不构成运行时字段泄露或崩溃诊断能力的 success proof。future `engine-proxy` 必须在边界处最小化并脱敏 process/host/IP/rule/chains 等字段，统一稳定错误码，默认不初始化或上传遥测，显式同意后才启用；日志与请求队列需有可核验的 drain/drop 生命周期，导出使用最小 SAF grant，所有 success、unavailable、cancel、crash、version mismatch 均需逐项持久 terminal receipt。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+### FlClash always-on 与 lockdown 能力边界静态审计（2026-09-09）
+
+- 固定 `VpnService.onStartCommand()` 将系统启动回调发送为受签名权限保护的 `VPN_START_REQUESTED` 广播；`ServiceBroadcastReceiver` 再交给 `ServiceState.handleStartAction()`。当 Flutter engine 未附着时，该路径读取已有 shared state、调用 `quickSetup` 并请求 native service start；它不是普通 bound-service 的可 await 启动回执。
+- 固定 `VpnService.onRevoke()` 先执行 service/module/TUN stop，再发送同样受保护的 `VPN_REVOKED` 广播。源码未声明独立的 service restart mode，也没有持久化运行意图、重试退避、reboot 后健康核验、lockdown 检测/设置 API 或竞争 VPN 仲裁；app process 死亡时内存中的 `ServiceState`/controller 不能提供恢复记录。
+- 本轮仅复核固定源码和既有只读系统入口证据；未写入 always-on/lockdown 设置、未重启设备、未杀进程、未触发 VPN revoke 或竞争 VPN，也未读取配置、通知、日志、请求、节点、订阅 URL、凭据、Cookie、数据库或设备文件。因此不能把系统设置入口可达或当前“未配置/未启用”状态当作该能力的 success proof。
+- future `engine-proxy` 必须把 always-on、lockdown、reboot、process death、service loss、VPN revoke 与竞争 VPN 分成可观察的 capability/health 状态；不支持或无法检测时返回脱敏 `Unavailable`，恢复意图和失败原因进入持久状态机，并以真实设备契约验证启动、断线阻止、恢复、取消、crash 与 version mismatch。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09）
 
 - focused commit `a9842d9` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
