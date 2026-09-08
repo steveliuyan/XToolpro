@@ -1556,6 +1556,20 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点 focused commit `b021cfb8fe6ee9a425966cf02917c4d8b5f36a5e` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。工作树中的其他既有修改和临时产物未纳入提交。
 
+### FlClash GeoIP/GeoSite/GeoData 更新链路静态审计（2026-09-09）
+
+- 审计对象为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未启动上游功能、未发起下载、未发送真实 URL、未读取设备数据或使用 ADB。相关源码位于 `core/Clash.Meta/component/updater/update_geo.go`、`core/Clash.Meta/component/resource/vehicle.go`、`core/Clash.Meta/component/geodata/init.go`、`lib/providers/actions/geo_resource.dart`。
+- `update_geo.go:52-194` 的 MMDB、ASN、GeoIP、GeoSite 更新均从 `geox-url` 解析出的 URL 创建 HTTP vehicle，读取既有文件 hash，使用 `defaultHttpTimeout=90s` 的 context、2xx 状态检查和内存 hash 去重；GeoIP/GeoSite 在写入前调用 standard loader 的 `LoadIPByBytes`/`LoadSiteByBytes`，MMDB/ASN 使用 MaxMind reader 解析。相同 hash 只刷新 mtime 并返回 skipped。
+- `resource/vehicle.go:122-172` 支持调用方 context、ETag（仅全局开关打开时）和可选 `sizeLimit`，但本更新路径传入 `sizeLimit=0`、空 header 和空 proxy；响应正文通过 `io.ReadAll` 完整进入内存。固定路径未见 Content-Type 校验、响应长度上限、签名/外部 hash、版本 provenance、来源绑定或独立取消 token。
+- `resource/vehicle.go:38-47,114-116` 的 `safeWrite` 创建父目录后直接 `os.WriteFile` 覆盖目标，未见临时文件、fsync、原子 rename、read-back 或失败回滚。定时更新失败会返回包装错误并发送 `sendGeoUpdateStatus`，但未形成持久化、逐资源 terminal receipt。
+- 初始化路径 `geodata/init.go:71-87` 也直接打开目标并 `io.Copy`；不存在目标或校验失败时，`initGeoSite`、`initGeoIP`、`initASN` 分支会直接下载覆盖，部分无效文件路径先 `os.Remove` 旧文件再下载。下载失败因此可能留下缺失或部分文件。`InitGeo*` 使用每资源 mutex；`UpdateGeoDatabases` 使用进程级 `updatingGeo` 布尔防重入，并通过 `errgroup` 并行更新启用资源。自动更新 ticker 以四类资源中首个存在文件的 mtime 判断整体更新时间，未见跨进程恢复或每资源来源锁定。
+- Flutter `GeoResourceAction.updateGeoResource()` 仅把资源名转发到 `coreController.updateGeoData()`；`updateGeoResourceUrl()` 只做 URL 形状校验并写入 patch config，没有稳定的成功、失败、取消或来源验证回执。
+- 结论：该上游具备可配置 URL、超时、hash 去重和内容解析校验，但不满足 XToolpro 要求的有界响应、可取消下载、原子发布、旧数据保留、版本/来源 provenance 与稳定 terminal receipt。对应 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`，不得据此进入正式 engine 集成。
+
+#### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
+
+- focused commit 尚未创建；本次仅修改 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。创建提交后仍不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
