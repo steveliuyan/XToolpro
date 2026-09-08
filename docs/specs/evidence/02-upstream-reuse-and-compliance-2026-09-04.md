@@ -812,6 +812,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 随后执行 `am force-stop com.follow.clash.dev`；第 5 秒 `tun0` 不存在且 dev 进程不存在。再解析并打开 dev `MainActivity`，第 8 秒 dev 进程存在而 `tun0` 仍不存在，证明此轮强停后的正常打开没有在没有新的启动请求时恢复 TUN。
 - 该 evidence 证明正确变体的原生显式启动可建立 TUN，并覆盖一次运行态 force-stop 清理和无意自动恢复边界；它不证明 core health、可转发流量、系统重启、always-on/lockdown、竞争 VPN、通知权限撤销或 service callback 的恢复行为。XToolpro 的 future `engine-proxy` 仍须以独立持久状态机、脱敏稳定错误和 TUN/健康/流量分别核验；完成 success、unavailable、cancel、crash、reboot、permission revoke 与 version-mismatch 契约测试前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash dev 原生 STOP 与实际 TUN 清理真机验证（2026-09-08）
+
+- 通过已解析的 `com.follow.clash.dev/com.follow.clash.QuickActionActivity` 和 `com.follow.clash.dev.action.START` 建立运行态；第 7 秒仅检查到 `tun0` 存在、dev 进程存在。
+- 随后向同一已解析组件发出 `com.follow.clash.dev.action.STOP`。第 5 秒 `tun0` 不存在而 dev 进程仍存在；再等 5 秒，第 10 秒结果相同。该证据证明本轮原生显式 STOP 实际清理了 TUN，同时保留应用 UI 进程。
+- 本轮没有发送流量、读取系统 VPN、通知、日志、请求/连接、配置、节点、订阅 URL、凭据、Cookie、设备数据库或导出文件，也没有改动持久化配置。该实际最终状态不等价于 Flutter `ServicePlugin.stop()` 的同步回执，亦不能证明 service destroy completion、core health、流量/请求缓存清理、失败/超时、reboot、always-on/lockdown、竞争 VPN 或 permission revoke 行为。
+- XToolpro 的 future `engine-proxy` 仍须将“停止请求已提交”和“实际停止已核验”区分为可 await 状态，并以脱敏错误、TUN/服务/core 分别断言覆盖 success、unavailable、cancel、timeout、crash、process death、reboot、permission revoke 与 version mismatch；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
