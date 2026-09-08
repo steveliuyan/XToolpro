@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=38`、`Pending=45`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=39`、`Pending=44`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1125,6 +1125,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 ImageToolbox version catalog 声明 OpenCV `5.0.0.1`、ONNX Runtime Android `1.29.0`、`aire` `0.18.1` 与 ImageToolboxLibs `8.0.6`。`lib:opencv-tools` 导出 OpenCV；`lib:neural-tools` 导出 ONNX Runtime 并依赖 aire；多个 feature 依赖 OpenCV/GPUImage。ImageToolboxLibs 的固定版本坐标包含 GPUImage、GIF/APNG、JP2、QOI、awebp、PSD、DjVu、RAW、TIFF、GMIC、archive 与其他 codec/processor 模块，不能由根仓库 Apache-2.0 许可替代其各自许可证审查。
 - `app/build.gradle.kts` 仅声明 `armeabi-v7a`、`arm64-v8a` 与 `x86_64`；非 app bundle 构建启用 split ABI 和 universal APK，JNI packaging 对 `libcoder.so` 使用 `pickFirst`，并保留 debug symbols。`market` flavor 另加入 ML Kit subject/selfie segmentation，`foss` flavor 不包含该依赖。固定归档本身没有 app `jniLibs` 目录，因此真实 native 库来自尚未解析的第三方 artifact。
 - 本轮未解析或下载任何依赖，未构建 AAR/APK，未加载 native library 或处理图像；因此没有逐 ABI/variant 的库清单、SHA-256、符号/加载、内存、GPU fallback、设备兼容性、许可证/NOTICE/SBOM 或 rollback 证据。XToolpro future `engine-image` 必须为每个实际交付 artifact/ABI/flavor 锁定来源、许可证与 hash，并真实执行 GPU/CPU fallback、unsupported ABI、cancel、native crash 与 version-mismatch contract。矩阵 native/GPU/AI 项从 `Pending` 调整为 `Partial`；Image 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ImageToolbox OCR 模型与导入边界静态审计（2026-09-08）
+
+- 固定 `feature:recognize-text` 同时依赖 Tesseract4Android 与 `lib:neural-tools` 的 ONNX PaddleOCR。PaddleOCR 提供 CJK、Korean、Latin、EastSlavic、Thai、Greek、English、Cyrillic、Arabic、Devanagari、Tamil、Telugu 和 UniversalV6 等 13 个 bundle，从 Hugging Face `T8RIN/imagetoolbox-models` 的 `main` 分支下载 ZIP；Tesseract best/standard/fast 训练数据也由三个 `tessdata*` 仓库 `main` 分支的 `.traineddata` URL 获取。固定 URL 没有 immutable commit/tag 或哈希。
+- Paddle 只通过 `det.onnx`、`rec.onnx`、`cls.onnx` 与 dictionary 文件的存在性决定模型可用，Tesseract 只检查目标 `.traineddata` 是否存在；两条下载路径都没有预期长度或 SHA-256 验证，也未在固定代码中发现逐模型许可证/provenance manifest。Paddle ZIP 解包前未做完整性验证；Tesseract 语言模型允许导出，并在导入 ZIP 时直接以 entry name 相对 `filesDir/tesseract` 创建输出，未先作 canonical-path containment 检查，故该边界不能接受未审计导入包。
+- 缺失数据分别返回 `NoData`/`NoPaddleData`，其他识别异常作为带原始 throwable 的 `Error` 返回；批量文字输出会写入其 message，UI 也可显示通用 failure。该路径没有把 missing、cancel、损坏/版本错配、ONNX/Tesseract load 或运行异常收敛为脱敏稳定 terminal result。本轮只读隔离上游源码，未下载模型、导入语言包、处理图像或读取任何文本内容。
+- future `engine-image` 必须固定每个 OCR bundle/训练数据的来源、许可证、版本、长度与 SHA-256，校验 archive 及其 canonical 解包目标，并默认避免将原始 OCR 文本或 throwable 写入诊断/批量输出。完成真实模型的 success、unavailable、cancel、crash、version-mismatch 和隐私输出契约前，OCR 矩阵项从 `Pending` 调整为 `Partial`；Image 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 

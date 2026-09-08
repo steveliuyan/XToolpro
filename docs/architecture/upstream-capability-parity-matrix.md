@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=38`、`Pending=45`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=39`、`Pending=44`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -133,7 +133,7 @@
 | 取色器、调色板、曲线和颜色比较 | `feature:pick-color`、`lib:curves` | 取色、调色和编辑参数 | Pending |
 | 图片转 PDF、PDF 页面转图片 | PDF/tool feature paths | 文件转换任务和输出验证 | Pending |
 | GIF 帧提取、SVG、二维码/条形码 | format/archive/QR paths | 导入、编辑和导出 | Pending |
-| OCR/文字提取和模型能力 | `lib:neural-tools`、OCR integrations | 本地模型、隐私提示和 unavailable 状态 | Pending |
+| OCR/文字提取和模型能力 | `feature:recognize-text`、`lib:neural-tools`、Tesseract4Android | 本地模型、隐私提示和 unavailable 状态 | Partial（静态）：固定 feature 提供 Tesseract、PaddleOCRv5/v6；Paddle 的 13 个语言/脚本 ZIP 由 Hugging Face `main` 分支下载，Tesseract best/standard/fast `.traineddata` 直接来自各 `tessdata*` 仓库 `main` 分支。两条路径只检查必需文件是否存在（Paddle 为文件名组合，Tesseract 为单文件存在），未锁定 commit、版本、长度或 SHA-256，也没有逐模型许可证/provenance manifest。Paddle ZIP 解包前未验证 hash；Tesseract 语言包可导出，导入时直接以 zip entry name 写入 internal `filesDir/tesseract`，固定代码未作 canonical-path containment 检查。识别异常虽可形成内部 `NoData`/`NoPaddleData`/`Error`，但 `Error` 携带原始 throwable 且 UI 可将其写入批量输出或 failure toast，不能作为脱敏、稳定的 engine contract。XToolpro 必须锁定各训练数据/ONNX bundle 的来源、许可、hash 和解析边界，拒绝路径逃逸/损坏包，并将缺失、取消、加载崩溃、版本不匹配映射为有界脱敏结果；完成真实模型五类契约和隐私输出审查前保持 `Partial` |
 | OpenCV、GPU、native codecs、AI models | `lib:opencv-tools`、`lib:neural-tools`、ImageToolboxLibs、`app/build.gradle.kts` | ABI、内存、版本、校验和与回滚 | Partial（静态）：固定 version catalog 锁定 OpenCV `5.0.0.1`、ONNX Runtime Android `1.29.0`、`aire` `0.18.1` 与 ImageToolboxLibs `8.0.6`；后者提供 GPUImage 及 GIF/APNG/JP2/QOI/WebP/PSD/DjVu/RAW/TIFF/GMIC 等多个 native/codec 组件。app 只声明 `armeabi-v7a`、`arm64-v8a`、`x86_64`，对非 bundle 构建开启 ABI split/universal APK，并以 `pickFirst` 处理至少 `libcoder.so`；market flavor 另引入 ML Kit subject/selfie segmentation，foss flavor 不引入该路径。固定源码归档没有自产 `jniLibs`，本轮也未解析/构建第三方 AAR 或 APK，故尚无逐 ABI 实际库清单、hash、符号/加载结果、内存/设备兼容性、许可证/NOTICE/SBOM、GPU fallback 或 rollback 证据。XToolpro 必须对每个实际交付 ABI 和 flavor 锁定所有 native/AI artifact 的来源、许可证、hash 与加载契约，并真实验证 GPU/CPU fallback、unsupported ABI、cancel、native crash 与 version mismatch；完成前保持 `Partial` |
 
 ## 批准门禁
