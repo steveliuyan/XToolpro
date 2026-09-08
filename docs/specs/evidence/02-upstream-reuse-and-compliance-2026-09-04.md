@@ -1284,6 +1284,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Android `PackageResolver`/`getPackages()` 是访问控制页的独立包清单入口，读取 `GET_PERMISSIONS` 安装包信息；它既不是 find-process 的运行时证明，也不应被 adapter 用作默认诊断或日志字段。固定请求/连接详情仍可能携带 process/path，未见统一最小化和脱敏边界。
 - 本轮仅复核固定源码与既有开关持久化 proof；未启动 VPN、未读取应用清单、进程名、请求/连接、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。future `engine-proxy` 必须将进程识别声明为可选 capability，在权限/引擎不可用时返回脱敏 `Unavailable`，对每项归因提供最小字段和可验证状态，并以真实流量、性能、取消、crash 与 version mismatch 契约测试确认；Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，进程归因审计）
+
+- focused commit `82ebdd8` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，LAN 暴露审计）
 
 - focused commit `ee898ba` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
