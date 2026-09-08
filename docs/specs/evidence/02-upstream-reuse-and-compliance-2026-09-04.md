@@ -1064,6 +1064,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 上述错误可继续到 `ManagedServiceBinding.useService()` 的 `runCatching`，使 `ServiceController.start()` 记录原始异常字符串、清理 binding 并返回 `0L`；`ServiceState.start()` 仅据该数值设置 `STOPPED` 并返回 `false`。同时固定 `ServicePlugin.start()` 在提交 `ServiceState.requestStart()` 后立即 MethodChannel `success(true)`，不等待这个结果。故这条路径只可能形成异步泛化失败，无法区分缺失 artifact、ABI/bridge/version mismatch 与运行期 core crash，也没有稳定、脱敏的外部 terminal result。
 - 本轮只读固定上游归档的 Kotlin bridge、service/controller/state 源文件；未执行或诱发 native 失败，未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须在加载前完成受签名 manifest 核验；在 throwable 边界把缺失映射为 `Unavailable`、不一致映射为 `VersionMismatch`、加载/运行异常映射为 `EngineCrashed`，并使调用方等待一次性、脱敏的 terminal result。完整/缺失/错配 artifact 的隔离五类契约仍未执行；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android 启动健康回执表面静态审计（2026-09-08）
+
+- 固定 `VpnService.handleStart()` 在 `Builder.establish()?.detachFd()` 后、调用 `Core.startTun()` 前就把私有 `tunRunning` 设为 true；Kotlin `Core.startTun` 是 `Unit`，虽然 Go export 返回 `true`，JNI 调用方没有接收该值。`ServiceController` 只以 service 调用完成和 `runTimeMillis` 记录开始时间，不读取 TUN、listener 或 core health。
+- 固定 Android core 表面没有 health/readiness/TUN-established 方法。现有 `getTraffic`/`getTotalTraffic` 被 UI 和通知用于流量展示；原生 fallback 保留相同 JNI 方法并返回 `{}`，故其可调用性或空流量对象不能证明完整 `libclash`、listener、TUN 或可转发性。该审计不读取设备流量或通知内容。
+- 本轮只读固定上游归档的 Android/Go/Dart bridge 源文件；未执行 core、未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须增加独立、最小化且无敏感字段的 health handshake，并将 system establish、TUN 存在和 engine readiness 作为不同阶段；只有这些受限回执可形成 `Success`。其余路径必须在 deadline 后稳定收敛为脱敏 terminal result。完整/缺失/错配 artifact 五类隔离契约仍未执行；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
