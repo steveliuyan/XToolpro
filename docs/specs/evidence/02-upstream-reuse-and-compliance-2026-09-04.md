@@ -896,6 +896,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 此结果与运行态偶数次切换最终保持运行相符。但本轮不读取 `isRunningRequested()`、短时间 TUN 状态、协程调度或资源计数，不能证明 action 逐个线性化、期间没有反向状态或不存在并发资源竞争。
 - XToolpro future `engine-proxy` 必须以线性化的显式目标状态、去重/取消语义和实际 TUN/core health 回执替代并发“读取后切换”；仍需无敏感字段的快速双切换、重复请求、timeout、crash、process death、reboot、permission revoke 与 version-mismatch 契约测试。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android 13 通知权限撤销下共享 TOGGLE 契约（2026-09-08）
+
+- 小米 10S（`bf353dda`，API 33）停止基线下，在确认 permission/app-op 允许后，以正常 `pm revoke` 临时撤销 dev 变体 `POST_NOTIFICATIONS`。UID 层 app-op 显示 `POST_NOTIFICATION: ignore`，同次 package 层查询仍显示 `allow`；因此不将二者压缩为单一授权状态。
+- 强停 dev 变体后，以已解析的 `com.follow.clash.dev/com.follow.clash.QuickActionActivity` 与 `com.follow.clash.dev.action.TOGGLE` 冷启动；第 7 秒及第 14 秒均仅确认 `tun0` 不存在、dev 进程存在。随后同一精确 STOP action 后仍无 TUN，最后以正常 `pm grant` 恢复 permission，package 层显示 `allow`。
+- 固定源码表明动态快捷方式和 `TileService` 共用该 TOGGLE action；本轮只证明这个共享 action 在撤销态观察窗口没有形成 TUN，不能外推至桌面快捷方式/系统磁贴 UI、前台通知可见性、Android permission callback、用户可见 unavailable/cancel、core 健康或流量。未发送流量，未读取系统 VPN、通知正文或 extras、日志、配置、节点、订阅 URL、凭据、Cookie、请求、数据库或文件。
+- XToolpro 未来必须使所有 VPN 入口在真实授权结果不可用时一致收敛为可恢复且脱敏的未启动状态；用相同的有界 completion/health 回执覆盖 direct start、toggle、notification 和 tile 路径。在完整 adapter 与五类契约测试完成前，该行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### XToolpro `engine-proxy` Phase 02 契约执行门禁静态审计（2026-09-08）
 
 - 受版本控制文件盘点显示，`engine-proxy` 当前只有 `build.gradle.kts` 和空的 `src/main/AndroidManifest.xml`；前者仅声明 Android library/Kotlin plugin 及对 `:core-model` 的依赖。该模块没有 Kotlin/Java 源文件、FlClash dependency、native library、公开 engine API、capability/health/version 模型或测试源。
