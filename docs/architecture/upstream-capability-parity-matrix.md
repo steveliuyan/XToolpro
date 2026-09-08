@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=50`、`Pending=33`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-08 Phase 02 gate 只读汇总：本矩阵当前为 `Verified=4`、`Partial=51`、`Pending=32`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -96,7 +96,7 @@
 | 上游能力 | 来源路径/组件 | XToolpro 映射 | 状态 |
 | --- | --- | --- | --- |
 | URL、批量 URL、系统分享、剪贴板识别 | `ShareActivity.kt`、`MainActivity.kt`、`HomeFragment.kt`、`UiUtil.kt`、manifest | 解析入口和批量校验 | Partial（静态）：固定 manifest 为 exported `ShareActivity` 声明 `ACTION_SEND text/plain` 与多个 HTTP(S) `ACTION_VIEW` filter；该 Activity 从 `EXTRA_TEXT`/data 取值并 `extractURL()`，可依偏好直接后台排队。主页 clipboard 检查会读取 primary clip，按换行筛出多个 `Patterns.WEB_URL`；文本文件分享也可被 `MainActivity` 全量读入并传到 URL 输入。入口没有逐 URL 用户确认、来源/权限/内容类型约束、规范化与 allowlist 结果、批量部分失败收敛或取消 receipt；`ShareActivity` 还 `Log.e` 整个 intent，URL 和异常/复制日志可进入系统日志或剪贴板。XToolpro 必须在显式用户动作后以脱敏的结构化输入解析与逐项确认处理共享/剪贴板，不得自动持久化或后台请求；真实输入、拒绝、取消、批量部分失败和隐私契约验证前保持 `Partial` |
-| 播放列表/频道、部分选择、增量下载 | `app/`、yt-dlp 参数路径 | 队列拆分、跳过已下载和进度 | Pending |
+| 播放列表/频道、部分选择、增量下载 | `YTDLPUtil.kt`、`ResultDao.kt`、`DownloadWorker.kt` | 队列拆分、跳过已下载和进度 | Partial（静态）：固定解析可保存 playlist title/URL/index，结果表支持按 playlist 过滤；单项构建时可向 yt-dlp 传 `--match-filter` 或 `-I`，并可选 `--download-archive` 跳过已下载。其没有不可变成员快照、页码/版本/etag、每成员授权或统一部分成功结果；archive 命中仅由“无 final paths”显示为已存在，无法区分跳过、空产出与失败。playlist URL、标题、成员 metadata、filter 和命令仍会进 Room/history/log。XToolpro 必须在显式用户选择后持久化可审计成员快照和逐项状态，稳定区分 skipped/success/failed/cancelled，默认脱敏敏感 source；真实 playlist/channel、增量、部分选择、并发变更和取消验证前保持 `Partial` |
 | 标题、作者、封面、时长、描述、章节、元数据 | yt-dlp/NewPipe extractor | 真实详情页和任务快照 | Pending |
 | 视频、音频、缩略图、字幕、元数据下载 | yt-dlp、FFmpeg | 格式任务和输出验证 | Pending |
 | 容器、编码、分辨率、帧率、音质、语言选择 | yt-dlp format selection | 格式选择器和能力提示 | Pending |

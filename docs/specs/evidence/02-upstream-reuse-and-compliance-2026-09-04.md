@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=50`、`Pending=33`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=51`、`Pending=32`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1193,6 +1193,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 manifest 将 exported `ShareActivity` 注册为 `ACTION_SEND text/plain` 与多组 HTTP(S) `ACTION_VIEW` handler；其从 `EXTRA_TEXT` 或 intent data 取得输入并 `extractURL()`。homepage 的 `checkClipboard()` 可读取 primary clipboard，按换行筛出多个 `Patterns.WEB_URL`；`MainActivity` 还会读取分享 text file 的完整内容并传给 URL 输入。因此上游具备 URL、批量 URL、分享与剪贴板的有限入口。
 - 入口按偏好可直接后台 queue download，没有逐 URL 明确确认、结构化/规范化结果、来源 allowlist、内容类型/大小边界、批量部分失败或 cancel receipt。`ShareActivity` 会 `Log.e` 整个 intent，URL 与 extras 因此可进入系统日志；共享、clipboard 和一般错误路径也能把原始字符串送入 UI/clipboard。固定源码没有为这些敏感输入提供默认脱敏/最小化持久化合同。
 - 本轮仅只读固定隔离的 manifest、activity、主页 clipboard 与 UI helper 源码；未触发 share/deep link、读取实际剪贴板、URL、文件、日志、Cookie、媒体或设备数据。future `engine-media` 必须只在显式用户动作后，采用脱敏的结构化解析和逐项确认处理 share/clipboard 输入，禁止自动持久化或后台请求，并以真实设备验证拒绝、取消、批量部分失败、crash 和 version mismatch。完成前该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ytdlnis 播放列表、部分选择与增量下载边界静态审计（2026-09-08）
+
+- 固定 `YTDLPUtil` 解析 playlist title/URL/index，结果表可按 playlist title 筛选。构建单项下载请求时，可对 playlist URL 使用 yt-dlp `--match-filter` 或 `-I` 选择成员；可选 `--download-archive` 支持避免已下载内容。因此存在有限播放列表、部分选择与增量下载基础。
+- 上游没有不可变成员快照、source/version/etag、成员授权决定或每成员状态/部分成功 receipt；成员变动时不提供一致性模型。archive 开启且 final paths 为空时仅显示“already exists”，不能稳定区分 archive skip、空产出、输出迁移失败或执行失败。playlist URL、标题、成员 metadata、filter 和 command 又会进入 Room/history/log 路径。
+- 本轮仅只读固定隔离上游的 parser、request builder、结果 DAO 和 worker 源码；未解析或访问任何真实播放列表、频道、媒体、URL、Cookie、日志或设备数据。future `engine-media` 必须在明确用户选择后持久化可审计成员快照与逐项状态，以脱敏稳定结果区分 skipped/success/failed/cancelled，并在真实 playlist/channel、增量、部分选择、成员变动、取消与版本错配上验证。完成前该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
