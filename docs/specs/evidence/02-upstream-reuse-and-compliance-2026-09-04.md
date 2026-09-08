@@ -1346,6 +1346,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定路径未提供 artifact provenance/hash manifest、last-known-good 保留、原子替换、回滚触发器或更新失败 terminal receipt；不能把应用更新检查、外部源码链接、`System.loadLibrary` 成功或既有 APK hash 当作内核更新能力。
 - 本轮只读复核固定源码与既有脱敏 UI 证据，未点击更新/源码链接、未下载或替换任何 native artifact，未读取构建产物、SDK、缓存、配置、日志、节点、订阅 URL、凭据、Cookie、数据库或设备文件。该项继续标记 `Unavailable`；future `engine-proxy` 必须随受签名版本 manifest 提供 core/bridge/ABI/hash 校验、staging + 原子发布、last-known-good rollback，并以脱敏 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt 覆盖升级、失败、取消和回滚。Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，内核更新审计）
+
+- focused commit `2835b57` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，诊断审计）
 
 - focused commit `d7f537b` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
