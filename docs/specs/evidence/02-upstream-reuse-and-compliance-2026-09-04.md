@@ -1214,6 +1214,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `DownloadWorker` 只从首个最终媒体文件记录 extension、大小和 Android 媒体时长，未对请求的 container、codec、fps、resolution、bitrate、audio/subtitle language、merge/recode 结果做 read-back、hash、逐输出 receipt 或 unsupported/fallback terminal state。因此 UI 资源与 request string 不是实际可用能力、兼容性提示或输出一致性的证明。
 - 本轮仅只读固定隔离上游的资源、view model、format utility、request builder 和 worker 源码；未解析/下载 URL、运行 yt-dlp/FFmpeg、读取日志/配置/媒体/设备数据或修改任何用户数据。future `engine-media` 必须在明确用户选择后对可用 format 建立版本化 snapshot，明确选择与 fallback，提交前 read-back 实际 stream/container/codec/resolution/fps/bitrate/language，并以脱敏持久 receipt 覆盖 unsupported、unavailable、cancel、crash 与 version mismatch。完成真实 source/format、合并、fallback 和目标设备兼容性验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis 音视频合并、音频提取与转码边界静态审计（2026-09-08）
+
+- 固定 `YTDLPUtil` 可为音频请求加入 `-x`、`--audio-format` 与 `--audio-quality`；视频请求可使用 `--merge-output-format` 或 `--recode-video`。compatibility mode 固定请求 mp4/h264/aac 与 FFmpeg baseline profile；裁剪和移除音轨会构建 `FFmpegCopyStream` postprocessor 参数。因此上游具有有限的请求级合并、提取和转码入口。
+- 这些参数只是传给受固定 runtime/version/ABI 约束的 yt-dlp/FFmpeg；固定代码没有可审计的 post-process 输入/输出映射、临时 staging、原子发布、container/stream 解码 read-back、hash、目标设备可播放性或逐步骤结果。worker 总体成功并不等于每一 merge/recode/extract 步骤成功，且其 cache 移动与 failure cleanup 不能提供部分成功、取消、native crash 或回滚 receipt。
+- 本轮仅只读固定隔离上游的 request builder 与既有 worker 输出/清理路径；未运行 yt-dlp、FFmpeg 或命令，未下载/读取/写入任何 URL、媒体、日志、配置、Cookie、设备或用户文件。future `engine-media` 必须在受确认任务下记录版本化 post-process plan，以临时输出和逐阶段 read-back/原子提交收敛 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并在真实 ABI/设备上验证合并、提取、转码、取消、crash 与恢复。完成前该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
