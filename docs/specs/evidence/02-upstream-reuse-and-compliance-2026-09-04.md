@@ -1016,6 +1016,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅只读固定 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72` 隔离归档中的 `ServiceState.kt` 与 `ServiceController.kt`；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。该静态结论不声称目标设备已发生挂起或在任何具体时序中留下 TUN。
 - XToolpro future `engine-proxy` 必须以一个受监督、可取消且有 deadline 的启动 transaction 覆盖 config/core setup、permission、VPN establish 与 health；STOP/detach 必须取消所有 in-flight 阶段，并只在实际清理/稳定脱敏 `Cancelled` 结果完成后结束。仍需在隔离 fixture 和真机上验证 setup callback timeout、STOP、detach/recreate、success、unavailable、crash 与 version mismatch；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash core setup callback 所有权与取消释放边界静态审计（2026-09-08）
+
+- 固定 JNI `Core_quickSetup` 将 Kotlin callback 提升为 global reference 后交给 Go `quickSetup`；后者在独立 goroutine 中以 `defer releaseObject(callback)` 延迟释放。`releaseObject` 通过 bridge 的 `release_object` 回到 JNI，因此 callback reference 的释放取决于该 goroutine 返回，而不是 Kotlin continuation 的取消、QuickAction Activity 结束、STOP 或 Flutter engine detach。
+- 对固定 Android bridge、生成 header 与 core export 的针对性检索未发现 `cancelQuickSetup`、setup cancellation token 或提前释放该 callback reference 的公开入口。结合 Kotlin wrapper 未注册 `invokeOnCancellation`，上层即使取得 cancellation 也无法向 native setup 传达一次性取消/释放请求；这不是对实际泄漏的断言，只确认 native in-flight setup 的 callback 所有权与有界释放没有可验证合同。
+- 本轮只读固定 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72` 隔离归档中的 `core.cpp`、`jni_helper.h`、`bride.go` 与 `lib.go`；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
+- XToolpro future `engine-proxy` 必须将每个 native callback 绑定到可取消 transaction，定义 native acknowledgement、deadline 后的确定性清理及一次性释放所有权；STOP/detach、timeout、crash、success 与 version mismatch 都必须给出稳定、脱敏的 terminal result。仍需隔离 fixture 与真机验证释放、无 TUN 残留及无重复 callback；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 ### FlClash Android ABI 构建面与逐 ABI 验证边界静态审计（2026-09-08）
 
 - 固定 `plugins/setup/buildkit/build_tool` 的 `Target` 定义三个 Android c-shared 目标：`armeabi-v7a`、`arm64-v8a`、`x86_64`；未传 `--arch` 或 `--target-platform` 时会选中全部三个。`plugins/setup/buildkit/gradle/plugin.gradle` 将 Go core task 设为 `:core` 的 CMake configure、external native build 与 merge native libs 的前置依赖，说明这是原生桥接的构建输入链，而不是 Flutter APK split 的单独展示设置。
