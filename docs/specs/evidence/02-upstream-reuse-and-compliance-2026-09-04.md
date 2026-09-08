@@ -1046,6 +1046,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定归档及既有 proof 仍只有 arm64 的 `libclash.so`、头文件、bridge pair/hash/symbol 观察；CI 的默认目标和投递文件名均不携带 FlClash/Clash.Meta commit、engine API、bridge revision、逐 artifact hash、符号集或健康结果。它们不能填补每个已发布 ABI 的受签名 manifest 缺口，也不能防止空 JNI fallback 被误判为完整 core。
 - 本轮只读固定上游归档的 workflow、setup 和 build-tool 源文件；未触发构建或发布，未修改 SDK、缓存、上游源码归档或构建产物，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须把支持 ABI 明确列入受签名 manifest，并逐 ABI 验证完整/缺失/错配 artifact 的 hash、bridge、commit/API、健康与五类结果；未发布 ABI 必须稳定返回 `Unavailable`。完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android native provenance 缓存与运行时版本接口静态审计（2026-09-08）
+
+- 固定 buildkit 的 `FingerprintBuilder` 将源码和构建工具输入的字节、target、Go/NDK/编译器环境及 build arguments 计算为 SHA-256；`GoBuilder` 为 Android core 使用 c-shared，并固定传入 `-ldflags=-w -s`。这能驱动本地 cache 失效，但不向 Go binary 注入可查询的 FlClash/Clash.Meta commit、engine API 或 bridge revision。
+- 固定 `BuildCache` record 对实际输出仅保存相对路径、大小和修改时间；其 fingerprint 与 record 是本地 cache 工作资料，未见其被打入 APK、由 `Core.kt`/JNI 导出或在安装时重算。固定 Go export 仅有 setup、TUN、event、traffic、suspend、GC 与 DNS 表面；`Core.kt` 同样没有 version/commit/hash 查询。因此不能以曾经匹配 cache 的构建输出、`System.loadLibrary` 成功或 JNI 符号存在，证明设备加载的 core 与固定源码、headers 或 bridge 完整配对。
+- 本轮只读固定上游归档的 build-tool、core export 与 Kotlin bridge；未运行构建、未读取或写入 cache record，未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。XToolpro future `engine-proxy` 必须把受签名且随交付物保存的 provenance manifest 与 runtime handshake 分开实现：前者逐 ABI 绑定 artifact hash、FlClash/Clash.Meta commit 和 bridge/API，后者在启动前验证并以脱敏 `Unavailable`/`VersionMismatch`/`EngineCrashed` 收敛。完整/缺失/错配 artifact 五类隔离契约仍未执行；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
