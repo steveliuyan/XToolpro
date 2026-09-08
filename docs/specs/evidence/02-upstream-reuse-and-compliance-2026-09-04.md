@@ -1408,6 +1408,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定 `lib/common/task.dart:537-552` 的 `_restoreTask()` 将每个 ZIP entry 以 `posix.normalize(file.name)` 拼到 restore 目录后直接写出，未见 canonical-path containment、绝对路径拒绝或条目大小/数量限制；随后 `:590-617` 以并发 `File.copy()` 将 profile/script 迁移到正式目录。该路径存在归档 entry 路径逃逸和部分迁移不可回滚的静态风险；本轮未构造恶意归档、未读取设备文件、未执行恢复。
 - 本轮仅读取固定提交 `62addf738a76b1a492e19af2dbabdb6d572b9e72` 的隔离归档源码与既有文档，未修改上游文件，未启动构建、未导入真实配置/订阅 URL、未读取日志、配置、节点、请求、数据库、凭据、Cookie 或设备文件，未使用 ADB。XToolpro 后续 adapter 必须在受限临时目录内执行大小/条目/格式预检和 canonical containment，验证后再以同目录原子发布；失败、取消、崩溃和版本错配要清理临时输入并返回脱敏 terminal receipt，恢复还必须具备 staging、逐项 read-back 与回滚。实际恶意归档、损坏/超限、取消、部分失败与版本错配契约测试尚未执行，矩阵相关行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
 
+### FlClash Profile script 覆写与配置生成边界静态审计（2026-09-09）
+
+- 固定 `lib/providers/actions/setup.dart:289-303` 在 `OverwriteType.script` 下从 `setupState.script?.content` 读取整段脚本，并调用 `handleEvaluate()`；`lib/common/javascript.dart:6-27` 使用锁定 pubspec 中的 `flutter_js ^0.8.7`，把完整 raw config JSON 与脚本拼接为 `scriptContent + main(<config>)` 后交给 `getJavascriptRuntime().evaluateAsync()`。调用点未传入超时或取消令牌，也未见 runtime dispose、执行配额、网络/文件/环境沙箱、输入大小限制或脚本来源授权；该包装器本身没有声明这些边界，不能据此推断底层 runtime 提供了受限能力。
+- `handleEvaluate()` 在 `res.isError` 时直接抛出 runtime 的 `stringResult`，成功路径把 `rawResult` 强制转换为 `Map<String,dynamic>`，没有输出 schema、版本/hash、字段白名单或 secret 约束；`getProfileWithId()` 又把异常 `toString()` 直接传给 notifier。脚本结果随后进入 `makeRealProfileTask()` 生成 YAML，并由 `_setupConfig()` 写入配置文件，未形成独立的可等待、可取消、脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` receipt。
+- 固定 `lib/models/common.dart:637-660` 的 `Script.content` 会整体读取内部 JS 文件；`save()` 使用普通 `writeAsString()` 覆盖，`saveWithPath()` 调用 `File(copyPath).copy(copyPath)` 将源路径复制到自身，疑似无法导入。两条保存路径均未见原子写入、fsync、read-back、大小/hash/版本绑定或失败回滚。未执行脚本、未读取设备文件/配置、未使用 ADB；结论仅限固定源码静态边界。
+- future `engine-proxy` 必须在受限 runtime 中绑定脚本来源、版本和 hash，预检输入大小与 schema，禁止未授权网络/文件/环境访问，支持有界 timeout/cancellation，归一化并脱敏错误；脚本失败、取消、runtime 崩溃、版本错配及配置发布失败都必须清理临时状态并返回可持久的 terminal receipt。完成受控 fixture 与五类契约测试前，矩阵新增脚本覆写行保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 acceptance gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，配置导入/恢复审计）
 
 - 本次 focused commit `78b6f97` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
