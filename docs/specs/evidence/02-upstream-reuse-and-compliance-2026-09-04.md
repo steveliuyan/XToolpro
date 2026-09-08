@@ -1077,6 +1077,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
 
+### 已授权启动窗口的系统 VPN 标记与 TUN 分离复核（2026-09-08）
+
+- 在上一轮用户手动启动后的稳定窗口，仅读取系统连接状态中的 VPN 连接标记计数、`tun0` 行数、目标进程计数与通知授权/app-op；结果为 `vpn_connected_markers=1`、`tun0=0`、dev 进程 `1`、`POST_NOTIFICATIONS granted=true`、UID `POST_NOTIFICATION=allow`。
+- 该组合说明系统层 VPN 标记可能存在而实际 TUN 接口不存在；本轮未读取连接详情、通知、日志、配置、节点、请求或数据库，不能据此归因具体 service/core 分支。它只强化了“系统 VPN 标记、进程存活、权限允许均不是 engine readiness 的充分回执”的边界。
+- XToolpro future `engine-proxy` 必须分别记录系统 VPN consent/establish、TUN 存在、native health/readiness 和可转发性，并在这些阶段不一致时阻止 `Success`，返回稳定、脱敏的 terminal result。完成对应真机与隔离契约前，矩阵保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
