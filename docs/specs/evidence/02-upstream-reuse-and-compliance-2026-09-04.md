@@ -896,6 +896,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 本轮仅读取隔离归档，未修改 SDK、缓存、上游源码归档或构建产物。设备端仅作允许范围内的停止基线读取：`tun0=0`、`com.follow.clash.dev` 进程计数为 `1`；未读取日志、配置、通知、节点、请求、数据库或其他敏感内容，亦未使用 ADB 发出 action 或改变任何设备设置。
 - XToolpro future `engine-proxy` 必须在任何配置写入、导出或 VPN 请求前，基于受签名 manifest 核验 FlClash/Clash.Meta commit、engine API、ABI、bridge 和 `libclash.so` SHA-256，以及必需符号/资源集合；缺失、ABI 不符或不一致时必须返回脱敏 `Unavailable`/`VersionMismatch` 并阻止启动。仍需在隔离环境以完整 core 与刻意缺失/错配 artifact 运行 success、unavailable、version-mismatch、cancel、crash 五类契约测试；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### FlClash Android native load 与 fallback 错误映射静态审计（2026-09-08）
+
+- 固定 `Core.kt` 在对象初始化时直接 `System.loadLibrary("core")`。对固定 `android/core`、`android/app` 与 `android/service` 源码的针对性检索未发现 `UnsatisfiedLinkError`、`ExceptionInInitializerError` 或 `LinkageError` 的显式处理；`ServiceController` 的 `runCatching` 只能捕获 `Exception`，`VpnService` 调用 `Core.startTun()` 时也只捕获 `Exception`，因此 native 加载/链接类 `Error` 没有被明确映射为脱敏 `Unavailable` 或 `EngineCrashed`。
+- 这不是唯一故障模式：前一项已确认的 CMake fallback 在 core 输入不完整时仍提供可加载的 `libcore.so` 与同名 JNI 符号，因而绕过链接错误。`VpnService` 可在 `Core.startTun()` 空返回后保留已建立的 TUN；`ServiceController.quickSetup()` 等待 native callback，而 fallback `quickSetup()` 不调用 callback，故可能无限等待，固定代码未为该 callback 建立 timeout/版本不匹配映射。
+- 本轮仅静态读取隔离归档；未触发缺库、错 ABI 或崩溃，未修改 SDK、缓存、上游源码归档或构建产物，也未使用 ADB。该审计不声称任何特定设备已发生上述情况。
+- XToolpro future `engine-proxy` 必须先验证受签名 native manifest，再以限定 timeout 包装初始化/回调和健康握手；将 hash/ABI/API/commit 不一致映射为 `VersionMismatch`，缺失组件映射为 `Unavailable`，加载、符号或运行健康失败映射为 `EngineCrashed`，在任何配置写入、导出或 VPN 请求前拒绝执行。仍需隔离的完整/缺失/错配 artifact 契约测试和真机健康回执；完成前矩阵保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+
 #### 上一检查点远端备份状态（2026-09-07）
 
 - 本检查点 focused commit `392b7946d6c3cae25f0b91ce83f0d1cd2ad1306c` 已成功推送到 `origin/codex/phase02-flclash-direct-logs`，远端分支核验结果与该提交一致；涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。此前短暂出现的 GitHub CLI 网页回调超时不影响 Git push，未将凭据或验证码写入证据。
