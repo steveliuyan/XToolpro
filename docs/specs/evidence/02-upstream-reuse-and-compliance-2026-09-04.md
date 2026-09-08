@@ -1325,6 +1325,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 日志/请求字段可能包含 host、地址、规则 payload、代理链等敏感诊断数据；本轮不据静态字段推断设备实际泄露，但确认固定路径没有统一脱敏或最小化结果合同。未发起流量、未读取日志/请求/配置、节点、订阅 URL、凭据、Cookie、数据库或设备文件。
 - future `engine-proxy` 必须对规则集来源/版本和每次匹配提供最小化、可审计但不含原始目标的结果，明确 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并以受控 fixture 覆盖规则优先级、域名/IP/GeoIP 命中、无命中、更新失败、取消和日志队列清理。Proxy 台账保持 `Investigating`，矩阵对应行保持 `Partial`，Phase 02 acceptance gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，规则命中审计）
+
+- focused commit `5ea564c` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，按应用 bypass 审计）
 
 - focused commit `b9a4b96` 尚未 push；按要求等待用户对 push 的明确确认。未远端备份路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
