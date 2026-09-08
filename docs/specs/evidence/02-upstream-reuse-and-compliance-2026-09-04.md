@@ -1227,6 +1227,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 真机 ABI/API 只读结果为 arm64-v8a/API 33，符合固定 app `minSdk 24`。但固定归档的 `settings.gradle` 声明 `:common`、`:app`、`:library`、`:ffmpeg`，归档中实际缺少 `library` 与 `ffmpeg` module；因此不能把该不完整归档直接构建为可归因的固定提交 APK，更不能以临时替换的未知 artifact 声称 runtime parity。
 - 因此当前只证明真机验证环境的 runtime/commit 可归因性仍不可用，不构成媒体解析、下载、合并或转码 success/unavailable proof，也不改变矩阵状态。future 验证需在版本、ABI、许可证与 artifact hash 均已锁定的隔离 Android 宿主中进行，并在先前定义的受限 ADB 范围内仅记录脱敏 terminal result；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
+### ytdlnis 固定提交源码闭包树核验（2026-09-08）
+
+- 在隔离 clone `D:\xtoolpro\.tmp-ytdlnis-source-verify-20260908` 中只读执行 `git rev-parse HEAD`、`git ls-tree -r --name-only 13320bb64f35c8d04f01bebfa782d7947758fb66 -- library ffmpeg common` 和 `git ls-tree 13320bb64f35c8d04f01bebfa782d7947758fb66`。固定提交为 `13320bb64f35c8d04f01bebfa782d7947758fb66`；路径过滤对 `library`/`ffmpeg` 无输出，顶层树仅含 `.github`、`.idea`、`.kotlin`、`app`、`gradle`、`fastlane` 及构建文件，未包含两模块。
+- 同一 clone 的历史只读核验显示祖先 `0ef8f5bf`（`Init`）曾包含 `common/`、`library/`、`ffmpeg/`；`2b28f347`（`1.1.0`）对 `library/src/...` 与 `ffmpeg/src/...` 执行删除，后续固定提交仍没有这些目录。固定 `settings.gradle` 却继续 `include ':common', ':app', ':library', ':ffmpeg'`，`app/build.gradle` 继续声明 `io.github.junkfood02.youtubedl-android:library:0.18.1`、`aria2c:0.18.1`、`ffmpeg:0.17.2` 外部坐标。
+- 本轮没有联网补取缺失对象，没有构建、安装或运行该提交，也没有读取媒体、Cookie、日志、配置、数据库或设备文件。结论是固定提交源码归档本身不构成可独立重建的完整闭包；不能以未知 artifact、设备 APK 或临时替换模块冒充固定提交 runtime parity。Media 台账保持 `Investigating`，相关矩阵行保持 `Partial`，Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-08）
 
 - focused commits 的远端备份暂未完成：对 `origin/codex/phase02-flclash-direct-logs` 的三次 push 均未返回远端更新，随后 `ls-remote` 未返回该 ref 的可核验 hash。未备份路径仅为 `AGENTS.md`、`docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；未纳入任何其他既有工作区改动或临时产物。待远端可用时必须先推送并核验这些 focused commits，之后才能将本检查点描述为远端备份。
