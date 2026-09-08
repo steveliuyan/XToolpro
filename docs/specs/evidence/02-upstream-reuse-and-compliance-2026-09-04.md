@@ -1072,7 +1072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### Phase 02 acceptance gate 只读缺口汇总（2026-09-08）
 
-- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=46`、`Pending=37`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
+- 依据 active spec 的验收条件，对 `upstream-capability-parity-matrix.md` 与 `upstream-reuse-ledger.md` 做只读统计：矩阵当前 `Verified=4`、`Partial=47`、`Pending=36`、`Unavailable=1`、`Blocked=0`；Proxy、Cleaner、Media、Image 四行台账均为 `Investigating`，没有 `Approved` 或 `Blocked` 域行。因此尚未达到“每个 PRO/CLN/MED/IMG 家族映射到 approved 或 explicitly blocked ledger row”以及“每个 engine 完成 capability-parity matrix”的 acceptance 条件。
 - `engine-contract-test-plan.md` 已为 Proxy、Cleaner、Media、Image 分别列出 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 的期望场景，但当前 `engine-proxy` 没有 adapter/公开 contract/health-version handshake 或测试实现；该计划本身也明确矩阵未完成时不能以少量成功场景宣称完整复用。它是未来执行标准，不是已满足的 contract evidence。
 - 未完成的直接 gate 工作包括：完成四域完整 capability matrix，完成每个已发布 ABI 的受签名 artifact/bridge/commit manifest 及完整/缺失/错配隔离验证，落实并执行五类 engine contract，完成 GPL/SBOM/NOTICE/传递依赖与 app-store/privacy 审查；FlClash 还缺真实 permission/consent/recreate/取消、健康和 TUN 回执契约。保持所有矩阵/台账既有 `Partial`、`Pending`、`Investigating` 状态，暂不进入正式 engine 集成。
 - 本轮只读项目规格、矩阵、台账和测试计划；未修改 SDK、缓存、上游源码归档或构建产物，未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie 或订阅 URL。
@@ -1166,6 +1166,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 用户级暂停、恢复与取消确有有限实现：暂停/取消 receiver 和 ViewModel 会取消 tagged work、通过内存 `RuntimeManager.idProcessMap` 尝试终止子进程，再异步改写 Room 状态；恢复把 paused 项重置为 queued 后重新排队。该 map 不持久化，进程死亡、重启或 map 缺项时无法归因；receiver/worker 多处 `runCatching` 吞掉异常，暂停全部依赖一秒延时后写状态，取消/暂停没有可持久验证的进程终止、数据库写入和输出清理 completion receipt。
 - `YTDLPUtil.buildYTDLRequest()` 可向 yt-dlp 传递用户设置的 `--retries` 与 `--fragment-retries`，且默认不加 `--no-part`；然而任务开始时和 failure 路径均直接删除 cache 输出目录。worker 对某一下载失败标为 `Error` 后自身仍整体返回 `Result.success()`；取消类异常直接返回而不收敛逐项状态。恢复路径不做已产出文件的 read-back、hash/容器完整性或部分成功核验。命令、URL 和原始异常还能进入 log/notification 相关路径，不能作为 XToolpro 的隐私安全合同。
 - 本轮仅只读固定隔离上游归档中的 Worker、Room repository/viewmodel、receiver、runtime 和 request-builder 源码；未执行下载、请求、命令、媒体处理、文件操作、日志读取、Cookie/session 访问或设备操作。future `engine-media` 必须提供可持久化的每项状态机及终止 receipt，以脱敏、稳定的 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` 收敛并发、暂停、恢复、取消、重试和断点；还须在真机验证真实断点、输出完整性、部分成功和进程重启恢复。该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
+
+### ytdlnis 输出命名、SAF 迁移与提交边界静态审计（2026-09-08）
+
+- 固定 `FolderSettingsModule` 为音频、视频、命令和缓存目录使用 `ACTION_OPEN_DOCUMENT_TREE`，申请读写 persistable URI grant；模板设置可写入音视频 filename template，`save_subdirectory` 可启用 website/playlist 等子目录。`YTDLPUtil` 将模板和目录传给 yt-dlp。文件系统目标冲突会追加递增编号；tree move callback 选择 `CREATE_NEW`，因此存在有限的命名、目录与冲突处理能力。
+- `FileUtil.moveFile()` 的直接文件系统分支以 move/copy 后删除源；SAF fallback 经 `DocumentsContract.createDocument` 创建最终目标并以 input/output stream 直接拷贝，再删除源。该链路没有同目录临时 staging、fsync、长度/hash/容器或 metadata read-back、原子 publish、跨 provider rollback 或可持久化的逐项 commit receipt。移动的 per-file exception 仅记录后继续，最后仍返回累积路径并扫描媒体；failure fallback 和 `keepCache=false` 均会递归删源目录。独立 `MoveCacheFilesWorker` 对 API 26+ 使用 `REPLACE_EXISTING`，完成后递归删除缓存子目录，也未提供中断/部分成功/恢复模型。
+- 路径格式化会把 tree URI 转为路径样式文本；打开/分享由 FileProvider 或现有 DocumentFile URI 给外部 app 授予 URI 权限，固定路径还会将路径和异常写入日志。该审计不能断言实际 provider 行为或任何设备上发生泄露。
+- 本轮只读固定隔离上游的目录设置、request builder、文件迁移和 cache worker 源码；未发起 SAF picker、访问/创建/移动/删除/分享用户文件，也未读取日志、URL、Cookie、媒体或设备数据。future `engine-media` 必须在最小 scoped grant 内使用预检、临时输出、read-back、原子提交和失败清理，并以脱敏、逐项持久 receipt 覆盖 provider unavailable、冲突、permission loss、cancel、crash 和 version mismatch。完成真实 provider 与输出完整性验证前，该矩阵项从 `Pending` 调整为 `Partial`；Media 台账保持 `Investigating`，不进入正式 engine 集成。
 
 #### 上一检查点远端备份状态（2026-09-07）
 
