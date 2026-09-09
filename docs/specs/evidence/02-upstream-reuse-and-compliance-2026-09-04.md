@@ -2110,6 +2110,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash Debug profiler 与 GC 管理端点边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 当 `isDebug` 为真时，router 在 secret 管理 group 之外挂载 `/debug`；子路由包含 `PUT /debug/gc`（直接调用 `runtime/debug.FreeOSMemory()`）和 `middleware.Profiler` 全部 profiler 端点，因此不经过 `authentication(secret)`。HTTP/TLS server 虽使用配置 secret，但 Unix/named-pipe server 传入空 secret，在 debug 模式下本地传输必然无鉴权。
+- `isDebug` 由 general log level 是否为 DEBUG 派生，调高日志级别会同步开启 profiler/GC 管理面；未见独立 allowlist、来源绑定、请求/响应大小预算、并发限制、操作审计或稳定错误回执。`/debug/gc` 无正文成功且无完成/耗时确认，profiler 可能暴露堆、goroutine、CPU/profile 等运行时诊断。
+- CORS 应用在根 router，允许配置的 origins 和 private-network 请求；本轮未启动 debug server、未调用 profiler 或 GC 端点、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，Debug profiler 与 GC 管理端点边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
