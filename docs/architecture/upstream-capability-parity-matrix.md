@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=76`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=77`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -94,6 +94,7 @@
 | External-controller `/restart` 完成与失败回执 | `core/Clash.Meta/hub/route/restart.go`、`hub/route/server.go` | 管理面重启、shutdown、exec 结果与可恢复状态 | Partial：`POST /restart` 在取得 executable path 后立即返回 `{"status":"ok"}` 并 flush，随后后台调用 `executor.Shutdown()` 和 `syscall.Exec`/Windows `cmd.Start`。重启失败仅以 `log.Fatalln` 处理，调用方没有等待、失败分类、旧实例保留、回滚或新的健康回执；路由还在非 embed 模式下统一挂载。XToolpro 需把重启建模为可取消、有界、可核验的 terminal operation，保持 `Partial`。 |
 | External-controller debug 路由鉴权边界 | `core/Clash.Meta/hub/route/server.go` | profiler/GC 调试入口的鉴权与禁用策略 | Partial：`router` 在受 secret 保护的管理 group 之前单独挂载 `/debug`，debug 模式下的 profiler 与 `PUT /debug/gc` 不经过 `authentication()`；因此 secret 非空不能覆盖该调试入口。XToolpro 需默认禁用 debug 路由，并将任何诊断操作置于独立、最小权限且可审计的本地授权边界，保持 `Partial`。 |
 | External-controller DoH 路由鉴权与错误边界 | `core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/hub/route/doh.go` | 受控 DNS-over-HTTPS 入口、请求上限和脱敏错误回执 | Partial：`router` 在 secret 鉴权 group 外以 `r.Mount(dohServer, dohRouter())` 挂载 DoH；`dohHandler` 接受 GET `dns` query 和 POST `application/dns-message`，POST 仅以 `io.LimitReader(..., 65535)` 限制读取。该入口未复用 `authentication()`，未见来源限制或管理面 allowlist；base64、relay、禁用 DNS 和 content-type 错误直接返回原始错误文本/固定内部错误，调用方无法获得稳定脱敏分类。XToolpro 需将 DoH 绑定到受控本地范围、统一鉴权与来源策略，保持有界请求体和稳定 `Unavailable`/`EngineCrashed`/`VersionMismatch` 回执，保持 `Partial`。 |
+| External-controller storage API 容量与写入回执边界 | `core/Clash.Meta/hub/route/storage.go`、`core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/component/profile/cachefile/storage.go` | 受控键值存储、容量预算和可核验写入/删除结果 | Partial：`/storage/{key}` 在 secret 鉴权管理 group 内挂载，但 Unix/named-pipe 传输将空 secret 传给同一 router，因而继承未鉴权边界。`setStorage` 先对请求体执行无界 `io.ReadAll`，之后才检查 JSON 与 1MB 长度；超限 key 由 cache 层静默跳过而路由仍返回 204。底层 bbolt storage 另设 64 字节 key、1MB 总数据和最多 16384 条目预算，按时间排序驱逐旧项，读写/删除失败仅写原始 key、路径或异常日志，未返回逐项成功、驱逐、取消、崩溃或版本错配回执。XToolpro 需在 adapter 层先行限制请求体与 key、统一鉴权/本地范围，提供有界、脱敏且可验证的写入、驱逐和删除终态，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 

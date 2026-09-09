@@ -1959,6 +1959,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `05b0167` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller storage API 容量与写入回执边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/storage.go`=`8BBB28DFE8BE5D38E3D826BC4DB54C595A6F6B0D24BF6C3CCA7A8F5ED886B007`；`core/Clash.Meta/component/profile/cachefile/storage.go`=`CF67E0E7E0329469F66E1C8C192DB29683ACA98C334828DDB404FBB48E566FE5`；`core/Clash.Meta/hub/route/common.go`=`FFB303C61FC0BD4535741F5BBFB49E31A3B97EB98C4C2EDF02B64F88625E6739`。
+- `storageRouter` 暴露 `GET/PUT/DELETE /{key}`，并由 `router` 在 secret 鉴权 group 内挂载；但 `startUnix`/`startPipe`/本地 transport 传入空 secret，故这些传输上的 storage API 不经过 `authentication()`。`getEscapeParam` 仅做 URL path unescape，没有长度、字符集或命名空间校验。
+- `setStorage` 先执行 `io.ReadAll(r.Body)`，再做 JSON 合法性与 `1MB` 长度检查；因此路由层没有先行请求体上限。底层 `CacheFile.SetStorage` 仅对 key `64` 字节和 payload `1MB` 做检查，超限时写 warning 并直接返回；路由随后仍返回 HTTP 204，调用方无法区分实际写入、静默跳过或逐项驱逐。底层 bbolt bucket 按旧 `Time` 排序，在总数据 `1MB` 或最多 `16384` 条目超限时删除旧项，失败只记录日志。
+- `getStorage` 对缺失或解码失败返回 JSON `null`，解码失败会尝试删除该 key；`deleteStorage` 无论 key 是否存在都返回 204。读写/删除错误未形成稳定脱敏的 `Unavailable`、`Cancelled`、`EngineCrashed` 或 `VersionMismatch` terminal receipt，日志包含 key、数据库路径或原始异常文本。
+- 本轮仅静态读取固定归档，未启动 core、未调用 `/storage`、未写入或删除任何存储键、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller storage API 容量与写入回执边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
