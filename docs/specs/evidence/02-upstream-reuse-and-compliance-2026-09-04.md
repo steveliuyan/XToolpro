@@ -1734,6 +1734,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `aababa7` 已创建但尚未 push；本次仅修改 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash rule-provider 自动拉取调度、取消与失败退避静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/resource/fetcher.go`=`D6076850B2068A1CA25430B6F2A4CE07CE6E43635726BD9260A84417DE9A4CFB`；`core/Clash.Meta/component/resource/vehicle.go`=`2B5AE763906EF70523A40830FCF04EAF1FE0076F54DCD36AFE4E7033D4327AFF`；`core/Clash.Meta/component/slowdown/backoff.go`=`A3DB7F37CE8C88449AD98F955E0EB03567866147320FEE3799D258101633EFDA`。
+- `Fetcher.Initial()` 按本地文件→bundle→远端顺序恢复；即使首次远端更新失败，也会启动 pull loop。file vehicle 通过 fswatch 监听，HTTP/inline 等非 file vehicle 在 `interval>0` 时启动 ticker。失败调用 `Backoff.AddAttempt()`，Factor=2、上限为 interval；成功或 hash 未变化时重置退避。解析成功后才执行 vehicle.Write，再更新 hash/时间并触发 onUpdate，因此解析失败通常保留旧内容。
+- `Fetcher` 仅创建内部 `context.WithCancel(context.Background())`，`Close()` 才取消；管理 API 调用的 `Update()` 不接收请求 context，pull loop 也只监听该内部 context。未见启动/关闭幂等、重复 watcher/loop 防护、逐次任务 ID、更新 generation、失败后的旧版本 terminal receipt 或调度持久化；`loadBufMutex` 只覆盖单个 fetcher 的解析/发布，不提供跨 provider 原子快照。
+- 本轮仅静态读取固定归档，未启动 core、未触发 watcher/ticker、未发起 provider 更新、未下载或修改规则数据、未使用 ADB，未读取设备规则、域名、IP、配置、订阅 URL、凭据、Cookie、日志或网络内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，rule-provider 自动拉取调度、取消与失败退避静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash HTTP/SOCKS/mixed 入站认证与 UDP 边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`listener/inbound/mixed.go`=`93844489F2101CBB3B9CFEA9CFFFD79641C24481547132DF53DF8D405648D361`；`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/auth.go`=`D80505C45B1E3B02D5109B77D5FF5A00E10DB5EFA728F37CEDB945746D70098E`；`component/auth/auth.go`=`93F4E431F51124258E43AB75B858DD351C9586A892EDEE56A74E8FC132ECD542`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`。
