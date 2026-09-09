@@ -2268,6 +2268,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `PATCH /rules/disable` 索引与持久化契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/rules.go`=`2295A989D65BF2F602320506DEDC9A4361BB937CD17F494E5D7CBDD631C9CDB9`；`core/Clash.Meta/rules/provider/rule_set.go`=`B58CC52A7C44758B06E66118ADF38F9249D42EDE2192078D2758AC2E5F50B267`；`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 固定非 embed 路由接受任意 JSON `map[int]bool`，按规则索引直接修改运行态 wrapper；越界索引静默跳过，空 map、部分有效 map 与全部有效 map 均无逐项结果，handler 始终返回 204。该端点不写回配置或 profile，也不携带 generation/version/冲突校验、撤销或失败回滚。
+- embed 模式不注册该端点；Unix/named-pipe transport 继续传入空 secret，继承本地管理面未鉴权边界。固定实现没有把索引快照与规则 provider 版本绑定，规则更新或重载期间可能出现索引漂移而仍返回成功。
+- XToolpro 只能在 adapter 入口锁定不可变规则快照并校验索引、版本和目标范围；提交前先 staging，成功后原子发布，失败/取消恢复旧快照，并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch` terminal receipt。完成隔离契约测试前，新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态读取固定归档与既有哈希记录，未调用 `/rules/disable`、未修改运行态规则、未启动 core、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller `PATCH /rules/disable` 索引与持久化契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
