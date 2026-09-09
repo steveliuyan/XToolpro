@@ -2060,6 +2060,20 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `13d1552` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller 代理、代理组与规则管理 API 字段和回执边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/proxies.go`=`51205BD6EDDDA36D7F8F60004E9E54E1171EABD4D5BCD2164A2EFD2FA9935F82`；`groups.go`=`BAAD47C7E2E3393BF914DD4D5F4A22446E8D1FBC8235381F604ED780A3B270ED`；`rules.go`=`2295A989D65BF2F602320506DEDC9A4361BB937CD17F494E5D7CBDD631C9CDB9`；`adapter/adapter.go`=`5344064E868AEEC63EB2D9AAE1FF69B50BC39BF8F1B230856B4833195642BAE5`；`adapter/outbound/base.go`=`68E01AA7F26D3AC01BA5620615B20DBB49114ED52C3E9FFC34C3C65A185E6A52`；`adapter/outboundgroup/selector.go`=`682FCEF95A0E9D7F97FB0ADDA6A72C82F772839ADC0C1E5FFB4A6D51B29AF1B9`；`adapter/outboundgroup/urltest.go`=`5970E1AB00F269C53108213F677702F00B8F690E06A5880E74F58F0AFDEC7E36`。
+- `proxyRouter` 暴露 `GET /`、单代理 `GET/PUT/DELETE` 和 `/delay`；`groupRouter` 暴露 `GET /`、单组 `GET`/`delay`；`ruleRouter` 暴露 `GET /` 与非 embed 模式下的 `PATCH /disable`。这些路由在 `server.go` 的 secret 管理 group 内，但 Unix/named-pipe transport 传入空 secret，因此本地传输继承未鉴权边界。
+- `Proxy.MarshalJSON` 将 adapter 自身字段与 `name`、alive、UDP/UOT、XUDP/TFO/MPTCP/SMUX、interface、routing-mark、provider-name、dialer-proxy、延迟 history 和按测试 URL 的 extra history 合并；selector/url-test adapter 另外暴露 `now`、完整 `all` 节点名列表、testUrl、expectedStatus、hidden/icon/emptyFallback。`GET /group` 直接返回完整 proxy group 对象；`GET /rules` 返回 index/type/payload/proxy/size 以及 disabled/hit/miss 统计和时间戳，未见字段白名单、分页或响应预算。
+- `PUT /proxies/{name}` 只解码 `{name}`，调用 `SelectAble.Set` 后写入 cachefile selected 值并异步触发 tray callback；core 状态与缓存写入没有 generation、事务、回读或失败回滚，selector 错误原文包装为 400。`DELETE /proxies/{name}` 对非 Selector 的 SelectAble 强制清空并返回 204，其他类型统一 400；找不到代理在 middleware 阶段返回 404。
+- 两类 `/delay` 仅检查整数 timeout 与 unsigned expected ranges，未拒绝 0/负 timeout、未限制 url/并发；代理 delay 在上下文超时后返回 504，其他失败返回 503，部分路径直接序列化原始 error。group delay 会先清空当前选择再测试，失败时没有恢复选择或 terminal receipt。
+- `PATCH /rules/disable` 接受任意 JSON `map[int]bool`，越界 index 静默跳过，逐项直接修改运行态 wrapper，不持久化、不做版本/冲突校验，始终返回 204；embed 模式不注册该路由。固定源码未提供 success、unavailable、cancel、crash、version mismatch 的统一结果或管理面最小字段合同。
+- 本轮仅静态读取固定归档，未启动 core、未调用任何 management API、未切换代理、未关闭代理、未禁用规则、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller 代理、代理组与规则管理 API 字段和回执边界静态审计）
+
+- focused commit 尚未创建：两次受控 `git add`/`git commit` 均因当前执行环境无法写入 `D:\xtoolpro\.git\index.lock`（`Permission denied`，审批超时）而失败；未发现残留 `index.lock`，也未运行任何删除/覆盖命令。本检查点未能建立 Git 备份，未备份路径为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。其他工作树改动和临时产物未纳入；按要求不得自动 push，须先获得用户明确确认并先恢复可写 Git 元数据权限。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
