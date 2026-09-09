@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=80`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=81`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -98,6 +98,7 @@
 | External-controller cache flush 清理范围与完成回执 | `core/Clash.Meta/hub/route/cache.go`、`core/Clash.Meta/dns/resolver.go`、`core/Clash.Meta/dns/enhancer.go`、`core/Clash.Meta/component/fakeip/pool.go` | Fake-IP/DNS 缓存清理、作用域和可核验终态 | Partial：`/cache/fakeip/flush` 与 `/cache/dns/flush` 位于 secret 管理 group 内，但 Unix/named-pipe 传输的空 secret 仍使其免鉴权。Fake-IP flush 对 IPv4/IPv6 pool 逐项执行并在成功后重置 offset；任一错误返回 HTTP 400 原始 `err.Error()`。DNS `ClearCache` 则对 DefaultResolver 与 SystemResolver 启动 goroutine 异步清理，路由立即返回 204，没有等待、失败聚合、作用域说明或完成/取消/崩溃回执；固定源码也未提供清理前后计数或 generation。XToolpro 需统一鉴权与本地范围，明确清理作用域并以有界、脱敏的 terminal receipt 区分成功、失败、取消和版本不匹配，保持 `Partial`。 |
 | External-controller upgrade UI/core/geo 更新与回滚边界 | `core/Clash.Meta/hub/route/upgrade.go`、`core/Clash.Meta/component/updater/{update_core,update_ui,update_geo,utils}.go` | 版本化更新、artifact 校验、原子替换和可回滚终态 | Partial：`/upgrade/ui`、`/upgrade/`、`/upgrade/geo` 由管理面 router 暴露；Unix/named-pipe 传输空 secret 时同样免鉴权。Core 更新仅按 channel/force 获取版本与压缩包，下载 90 秒超时并限制 32MB，但未见签名、发布 hash、来源绑定或兼容性 manifest；Windows 先将当前可执行文件 rename 到 `meta-backup`，再直接替换，失败时无统一恢复/健康验证。UI 更新将完整响应读入内存，解压后先清空现有 UI 目录，再移动新文件，移动失败可能留下不完整目录且无旧版本回滚。Geo 更新虽按内容 hash 跳过相同数据并在加载后写入，但批量更新并发执行、返回仅聚合 error，路由直接回原始错误文本或 `{"status":"ok"}`，没有逐数据库成功、取消、崩溃、版本错配 terminal receipt。XToolpro 需采用签名 manifest、staging+原子切换、last-known-good 保留和稳定脱敏结果，保持 `Partial`。 |
 | External-controller DNS query API 字段与输入边界 | `core/Clash.Meta/hub/route/dns.go`、`core/Clash.Meta/hub/route/server.go` | 受控 DNS 查询、名称/type 校验和脱敏响应 | Partial：`GET /dns/query` 位于 secret 管理 group 内，但 Unix/named-pipe 空 secret 传输继承未鉴权边界。`name` query 直接进入 `dns.Fqdn`，未见长度、标签、字符集或敏感名称策略；`type` 无值默认 `A`，未知值返回 400。查询仅使用 resolver timeout，relay 错误以原始文本返回；成功响应包含 Question、Answer、Authority、Additional 的完整名称、TTL 和 RR data，未见字段最小化、响应大小/并发预算或稳定脱敏错误码。XToolpro 需限制输入与输出范围，统一鉴权、本地绑定和 `Unavailable`/`EngineCrashed`/`VersionMismatch` 回执，保持 `Partial`。 |
+| External-controller 外部路由注册与并发边界 | `core/Clash.Meta/hub/route/external.go`、`core/Clash.Meta/hub/route/server.go` | 扩展管理路由的注册时机、鉴权继承和生命周期安全 | Partial：`Register` 将回调追加到进程级 `externalRouters` slice，`addExternalRouters` 在 secret 管理 group 内逐项调用，因此已注册路由继承 group 的认证；但 slice 无 mutex、generation 或重复注册防护，注册与 server 重建/路由遍历并发时未见同步或快照语义。外部回调可直接向传入 router 挂载任意路径，固定代码未见 allowlist、命名空间、方法/资源预算或独立失败回执；XToolpro 需在 adapter 层采用不可变路由快照、白名单和最小权限扩展接口，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 

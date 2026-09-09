@@ -2005,6 +2005,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `7642d2f` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller 外部路由注册与并发边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/external.go`=`08B3D320DD060E141953E56E88AED131502E7699F2F318051E1F6C45FEC92ACD`；`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- `Register(route ...externalRouter)` 直接向进程级 `externalRouters` slice 追加回调；`addExternalRouters` 在 `router` 的 secret 管理 group 内逐项调用，因此已注册扩展默认继承 `authentication()`，与 DoH/debug 等 group 外挂载路径形成边界差异。
+- 固定 slice 无 mutex、generation、不可变快照或重复注册检查；server 重建或多 goroutine 注册/遍历并发时未见同步语义。外部回调可向传入 router 挂载任意路径，未见固定命名空间、方法/资源预算、能力 allowlist 或扩展级 terminal receipt。
+- 本轮仅静态读取固定归档，未启动 core、未注册扩展路由、未调用管理 API、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller 外部路由注册与并发边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
