@@ -2743,6 +2743,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider HTTP/ETag 缓存写入原子性与损坏恢复静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/resource/vehicle.go`=`2B5AE763906EF70523A40830FCF04EAF1FE0076F54DCD36AFE4E7033D4327AFF`；`core/Clash.Meta/component/profile/cachefile/cache.go`=`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`；`etag.go`=`477D1BBBE97EF51DDE00ABEBF7B82293006F60EC34EF4BE54C790914A4670D6A`。
+- 固定缓存内容写入使用普通文件覆盖，ETag 元数据写入 bbolt；未见同目录临时文件、fsync、原子 rename、read-back/hash 校验、文件模式收紧或损坏缓存隔离。读取/反序列化错误可能被折叠为空值，写入失败也没有稳定的阶段性回执。
+- 进程中断、磁盘不足或半写入后，固定路径不能证明旧缓存仍可用、临时文件已清理或下一次更新会安全重建；也没有 last-known-good、generation 或损坏原因向调用方暴露。
+- 结论：XToolpro adapter 必须在受限目录使用 staging+原子提交，执行大小/hash/read-back 校验并保留 last-known-good；损坏、权限、空间不足、取消和版本错配均需返回脱敏终态。完成中断、半写入、损坏恢复、权限/空间失败和清理契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未读写缓存、未发起 HTTP 请求、未解析真实 provider、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider HTTP/ETag 缓存写入原子性与损坏恢复静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
