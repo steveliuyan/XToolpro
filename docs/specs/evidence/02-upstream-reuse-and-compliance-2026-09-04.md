@@ -2471,6 +2471,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash core event bulk queue 容量/丢弃与 listener detach 回执契约静态审计（2026-09-10）
+
+- 固定归档关键文件 SHA-256：`core/hub.go`=`9EE8E64E73390F9120B088D893EFF836F318F1FC2E11372B172317C6E3EB0AD0`；`core/lib.go`=`0C2A7D1F5527FD9478F27255DB59B6328D2736AE211DB41EFB0C0F318A31E831`；`core/constant.go`=`9088411E269CAE0C027159E5BB3CE3BD052A271789827430F106BEB7E22F60BE`；`lib/core/event.dart`=`BD48F0771D2D3155089EF22D12566DB19EBA89300CAADC76095617C5C921D335`；`lib/manager/core_manager.dart`=`D1E55B4ADCB151F99846CCE1C7A6D59BDE7FB159788C6D1E05A12C87EA9BCC53`。
+- 固定 core log/request 事件进入容量 256、批量 32 的 bulk 队列，满载丢弃同类最旧事件；无 listener 时批次直接丢弃，存在 listener 时才 JSON 序列化并回调 Dart。`stopTun()` 不负责关闭或 drain 全局 priority/bulk channel，batcher 未提供显式 drop 计数或完成回执；engine detach 释放 JNI listener 引用，但固定 Go/C++ 路径未见与 batcher 读取、in-flight callback 的生命周期屏障。
+- 因而停止、重启或 detach 后不能稳定区分已交付、已丢弃、仍在途和被取消的事件，也无法为队列背压提供资源终态。XToolpro 只能在 adapter 层设置有界队列与背压策略，记录 drain/drop 原因和计数，在停止或 detach 前等待/取消 in-flight callback 后再释放引用，并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 终态。
+- 本轮仅静态复核固定归档和既有文件哈希，未启动 core、未触发日志/请求事件、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash core event bulk queue 容量/丢弃与 listener detach 回执契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
