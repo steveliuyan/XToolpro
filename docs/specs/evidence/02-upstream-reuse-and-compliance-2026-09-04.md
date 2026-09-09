@@ -1665,6 +1665,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定实现未见文件大小/行数预算、canonical provenance、显式 cache 清除/过期回执或针对 hosts 内容的字段最小化合同。虽然此组件本身没有新增日志调用，但 host/IP 映射会进入 resolver/routing metadata，不能把“静默空结果”误认作不存在 hosts 覆写或功能成功。
 - 结论：上游可使用 platform hosts 作为 DNS/路由输入，但 XToolpro 必须在隔离边界提供最小化、可撤销的 hosts 配置、读取失败的稳定状态和缓存生命周期；完成受控 hosts fixture、缺失/权限失败、超限、更新、清除、取消和 version mismatch 契约前，对应矩阵行保持 `Partial`。
 
+#### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
+
+- focused commit `0bbfe95` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，sniffing dispatcher 静态审计）
 
 - focused commit `1c4a864` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
