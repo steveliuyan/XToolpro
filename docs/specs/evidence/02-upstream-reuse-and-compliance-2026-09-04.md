@@ -1585,6 +1585,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `config.go` 默认 `ExternalControllerCors` 为 `AllowOrigins=["*"]` 和 `AllowPrivateNetwork=true`；debug 模式还会挂载 `/debug` profiler。配置模型虽支持 external-controller、TLS、Unix/pipe、CORS、client-auth、routing mark 和 secret，固定 Flutter `lib/common/task.dart:115` 只把 external-controller 地址写入 raw config，未提供 XToolpro 所需的最小 bind scope、管理面 allowlist、TLS/client-cert 健康回执或稳定错误类别。
 - 结论：该上游管理面具备 secret Bearer/query-token 认证和多种本地传输入口，但默认 CORS/私网策略宽泛，空 secret 会关闭鉴权，且 Android bridge 未形成可验证的 controller 绑定范围、secret 生命周期、权限分级或 terminal health contract。对应 parity 行保持 `Partial`，不得将 external-controller 认证外推到 mixed proxy inbound 或 LAN sharing。
 
+### FlClash external-controller 重建并发与失败回执静态审计（2026-09-09）
+
+- 固定 `hub/hub.go` SHA-256 为 `A92B15683A6FF7245F5D34F36EA99D58AC9F38B6293DDE9B34EAB9620716CCD4`；`ApplyConfig` 将 controller 配置传给 `route.ReCreateServer`，后者以四个 goroutine 并发调用 `start`、`startTLS`、`startUnix` 和可选 `startPipe`。每个 `start*` 都先关闭各自全局 server 指针，再异步监听并覆盖指针；监听、证书、目录、socket 或 `Serve` 失败只写日志/返回，无跨 transport 聚合结果、generation、串行化或 terminal receipt。本轮只读源码，未启动管理面、未改配置、未使用 ADB；新增 parity 行保持 `Partial`。
+
 ### FlClash proxy-provider 订阅、健康检查与 API 字段边界静态审计（2026-09-09）
 
 - 审计对象仍为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未发起订阅请求、未读取节点/配置/设备数据、未使用 ADB。相关源码为 `core/Clash.Meta/adapter/provider/provider.go`、`core/Clash.Meta/adapter/provider/healthcheck.go`、`core/Clash.Meta/hub/route/provider.go`。
