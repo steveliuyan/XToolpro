@@ -2516,6 +2516,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash platform hosts resolver 缓存一致性与刷新回执静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/resolver/hosts/hosts.go`=`2EA91E5A1F9E06D848A941AA6573F87AF0D50229C9DC6109ABFF2749D6F7A5F6`；`hosts_windows.go`=`F791005F68CDF1C30E48B0966CB89689F346D3DD03AACA60E94F97A268DFD2B5`。
+- 固定 resolver 以平台 hosts 文件的 mtime/size 和 5 秒 `cacheMaxAge` 判断是否复用完整 host→IP、IP→host 映射；该键未包含内容摘要、profile/config generation 或显式清除代数，因此同一 mtime/size 窗口内的内容替换可能继续使用旧映射，策略切换也没有可核验的刷新回执。
+- `not found`/`permission denied` 与其他读取失败均折叠为空映射或普通空结果，未返回来源、刷新代数、旧值保留、失败原因或取消回执；查询返回防御性副本不能证明底层读取或刷新已完成。固定实现未见文件大小/行数上限、超限分类或显式 cache clear API。
+- 结论：上游具备平台 hosts 解析和短 TTL 缓存，但不能直接作为 XToolpro 的来源绑定、内容一致性或失败重试合同。XToolpro 只能在 adapter 层限制来源路径与文件预算，使用内容/版本绑定的可撤销缓存，并在刷新、权限失败、超限、取消和清除后返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch` 终态；完成受控 hosts fixture 与一致性/重试契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档与既有文件哈希，未读取任何设备或系统 hosts 文件、未启动 core、未发送网络请求、未使用 ADB，也未读取日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=125`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash platform hosts resolver 缓存一致性与刷新回执静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
