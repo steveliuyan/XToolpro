@@ -2732,6 +2732,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider HTTP 缓存 namespace 与来源隔离静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/resource/vehicle.go`=`2B5AE763906EF70523A40830FCF04EAF1FE0076F54DCD36AFE4E7033D4327AFF`；`core/Clash.Meta/component/profile/cachefile/cache.go`=`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`；`etag.go`=`477D1BBBE97EF51DDE00ABEBF7B82293006F60EC34EF4BE54C790914A4670D6A`。
+- 固定 HTTP vehicle 以 URL hash 派生缓存文件，ETag 元数据以完整 URL 作为 bbolt key；静态路径未见 provider/profile namespace、配置 generation、来源证书/host 绑定或 URL 变更后的旧缓存清理回执。同一 URL 在不同 provider/profile 间可能共享底层缓存身份，命中结果也没有返回当前配置代次。
+- 结论：XToolpro adapter 必须使用不可逆且带 provider/profile/generation 的缓存标识，限制 TTL/容量，来源或配置变化时显式失效并返回脱敏终态；完成同 URL 跨 provider、profile 切换、来源变化、清理和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未读写缓存、未发起 HTTP 请求、未解析真实 provider、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider HTTP 缓存 namespace 与来源隔离静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
