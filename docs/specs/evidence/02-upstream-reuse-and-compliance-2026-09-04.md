@@ -1756,6 +1756,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `c8257a3` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider 过滤、覆盖与 age 解密解析边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52`；`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。
+- `ParseProxyProvider` 支持 file/http/inline vehicle；HTTP vehicle 默认按 URL hash 生成缓存路径，显式 path 需通过 `C.Path.IsSafePath`，header、proxy、size-limit 直接传递给 HTTP vehicle。`NewProxiesParser` 将 filter/exclude-filter 按反引号拆分并编译 regexp2，随后应用 exclude-type、名称筛选、`dialer-proxy`、override 和 `adapter.ParseProxy`；支持 `age-secret-key` 校验与解密，YAML 失败时回退 V2Ray 转换。
+- 无匹配或无 proxies 返回普通错误；错误包装可能携带 proxy index、filter、解密或解析原文。固定路径未见正则复杂度/输入大小预算、字段白名单、header/secret 脱敏、解析版本/generation 或部分成功回执；显式 override 会就地修改解析中的 mapping，未形成可回滚快照。
+- 本轮仅静态读取固定归档，未解析真实 provider、未使用 age key、未发起 HTTP 请求、未下载或修改代理数据、未启动 core、未使用 ADB，未读取设备配置、节点、URL、凭据、Cookie、日志或网络内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，proxy-provider 过滤、覆盖与 age 解密解析边界静态审计）
+
+- focused commit `3ea2060` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash proxy-provider `subscription-userinfo` 缓存与配额字段边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`；`core/Clash.Meta/adapter/provider/subscription_info.go`=`123565A529C8C5CD74F836AEAE79092007533DB7A8D49256EF91C90283E021B1`；`core/Clash.Meta/component/profile/cachefile/subscriptioninfo.go`=`07D9A7FCFB4C5112CC2FE3A603A9227959F1E5F165EE22B50500FEB32F26A92E`；cache 初始化实现位于 `cache.go`（`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`）。
