@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=70`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=71`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -84,6 +84,7 @@
 | Listener 停止与配置重载并发串行化 | `core/Clash.Meta/listener/patch.go`、`listener/listener.go` | stop/reload 互斥、资源生命周期与一致终态 | Partial：`PatchInboundListeners` 与 `PatchTunnel` 分别以 `inboundMux`/`tunnelMux` 保护 map 更新和 close/create；固定 `listener.StopListener()` 逐项关闭全局 listener，但未获取上述 mutex，也未同步命名 inbound/tunnel map。停止与配置重载并发时，静态路径允许交叉 close、重载后重新创建或 map 状态与实际 socket 不一致；未见全局 stop/reload 串行化、generation 检查、in-flight 等待或 terminal receipt。XToolpro 需在 adapter 层统一生命周期锁与代次校验，确保 stop/reload 互斥并返回可核验终态，保持 `Partial`。 |
 | UDP tunnel 队列背压与丢包可观测性 | `core/Clash.Meta/tunnel/tunnel.go` | UDP 并发预算、背压策略和丢包结果 | Partial：固定 `queueCapacity=64`，`initUDP` 为每个 worker 创建 64 容量队列；`HandleUDPPacket` 使用非阻塞发送，队列满时直接 `packet.Drop()`，未记录计数、错误、取消或 terminal receipt。调用方无法区分正常转发与过载丢弃，也没有 adapter 级可配置预算或健康状态。XToolpro 需在 adapter 层定义有界队列、可观测丢弃原因和稳定 `Unavailable`/失败分类，保持 `Partial`。 |
 | UDP tunnel 回包源地址语义 | `core/Clash.Meta/listener/tunnel/packet.go`、`core/Clash.Meta/constant/adapters.go` | UDP 回包源地址、NAT 语义与失败回执 | Partial：`UDPPacket.WriteBack` 合同要求按传入 `addr` 设置回包源 IP/端口（未提供时才使用原始目标）；但 tunnel `packet.WriteBack(b, addr)` 忽略 `addr`，始终向接收数据报的原始 `rAddr` 写回。相较 SOCKS 会将 `addr` 编码入 UDP response、tproxy 会绑定 `addr` 创建本地 socket，tunnel 路径未提供同等源地址控制或错误分类。XToolpro 需在 adapter 层明确回包源地址/NAT 合同并以受控 fixture 验证，保持 `Partial`。 |
+| TUN 运行时配置 PATCH 的原子性与失败回执 | `core/Clash.Meta/hub/route/configs.go`、`listener/listener.go` | TUN 配置更新、回滚和稳定终态 | Partial：管理面 PATCH `/configs/` 先写 allow-lan、认证、bind 等运行态值，再直接调用 `ReCreateTun`。当 TUN 配置发生变化时，后者先关闭旧 TUN，再尝试创建新 TUN；失败仅写日志并将记录的配置设为 disabled，不恢复旧实例或返回错误。`patchConfigs` 不接收各重建函数结果，仍无条件返回 HTTP 204，不能区分 TUN 成功、失败、部分更新、取消或回滚。XToolpro 需用受限配置 transaction、旧实例保留/回滚和稳定终态取代该语义，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 

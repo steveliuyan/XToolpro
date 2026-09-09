@@ -1867,6 +1867,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - tunnel `packet.WriteBack(b, addr)` 不使用 `addr`，直接 `pc.WriteTo(b, c.rAddr)`；SOCKS 对照实现将 `addr` 编码为 UDP response，tproxy 对照实现以 `addr` 绑定本地 socket。故 tunnel 路径没有同等回包源地址控制、NAT 映射验证或稳定错误回执。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未发起 UDP 流量或读取地址/流量内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash TUN 运行时配置 PATCH 的原子性与失败回执静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/configs.go`=`B4058F78C4CE3E975A84976A4B7F546F378DB3FB429BE87E904D04403153C390`；`core/Clash.Meta/listener/listener.go`=`5D9BCDED93B4ED821D80827DF0A6EB198F844AA27EB10C74AC887C8FFD3FE019`。
+- `patchConfigs` 先应用 allow-lan、认证、bind address 等运行态 mutation，再调用 `ReCreateTun`；该函数在配置变化时先关闭旧 TUN，再调用 `sing_tun.New`。创建失败只写日志，将保存的 TUN 配置置为 disabled，不恢复旧实例，且函数无返回结果。
+- `patchConfigs` 不收集任一 listener 重建结果，最后无条件 `render.NoContent`（HTTP 204）；请求方无法区分 TUN 成功、失败、部分更新、取消或回滚。本轮未调用管理面、未启动 core、未使用 ADB，未读取配置、日志、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-09，UDP tunnel 回包源地址语义静态审计）
 
 - focused commit `c1d84e5` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
