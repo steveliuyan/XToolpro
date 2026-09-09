@@ -2564,6 +2564,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller 请求准入、body 上限与连接超时静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/hub/route/server.go`、`hub/route/configs.go`、`hub/route/storage.go`、`hub/route/doh.go`；沿用已记录的固定提交和文件哈希，仅补充请求准入预算边界。
+- 固定管理路由对 `/configs` 的完整 YAML/JSON payload、`/storage` body 以及部分 JSON handler 未见统一 `Content-Length`/`MaxBytesReader`、header 数量或请求并发上限；`setStorage` 在 JSON/1MB 校验前先 `io.ReadAll`，超限请求可能已将完整 body 放入内存。DoH 仅在 POST 使用 65535 字节 `LimitReader`，不同路由没有共享预算、超限分类或回读。
+- TCP/TLS server 与 hijack WebSocket 路径未见统一 read/write/idle deadline，连接关闭和取消也没有稳定终态；固定实现不能向调用方说明请求是在准入、读取、解析、执行还是回写阶段超限/取消。
+- 结论：上游具备若干局部 body 限制，但不能直接作为 XToolpro 的统一请求预算合同。XToolpro 只能在 adapter 层统一设置 body/header/并发/连接 deadline，超限或取消时释放已读资源并返回脱敏 `Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`；完成受控超限、慢连接和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档，未启动 server、未发送管理请求、未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件，未使用 ADB；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=129`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller 请求准入、body 上限与连接超时静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
