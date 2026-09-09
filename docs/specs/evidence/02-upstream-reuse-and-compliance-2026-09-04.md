@@ -1873,6 +1873,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `patchConfigs` 先应用 allow-lan、认证、bind address 等运行态 mutation，再调用 `ReCreateTun`；该函数在配置变化时先关闭旧 TUN，再调用 `sing_tun.New`。创建失败只写日志，将保存的 TUN 配置置为 disabled，不恢复旧实例，且函数无返回结果。
 - `patchConfigs` 不收集任一 listener 重建结果，最后无条件 `render.NoContent`（HTTP 204）；请求方无法区分 TUN 成功、失败、部分更新、取消或回滚。本轮未调用管理面、未启动 core、未使用 ADB，未读取配置、日志、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+#### 本检查点远端备份状态（2026-09-09，TUN 运行时配置 PATCH 的原子性与失败回执静态审计）
+
+- focused commit `9f49b8a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，UDP tunnel 回包源地址语义静态审计）
 
 - focused commit `c1d84e5` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
