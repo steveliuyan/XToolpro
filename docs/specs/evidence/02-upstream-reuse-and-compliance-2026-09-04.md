@@ -2292,6 +2292,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller storage 请求体与驱逐回执契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/storage.go`=`8BBB28DFE8BE5D38E3D826BC4DB54C595A6F6B0D24BF6C3CCA7A8F5ED886B007`；`core/Clash.Meta/component/profile/cachefile/storage.go`=`CF67E0E7E0329469F66E1C8C192DB29683ACA98C334828DDB404FBB48E566FE5`。
+- 固定 `setStorage` 先对请求体执行 `io.ReadAll`，之后才检查 JSON 合法性与 1MB 长度；key 仅做 URL path unescape，未见长度、字符集或命名空间预检。底层 bbolt 再按 key 64 字节、总 payload 1MB、最多 16384 条目限制，并按旧时间驱逐。
+- 超限 payload/key、驱逐失败或删除不存在 key 时，路由仍可能返回 204；没有写入成功、静默跳过、驱逐数量、删除确认或 generation 回执。日志可能包含 key、数据库路径与原始异常；本地 Unix/named-pipe 传输还继承空 secret 的未鉴权边界。
+- XToolpro 只能在 adapter 入口先行限制 body/key，采用 staging 与原子提交，返回脱敏的写入/驱逐摘要和版本；取消或失败时恢复旧快照，并区分 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`，在隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未调用 `/storage`、未写入或删除任何键、未启动 core、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller storage 请求体与驱逐回执契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
