@@ -1705,6 +1705,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `e5b2f3a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+#### 本检查点远端备份状态（2026-09-09，实时流量与连接静态审计）
+
+- focused commit `3b60951` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
 
 - focused commit `8b141c8`（DoH/DoT/DoQ DNS transport 静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
