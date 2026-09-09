@@ -1638,6 +1638,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 对 `docs/architecture/upstream-capability-parity-matrix.md` 的状态列做只读正则统计，当前为 `Verified=4`、`Partial=56`、`Pending=29`、`Unavailable=1`、`Blocked=0`。矩阵顶部汇总已同步为该数值；此前 evidence 中的 `Partial=51` 与矩阵顶部旧值 `Partial=54` 均保留为历史 checkpoint，不作为当前 gate。
 - 四域 upstream ledger 仍为 `Investigating`，`engine-proxy` 仍只有壳模块和测试计划；本次只修正文档计数，没有改变任何能力状态、台账状态、实现或集成范围。Phase 02 acceptance gate 继续不通过。
 
+#### 本检查点远端备份状态（2026-09-09，Phase 02 gate 计数一致性复核）
+
+- focused commit `3b57460` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，运行态快速双 TOGGLE 复核）
 
 - focused commit `6dd5293` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
