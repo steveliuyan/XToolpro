@@ -1694,6 +1694,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 组级失败计数默认达到 5 次后触发健康检查；provider 检查按 interval 周期运行、lazy 模式可跳过、每轮最多 10 并发且每代理默认 5 秒 timeout。未见空 provider、全成员失败、超时、选择失败或 core 同步失败的稳定用户状态、取消/回滚回执；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
 - 本轮未使用 ADB，未读取设备 UI、配置、节点、订阅 URL、凭据、Cookie、日志或网络内容；未修改 SDK、缓存、上游归档或构建产物。
 
+#### 本检查点远端备份状态（2026-09-09，代理组策略静态审计）
+
+- focused commit `e5b2f3a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
 
 - focused commit `8b141c8`（DoH/DoT/DoQ DNS transport 静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
