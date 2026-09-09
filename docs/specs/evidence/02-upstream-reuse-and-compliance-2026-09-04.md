@@ -2072,7 +2072,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 #### 本检查点远端备份状态（2026-09-09，External-controller 代理、代理组与规则管理 API 字段和回执边界静态审计）
 
-- focused commit `513d241` 与 evidence-only commit `4b3bc75` 已由用户在本机 PowerShell 创建，均尚未 push；涉及路径仅为本 checkpoint 的矩阵与 evidence 文档，其他工作树改动和临时产物未纳入。
+- focused commit `513d241` 与 evidence-only commit `4b3bc75` 已由用户在本机 PowerShell 创建，均尚未 push；涉及路径仅为该 checkpoint 的矩阵与 evidence 文档，其他工作树改动和临时产物未纳入。
 
 ### FlClash External-controller `/configs` GET/PUT/PATCH 与 Geo 更新边界静态审计（2026-09-09）
 
