@@ -1597,6 +1597,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 操作前停止基线为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。发送 START 后等待 7 秒，结果为进程存在、app-op 仍为 `allow`、`vpn_connected_markers=1`，但 `all_tun_interfaces=0`；随后发送同一 STOP 并等待 7 秒，结果为 `vpn_connected_markers=0`、`all_tun_interfaces=0`，进程和 app-op 不变。
 - 该轮没有发起流量，也没有把系统 VPN 标记解释为 TUN、core 或转发成功。它仅证明该 action 序列的系统标记可收敛；START 的标记/TUN 分离再次说明 UI/系统标记、service 请求和实际 TUN 健康不是同一完成回执。对应矩阵行保持 `Partial`，Phase 02 gate、Proxy 台账 `Investigating` 和 `engine-proxy` 未变。
 
+#### 本检查点远端备份状态（2026-09-09，原生 START/STOP 与 TUN 收敛受限复核）
+
+- focused commit `79a53a2` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
 
 - focused commit `7c23efa` 已创建但尚未 push；随后将以 evidence-only commit 固化本 hash 与未 push 状态。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
