@@ -1658,6 +1658,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - debug/error 日志模板包含源/目的地址、目标/嗅探 host、sniffer protocol、首包不足和失败原因；固定路径未见统一字段脱敏、首包大小/时间预算的外部合同或 sniff 数据生命周期清理。该能力可以改变规则匹配的 host/destination 语义，不能以“sniffer 代码存在”推断已启用、命中或安全。
 - 结论：上游具备协议级嗅探与有限失败退避，但 XToolpro 仍需默认关闭敏感 host/address 诊断，显式声明可探测能力和取消/超时/失败分类，并在受控 fixture 覆盖 HTTP/TLS/QUIC、skip/force、DNS mapping、失败缓存和 metadata 改写前保持 `Partial`。
 
+### FlClash platform hosts resolver 加载与空结果边界静态审计（2026-09-09）
+
+- 固定来源文件为 `core/Clash.Meta/component/resolver/hosts/hosts.go`，SHA-256 `2EA91E5A1F9E06D848A941AA6573F87AF0D50229C9DC6109ABFF2749D6F7A5F6`；Windows 路径适配文件为 `hosts_windows.go`，SHA-256 `F791005F68CDF1C30E48B0966CB89689F346D3DD03AACA60E94F97A268DFD2B5`。本轮只读固定归档，未读取任何设备或系统 hosts 文件，也未启动 core 或发起网络请求。
+- resolver 以平台 hosts 路径为输入，按 mtime/size 和 5 秒 `cacheMaxAge` 缓存完整的 host→IP、IP→host 映射；解析忽略注释、无效 IP 和格式不足行，查询返回防御性副本。读取文件时 `not found`/`permission denied` 不报错，直接写入空映射；其他 open/stat/read failure 同样没有稳定错误、用户可见 unavailable、来源/version 或 terminal receipt。
+- 固定实现未见文件大小/行数预算、canonical provenance、显式 cache 清除/过期回执或针对 hosts 内容的字段最小化合同。虽然此组件本身没有新增日志调用，但 host/IP 映射会进入 resolver/routing metadata，不能把“静默空结果”误认作不存在 hosts 覆写或功能成功。
+- 结论：上游可使用 platform hosts 作为 DNS/路由输入，但 XToolpro 必须在隔离边界提供最小化、可撤销的 hosts 配置、读取失败的稳定状态和缓存生命周期；完成受控 hosts fixture、缺失/权限失败、超限、更新、清除、取消和 version mismatch 契约前，对应矩阵行保持 `Partial`。
+
 #### 本检查点远端备份状态（2026-09-09，sniffing dispatcher 静态审计）
 
 - focused commit `1c4a864` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
