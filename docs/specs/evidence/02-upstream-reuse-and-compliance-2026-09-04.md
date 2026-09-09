@@ -2677,6 +2677,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider exclude-type/名称筛选优先级静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52`。固定顺序先做 `exclude-type`/名称筛选，再进入 `dialer-proxy` 与 override；当前证据未见 exclude-type 的大小写/别名归一化、未知类型拒绝、空 include/exclude 的明确语义或按筛选原因统计。
+- 名称与类型筛选没有独立的计数、跳过原因或版本回执；筛选后为空、部分类型未知或名称只差大小写/空白时，调用方无法从普通结果区分“无匹配”“被排除”与“解析失败”。
+- 结论：XToolpro adapter 必须定义类型/名称的规范化与 allowlist，明确空筛选语义，记录脱敏的筛选计数和原因，并在 staging 阶段对空集合返回稳定 `Unavailable` 而不是普通异常；完成类型别名、空筛选、大小写/Unicode/空白和部分排除契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未解析真实 provider、未执行筛选、未发起 HTTP 请求、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider exclude-type/名称筛选优先级静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
