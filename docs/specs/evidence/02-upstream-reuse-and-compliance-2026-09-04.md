@@ -2376,6 +2376,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `/logs` level/structured 字段与脱敏契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`core/Clash.Meta/log/log.go`=`1F474A4091999E04A8C07D498DAF18260575A907316D73B95E6D7B123D22A5D8`。
+- 固定 `/logs` 通过 `level` 与 `format=structured` 选择输出形态，但未见字段白名单、敏感键脱敏、事件长度/大小预算或调用者分级；structured 事件仍由上游日志对象直接编码，可能携带 URL、地址、错误和运行态字段。level/format 错误及订阅失败没有统一脱敏分类。
+- 该路由的本地 Unix/named-pipe transport 继续传入空 secret，继承管理面未鉴权边界；与既有流式订阅审计相同，固定路径没有订阅级终态、丢弃统计或隐私审计回执。
+- XToolpro 只能在 adapter 入口限制 level/format 和事件预算，先做字段裁剪、敏感值脱敏与权限检查，再通过可取消、有界流输出，明确记录 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed` terminal receipt；隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未调用 `/logs`、未订阅或导出日志、未读取设备日志正文、未使用 ADB，未读取配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller `/logs` level/structured 字段与脱敏契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
