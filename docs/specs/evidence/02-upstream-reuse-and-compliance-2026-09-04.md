@@ -2588,6 +2588,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider filter 正则复杂度与解析原子性静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52`；`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。
+- 固定 `NewProxiesParser` 按反引号拆分 filter/exclude-filter 并编译 regexp2，先做 exclude-type/名称筛选，再执行 `dialer-proxy` 和 override；重复名称会去重。固定路径未见表达式长度/复杂度、候选数量、总解析时间或 override 深度预算。
+- 解析和 override 直接作用于当前 mapping；单项错误、无匹配或 age/YAML/V2Ray 转换失败返回普通 error，未见保留旧快照、逐项部分成功、generation 或取消回执。错误包装可能携带 proxy index、filter 或解析原文，不能视为脱敏终态。
+- 结论：上游具备过滤、去重和覆盖能力，但不能直接作为 XToolpro 的正则安全或解析原子性合同。XToolpro 只能在 adapter 层限制正则/候选/递归预算，先在 staging 生成不可变快照，失败时保留旧版本并返回脱敏 `Unavailable`/`Cancelled`/`VersionMismatch`；完成恶意正则、超限、重复名称和部分失败契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档与既有文件哈希，未解析真实 provider、未使用 age key、未发起 HTTP 请求、未启动 core、未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件，未使用 ADB；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=131`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider filter 正则复杂度与解析原子性静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
