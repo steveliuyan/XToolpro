@@ -2340,6 +2340,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller Geo 数据更新并发与部分失败契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/updater/update_geo.go`=`DB3D1C9B1A82C9BD1F7DF9B5018BA33FDC81BCBC95970D3C9C5E8CB09202F882`；管理路由 `core/Clash.Meta/hub/route/upgrade.go`=`6C3F995D1786076A80913D83812BEF199281BC6D008D986E6BCAB321038F0332`。
+- 固定 Geo updater 以 errgroup 并发更新 MMDB、ASN、GeoIP、GeoSite；相同内容按 hash 跳过，并在写入前调用对应 loader 解析校验。批量函数只聚合 error，路由成功返回 `{"status":"ok"}`，不返回逐数据库成功/跳过/失败明细。
+- 未见每资源 staging/原子替换、签名或来源 manifest、旧文件保留、失败回滚、任务 ID、请求取消或 generation。一个资源失败时其他资源仍可能成功，调用方无法判断整体是否可用；Unix/named-pipe 传输继续继承空 secret 的未鉴权管理边界。
+- XToolpro 只能在 adapter 层逐资源执行签名/格式预检，隔离并发并以 staging+原子发布保留 last-known-good；失败或取消时按资源恢复并返回脱敏逐项 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`，隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未调用 `/upgrade/geo`、未下载或写入 Geo 文件、未启动 core、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller Geo 数据更新并发与部分失败契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
