@@ -1679,6 +1679,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 未发现 artifact 签名/哈希、来源绑定、staging、ABI/版本兼容校验、安装回滚或 update terminal receipt；“已是最新版”只代表 metadata 比较结果，不能证明可安装 artifact 或 native core 兼容。未执行真实更新、恶意/错误 metadata、取消、下载失败、安装失败或回滚验证。
 - 结论：固定上游仅提供 release metadata 提示和外部页面跳转，不能作为 XToolpro 的更新信任链或回滚证明；对应矩阵行保持 `Partial`，Proxy 台账与 Phase 02 gate 不变。
 
+### FlClash provider 协议/地区/标签筛选语义静态审计（2026-09-09）
+
+- 审计对象为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，只读 `core/Clash.Meta/adapter/provider/provider.go`（SHA-256 `546ED6CDAC36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`）、`parser.go`、`lib/views/proxies/proxies.dart`（`271197BA005F48A922046A4256AA2485734D65EB6064707DCE6AFF5C9136249F`）和 `lib/views/proxies/list.dart`（`F54613F01F8A718557B119A958A708292AF73F1E1CCB889B05510136FB73A79E`）；未启动 core、未读取设备代理数据或使用 ADB。
+- `NewProxiesParser` 将 `filter`/`exclude-filter` 按反引号拆分为正则，先按 `exclude-type` 不区分大小写排除协议类型，再按代理 `name` 应用排除/包含规则；重复名称去重，正则语法错误、override 错误或单项代理解析错误会令 provider parse 失败。无匹配时分别返回 filter 不匹配或无代理错误。
+- Flutter 代理页只有通用搜索输入、布局/展开与 provider 入口；固定源码未形成协议、地区、标签的独立筛选模型、结果原因、空态/重试或 terminal receipt。未执行恶意正则、空结果、重复名称或真实 provider fixture 验证。
+- 结论：上游存在基于类型/名称的 provider parser 过滤能力，但不能证明 FlClash Android UI 提供用户级协议/地区/标签筛选，也不能直接作为 XToolpro 的筛选合同；对应矩阵行保持 `Partial`，Proxy 台账与 Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
 
 - focused commit `8b141c8`（DoH/DoT/DoQ DNS transport 静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
