@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=61`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=62`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -74,6 +74,8 @@
 | 代理组策略、健康选择与空成员回退 | `core/Clash.Meta/adapter/outboundgroup/{parser,groupbase,selector,urltest,fallback,loadbalance}.go`、`adapter/provider/healthcheck.go` | 组策略、健康状态和失败回退合同 | Partial：固定归档只注册 `select`、`url-test`、`fallback`、`load-balance`，`relay` 明确返回移除错误；空结果统一回落 `empty-fallback`（默认 `COMPATIBLE`）。`select` 成员不存在时回到首项；`url-test` 使用 10 秒单飞缓存、fixed selection 和 tolerance；`fallback` 优先健康成员，固定成员失效后清除并回退；`load-balance` 支持 consistent-hashing、round-robin、sticky-sessions，可用成员耗尽时回到首项且 `Now()` 为空。健康检查默认 5 秒 timeout、5 次失败触发、provider 单轮最多 10 并发并可 lazy 跳过。未形成空 provider、全失败、超时、选择失败或 core 同步失败的稳定 UI 状态和回滚回执，保持 `Partial`。 |
 
 | 命名 inbound listener 重载与失败回滚 | `core/Clash.Meta/listener/{listener,parse}.go`、`core/Clash.Meta/config/config.go`、`core/Clash.Meta/hub/executor/executor.go` | 配置重载、监听器替换和失败回滚 | Partial：`parseListeners` 按列表逐项解析，缺失类型、未知协议、重复名称或任一项解码失败都会使整个 listener map 返回错误；`updateListeners` 再以 `PatchInboundListeners` 更新运行态。该函数在配置变化时先 `oldListener.Close()`，随后才调用新 listener 的 `Listen`；若新监听失败，函数仅记录错误并继续，已关闭的旧对象仍可能留在 `inboundListeners` map 中，没有原子替换、回滚、失败分类或 terminal receipt。删除仅在 `dropOld=true` 且新 map 不含名称时执行；Android bridge 对内置 HTTP/SOCKS/redir/tproxy/mixed 等端口另走重建函数，不能把命名 listener 重载语义外推为设备可用。XToolpro 需以 prepare/validate、原子切换、旧实例保留或明确 unavailable 结果及可核验健康回执覆盖重载失败、取消和重试，保持 `Partial`。 |
+
+| 内置 HTTP/SOCKS/redir/tproxy/mixed 端口重建与 UDP 失败边界 | `core/Clash.Meta/listener/listener.go`、`core/Clash.Meta/hub/executor/executor.go` | Android 端口重建、部分失败与回滚合同 | Partial：固定 `ReCreate*` 路径按 `allow-lan`/`bind-address` 计算地址，并以独立 mutex 保护重建。地址变化时先关闭旧 listener；HTTP/TProxy 失败后不恢复旧实例，SOCKS/mixed 在 UDP listener 创建失败时关闭新 TCP 但仅经日志返回，redir/TProxy 的 UDP 创建失败仅写 warning 仍保留 TCP listener 并记录主监听成功。端口为 `0` 或空时直接返回，调用方拿不到成功/失败/部分成功结果；`updateListeners` 也不等待或汇总这些重建结果。XToolpro 需以 prepare/validate、原子切换、TCP/UDP 部分成功分类和可核验 terminal receipt 覆盖端口重建失败、取消、重试及旧实例保留，保持 `Partial`。
 
 ## sdmaid-se：设备维护能力
 

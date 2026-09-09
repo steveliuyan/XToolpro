@@ -1723,6 +1723,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 内置 HTTP/SOCKS/redir/tproxy/mixed 等端口由 `updateListeners` 后续的 `ReCreate*` 函数单独重建，不能据此证明命名 listener 在 Android bridge 上具有同样的可用性或失败语义。XToolpro 需要在 adapter 层执行 prepare/validate、原子切换和可核验的失败/取消/重试结果。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未修改配置或监听器，未读取设备文件、日志、节点、URL、凭据、Cookie 或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 内置 HTTP/SOCKS/redir/tproxy/mixed 端口重建与 UDP 失败边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`listener/listener.go`=`5D9BCDED93B4ED821D80827DF0A6EB198F844AA27EB10C74AC887C8FFD3FE019`；`hub/executor/executor.go`=`3AE623D0272443453ED2957B4E973532FBBB2CC759232E646C3DE1DAAF1F17FE`。
+- `ReCreateHTTP`、`ReCreateSocks`、`ReCreateRedir`、`ReCreateTProxy`、`ReCreateMixed` 均按共享 `allowLan`/`bindAddress` 计算地址并使用独立 mutex；地址变化时先关闭旧实例，端口为零或空时直接返回。
+- HTTP/TProxy 在新 TCP listener 创建失败后不恢复旧实例；SOCKS/mixed 的 UDP listener 创建失败会关闭本轮新建 TCP，但不返回稳定失败结果；redir/TProxy UDP 创建失败只记录 warning，TCP listener 仍被保留并记录主监听成功。
+- `updateListeners` 调用这些重建函数时不接收返回值、不汇总 TCP/UDP 部分成功，也没有统一健康、回滚、取消或完成 receipt。XToolpro 需在 adapter 层先校验资源，再原子切换并显式区分成功、部分成功、不可用、取消和重试。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未修改端口或配置，未读取设备文件、日志、节点、URL、凭据、Cookie 或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-09，代理组策略静态审计）
 
 - focused commit `e5b2f3a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
