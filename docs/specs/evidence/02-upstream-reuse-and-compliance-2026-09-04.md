@@ -1651,6 +1651,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - DNS client 使用 `DialContext` 和 5 秒 DNS client timeout，但固定 `miekg/dns ExchangeWithConn` 路径的取消语义受库限制；`dns/client.go`、`dns/util.go` 的 debug/warn 模板包含 DNS server address、query name、ECS prefix、截断重试和 cache/ACME 分支信息。未见统一字段脱敏、DNS query 日志开关边界、cache 清除/过期 terminal receipt 或独立 Fake-IP/Host/sniffing health/capability API。
 - 结论：上游具备 DNS transport、有限 timeout、内存/持久 Fake-IP 映射和 5 分钟 server-failure cache 规则，但 cache 文件权限、错误恢复和 DNS/Fake-IP 诊断字段不满足 XToolpro 的最小化、加密、可回滚和稳定错误合同。未执行真实解析、Fake-IP 冲突、cache 损坏、取消或嗅探验证；对应矩阵行保持 `Partial`，Proxy 台账和 Phase 02 gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，DNS/Fake-IP cache 静态审计）
+
+- focused commit `55b0836` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，强停后 launcher 冷启动无意恢复复核）
 
 - focused commit `df32aa8` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
