@@ -1627,6 +1627,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 操作前为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。重复 START 后 7 秒和 14 秒均为 `vpn_connected_markers=1`、`all_tun_interfaces=0`；STOP 后 5 秒回到 `vpn_connected_markers=0`、`all_tun_interfaces=0`，进程和 app-op 不变。
 - 本轮未发送流量，未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只支持系统标记最终可清理，不证明启动请求去重、core/listener 次数、资源释放或实际 TUN 健康；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
 
+### FlClash 运行态快速双 TOGGLE 受限复核（2026-09-09）
+
+- 设备为已授权测试设备 `bf353dda`；先向已解析 dev `QuickActionActivity` 发送 START，等待 7 秒，再连续发送两次 TOGGLE，最后发送 STOP。每次 mutation 前后只采集进程存在性、`POST_NOTIFICATION` app-op、系统 `VPN CONNECTED` 标记计数和所有 `tun*` 接口计数。
+- 停止基线为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。START 后 7 秒为 `vpn_connected_markers=1`、`all_tun_interfaces=0`；双 TOGGLE 后 7 秒仍为 `vpn_connected_markers=1`、`all_tun_interfaces=0`；STOP 后 5 秒回到 0/0，进程和 app-op 不变。
+- 本轮未发送流量，未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只证明该轮运行态偶数切换保留系统标记并可由 STOP 清理，不能证明实际 TUN/core 运行、线性化、中间反向状态或资源安全；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，重复 START 请求最终收敛复核）
 
 - focused commit `de53d07` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
