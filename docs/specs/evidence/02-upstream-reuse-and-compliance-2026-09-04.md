@@ -1701,6 +1701,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Flutter `Traffic`/dashboard provider 消费速率和累计值；连接页通过 polling reader 刷新列表，支持清空全部和关闭单条。`TrackerInfo`/`Metadata` 与详情页直接覆盖 UID、进程/路径、网络、host、源/目的 IP/端口、规则 payload、GeoIP/ASN、DNS mode、special proxy/rules、remote destination、上下行字节和代理链；列表搜索只覆盖部分字段。该字段集合和原始错误写日志的路径尚无脱敏/最小化边界，且关闭、重置流量与请求缓存清理并非同一 terminal receipt。
 - 本轮仅审计固定源码，未启动 core、未使用 ADB、未读取设备连接正文、地址、节点、配置、订阅 URL、凭据、Cookie、日志或网络内容；对应矩阵行从 `Verified` 调整为 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash rule-provider 车辆与 `/rules` 命中 API 静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`rules/provider/parse.go`=`763F74A57B32688AACEA86BA389DE52FDC2F74FB5829874AE296DB6E32C2B472`；`provider.go`=`3B37837D9A3B25CB9BC8A1D06E18E1CDC0143D379AC5000F4FC3B024DC9B7E6A`；`rule_set.go`=`B58CC52A7C44758B06E66118ADF38F9249D42EDE2192078D2758AC2E5F50B267`；`rules/parser.go`=`8B3004C05CA7318E654239920BC876428BFD1F4CEF48E7CF214AC9411D60EBA4`；`hub/route/rules.go`=`2295A989D65BF2F602320506EDDC9A4361BB937CD17F494E5D7CBDD631C9CDB9`。
+- 解析器接受 `file`、`http`、`inline` vehicle，yaml/text/mrs 格式以及 `interval`、`size-limit`、header/proxy、bundle fallback；规则 provider 在解析成功后替换 strategy 并触发更新 callback。`ParseRule` 覆盖 DOMAIN/GEOSITE/GEOIP/IP-CIDR/IP-ASN、RULE-SET、AND/OR/NOT 等类型。
+- `/rules` 返回 index/type/payload/proxy/size 以及 disabled、hitCount、hitAt；PATCH `/rules/disable` 按 index 改变运行态。RuleSet 找不到 provider 时静默返回 false。固定路径未见签名/来源绑定、原子 staging/read-back、规则版本 hash、逐项更新 receipt、稳定错误分类或 payload/host 脱敏。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未下载或修改规则数据，未读取设备规则、域名、IP、配置、订阅 URL、凭据、Cookie、日志或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-09，代理组策略静态审计）
 
 - focused commit `e5b2f3a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
