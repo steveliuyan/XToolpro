@@ -1690,6 +1690,8 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `8b141c8`（DoH/DoT/DoQ DNS transport 静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+- focused commit `4804bed`（provider 协议/地区/标签筛选语义静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 - focused commit `188db09`（应用更新 metadata 与 artifact 信任边界静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
 - focused commit `0bbfe95` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
