@@ -1615,6 +1615,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 操作前为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。立即 START→STOP 后 7 秒和 14 秒均为 `vpn_connected_markers=1`、`all_tun_interfaces=0`，进程和 app-op 不变；再次发送 STOP 后 5 秒回到 `vpn_connected_markers=0`、`all_tun_interfaces=0`。
 - 本轮未发送流量，未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果表明已提交 STOP 与最终系统停止摘要存在可观察延迟/竞态，不能证明取消已覆盖 setup、service callback 或 core health；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，快速 START→STOP 取消收敛复核）
+
+- focused commit `064bd7a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，重复 STOP 请求最终收敛复核）
 
 - focused commit `3832883` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
