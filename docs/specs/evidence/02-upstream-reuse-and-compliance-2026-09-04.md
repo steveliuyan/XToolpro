@@ -2400,6 +2400,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller WebSocket 握手与帧边界契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/common.go`=`FFB303C61FC0BD4535741F5BBFB49E31A3B97EB98C4C2EDF02B64F88625E6739`；`hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 固定 `wsUpgrade` 手工检查 GET、HTTP/1.1、Host、Upgrade/Connection、24 字节 `Sec-WebSocket-Key` 和版本 13；失败直接写原始握手错误。Hijack 后清除 deadline 并发送 101，未见 Origin/来源校验、握手超时、读写 deadline、最大帧/消息大小、压缩限制或 ping/pong 保活。
+- 服务器帧写入不限制 payload；协议/编码错误在 hijack 后无法转为结构化 HTTP 回执，也没有稳定 close code、取消原因或 version mismatch 终态。该边界与各流式端点的 context/订阅缺口叠加，可能放大资源占用。
+- XToolpro 只能在 adapter 层采用受审计 WebSocket 库，绑定来源与凭据策略，限制握手/帧预算、心跳和读写 deadline，传播取消并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 结束订阅；隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未建立 WebSocket、未发送帧、未读取连接内容或日志、未使用 ADB，未读取配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller WebSocket 握手与帧边界契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
