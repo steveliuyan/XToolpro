@@ -1817,6 +1817,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `10ac147` 已创建但尚未 push；本次仅修改 parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+#### 本检查点远端备份状态（2026-09-09，多地址 HTTP/SOCKS listener 创建与连接资源边界静态审计）
+
+- focused commit `a50b166` 已创建但尚未 push；本次仅修改 parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash 多地址 HTTP/SOCKS listener 创建与连接资源边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`；`listener/http/server.go`=`5F155948A183E63186481123AFCA464CE99EACDFDD7871C2424ED956960DA1F8`；`listener/socks/tcp.go`=`7A4E5DDDA9C6B3C2415081898309E66F9D3207ED10D22911FC82E4C02391637E`；`listener/socks/udp.go`=`A641A6E552DF1EC4FB2FC006FCB523D0E7DE90A7F47D41AF09813BFB4CC5A416`。
