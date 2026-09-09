@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=66`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=67`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -81,6 +81,7 @@
 | 全局停止对命名 inbound/tunnel listener 的清理覆盖 | `core/Clash.Meta/listener/patch.go`、`listener/listener.go`、`core/common.go`、`core/hub.go`、`core/Clash.Meta/hub/executor/executor.go` | 停止/重启时的完整 listener 回收与可核验终态 | Partial：固定 `listener.StopListener()` 仅逐项关闭全局 socks/http/redir/tproxy/mixed/TUN/ShadowSocks/VMess/TUIC 实例，未遍历或清空 `inboundListeners`、`tunnelTCPListeners`、`tunnelUDPListeners`。`core/hub.go:handleStopListener` 与 `core/common.go:stopListeners` 直接调用该函数；`core/Clash.Meta/hub/executor/executor.go:Shutdown` 另调 `listener.Cleanup()`，而 `listener.Cleanup()` 仅调用 `closeTunListener()`。因此停止/Shutdown 静态路径可能遗留命名 inbound 与 tunnel listener map 项；未见统一 close、map 清空、in-flight 等待、失败分类或 terminal receipt。XToolpro 需在 adapter 层覆盖所有 listener 注册表并以可核验 Success/Cancelled/EngineCrashed 终态收敛，保持 `Partial`。 |
 | Tunnel listener target 解析失败与资源回收 | `core/Clash.Meta/listener/tunnel/{tcp,udp}.go`、`core/Clash.Meta/listener/listener.go`、`core/Clash.Meta/hub/executor/executor.go` | tunnel 创建失败分类、socket 回收与并发边界 | Partial：固定 `tunnel.New`/`NewUDP` 先调用 `Listen`/`ListenPacket` 绑定 TCP/UDP socket，再调用 `socks5.ParseAddr(target)`；target 无效时直接返回错误，未关闭已绑定的 socket。成功后分别启动无界 Accept/ReadFrom 循环，并为每个连接/数据包派生 goroutine；除 `closed` 标志外无 context、deadline、并发预算或 terminal receipt。`PatchTunnel` 逐项创建时仅记录错误并继续，调用方不能区分部分成功、资源泄漏、取消或重试；`updateTunnels` 不汇总结果。XToolpro 需在 adapter 层先校验 target、失败时回收已分配资源并提供有界并发与稳定失败分类，保持 `Partial`。 |
 | Tunnel 配置对象校验与未知 network 处理 | `core/Clash.Meta/listener/config/tunnel.go`、`core/Clash.Meta/listener/listener.go` | tunnel 输入校验、协议拒绝与稳定错误分类 | Partial：`listener/config/tunnel.go` 的字符串配置分支校验 network 仅允许 `tcp`/`udp` 并核对 address/target 的 host:port；但 YAML/JSON 对象分支直接赋值 `Network`、`Address`、`Target`、`Proxy`，未执行同等校验。随后 `PatchTunnel` 仅对 `network == "tcp"` 走 TCP，其他值一律进入 UDP 创建路径，未知 network 不会被拒绝或映射为 `Unavailable`。XToolpro 需在 adapter 层对所有输入形态执行统一 schema 校验，未知协议明确拒绝并返回脱敏分类，保持 `Partial`。 |
+| Listener 停止与配置重载并发串行化 | `core/Clash.Meta/listener/patch.go`、`listener/listener.go` | stop/reload 互斥、资源生命周期与一致终态 | Partial：`PatchInboundListeners` 与 `PatchTunnel` 分别以 `inboundMux`/`tunnelMux` 保护 map 更新和 close/create；固定 `listener.StopListener()` 逐项关闭全局 listener，但未获取上述 mutex，也未同步命名 inbound/tunnel map。停止与配置重载并发时，静态路径允许交叉 close、重载后重新创建或 map 状态与实际 socket 不一致；未见全局 stop/reload 串行化、generation 检查、in-flight 等待或 terminal receipt。XToolpro 需在 adapter 层统一生命周期锁与代次校验，确保 stop/reload 互斥并返回可核验终态，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 
