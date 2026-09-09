@@ -2790,6 +2790,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider healthcheck lazy/touch 跳过与竞态边界静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/adapter/provider/healthcheck.go`、`core/Clash.Meta/adapter/provider/provider.go`；沿用已记录的固定提交和文件哈希，仅补充惰性调度边界。
+- 固定 healthcheck 支持 `lazy`/touch 语义跳过近期无活动或无需探测的集合，但未见跳过原因、活动时间窗口、配置 generation、force 覆盖或与更新/关闭并发时的统一锁与回执；同一 proxy 在“跳过”“排队”“检查中”“过期”之间的状态不能由 API 稳定区分。
+- 结论：XToolpro adapter 必须显式记录 skip reason、last-touch 和 freshness，定义 force 语义并串行化更新、触发、检查和关闭，返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`；完成 lazy、touch、force、并发更新和关闭契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未运行 healthcheck、未发起测速或网络请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider healthcheck lazy/touch 跳过与竞态边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
