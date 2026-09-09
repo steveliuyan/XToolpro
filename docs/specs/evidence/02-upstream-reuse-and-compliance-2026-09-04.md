@@ -2504,6 +2504,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash sniffing 失败缓存与 metadata 改写生命周期静态审计（2026-09-10）
+
+- 固定归档关键文件 SHA-256：`core/Clash.Meta/component/sniffer/dispatcher.go`=`4B04CBFA8D4A21C5C305DEB6E8E5B8719D6FC047CB3F7A176C6805C7C2045B81`；`base_sniffer.go`=`B11A1E3C557C8F38ECA3C1C289E12313BB83641D9874F987363AF41D09238C20`；`http_sniffer.go`=`383EFD22A42E50AF06C62B5C4C833096DDBF1307156CCB075A27F11EFBCD79F2`；`tls_sniffer.go`=`CE8EF5E462226143F8950F3F9974960141CDCF8C077406A7A7F7F5CD7546045E`；`quic_sniffer.go`=`C451AC34D588B2FD180DAC75A2EC3904CC3274902AB72A9FF8451DA7430EA5E1`。
+- 固定 dispatcher 对 HTTP/TLS/QUIC 首包嗅探失败按目的地址写入容量 128、TTL 600 秒的 LRU skip cache；命中后跳过后续嗅探。源码边界未见 profile/config generation、force/skip 规则切换或显式清除与该缓存绑定，因此不能证明切换嗅探策略后旧失败状态已失效，也没有缓存命中/过期/清除的对外回执。
+- 成功嗅探会改写 `Metadata.SniffHost`、`Host`，必要时改写 `DstIP`/`DNSMode`；固定实现未提供 metadata 原值快照、回滚标记或“改写已被规则消费”的终态。未知 sniffer 类型和全部 sniffer 失败只返回普通 error，失败日志包含源/目的地址、嗅探 host、协议和原因，未见统一字段脱敏或首包生命周期边界。
+- 结论：上游具备有限的失败退避和 metadata 改写能力，但不能直接作为 XToolpro 的可取消/可回退嗅探合同。XToolpro 只能在 adapter 层按配置 generation 隔离失败缓存，令每次 metadata 改写可取消、可回退，并禁止源/目的地址、host 或首包内容进入未脱敏日志；在受控 HTTP/TLS/QUIC fixture 覆盖命中、过期、规则切换、取消和失败回执前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档与既有文件哈希，未启动 core、未发送流量、未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、凭据、Cookie、数据库或文件，未使用 ADB；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=124`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash sniffing 失败缓存与 metadata 改写生命周期静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
