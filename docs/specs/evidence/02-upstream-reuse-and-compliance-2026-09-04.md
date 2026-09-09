@@ -2304,6 +2304,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller cache flush 同步/异步与取消语义静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/cache.go`=`B9DCE3EA2745EB7878C7876DB98C1D3436E7D751E79822A17A33FF20937C4E23`；`core/Clash.Meta/dns/resolver.go`=`076C077A14DDDCB744CDE2087D83FF05E2888718F33BFF58490EB5BA04115EF7`；`core/Clash.Meta/dns/enhancer.go`=`55B47DA94B15CD4C7E576DDDD8C11651B6F165998D58F00098C8A34DC924CF91`；`core/Clash.Meta/component/fakeip/pool.go`=`99E1323AF5E5D25013F08A1E63201463E86319859FAF892B4F419196BB134817`。
+- `/cache/fakeip/flush` 对实际存在的 IPv4/IPv6 pool 逐项同步执行，成功后才重置 pool offset；任一错误返回 400 原始文本，但不返回已清理范围、部分成功或前后计数。`/cache/dns/flush` 则对 DefaultResolver 与 SystemResolver 启动 goroutine 后立即返回 204，不等待清理结束，不接受 request context 取消，也不聚合后台失败。
+- 两类 flush 均未提供任务 ID、generation、清理前后计数、作用域回读或稳定 `Cancelled`/`EngineCrashed` 回执；Unix/named-pipe transport 仍以空 secret 挂载在本地未鉴权管理面。
+- XToolpro 只能在 adapter 层把清理建模为可取消、有界任务：明确 fake-IP/DNS 作用域，记录不可变快照，等待所有目标收敛后再返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`，并在部分失败时保留可恢复状态；隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未调用 cache flush、未修改 DNS/Fake-IP 状态、未启动 core、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller cache flush 同步/异步与取消语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
