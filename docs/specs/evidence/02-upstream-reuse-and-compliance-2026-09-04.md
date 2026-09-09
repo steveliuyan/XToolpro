@@ -2823,6 +2823,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider 更新与 healthcheck 代际竞态静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/adapter/provider/provider.go`、`core/Clash.Meta/adapter/provider/healthcheck.go`；沿用已记录的固定提交和文件哈希，仅补充 stale-result 边界。
+- provider `setProxies` 替换切片并递增 version 后异步触发 healthcheck；固定 worker 结果未见携带 provider/config generation、对旧快照完成结果做 stale 检查，或在替换期间阻止旧 proxy 状态回写。更新、检查、关闭之间未见统一顺序和冲突回执。
+- 结论：XToolpro adapter 必须让每轮检查绑定不可变 snapshot/generation，在提交结果前验证代次，旧结果丢弃并记录脱敏计数，替换失败时保留旧快照；完成更新期间并发检查、stale write、取消和回滚契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未运行 healthcheck、未触发 provider 更新、未发起测速或网络请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider 更新与 healthcheck 代际竞态静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
