@@ -1756,6 +1756,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `c8257a3` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider `subscription-userinfo` 缓存与配额字段边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`；`core/Clash.Meta/adapter/provider/subscription_info.go`=`123565A529C8C5CD74F836AEAE79092007533DB7A8D49256EF91C90283E021B1`；`core/Clash.Meta/component/profile/cachefile/subscriptioninfo.go`=`07D9A7FCFB4C5112CC2FE3A603A9227959F1E5F165EE22B50500FEB32F26A92E`；cache 初始化实现位于 `cache.go`（`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`）。
+- HTTP provider 在响应头读取 `subscription-userinfo`，解析 `upload`、`download`、`total`、`expire` 四个数值，更新内存 `SubscriptionInfo` 并写入 bbolt `subscriptioninfo` bucket；provider 初始化按 name 恢复该原始 header 文本。provider JSON 将四项数值作为 `subscriptionInfo` 暴露。
+- `NewSubscriptionInfo` 对无法解析的值记录包含原始值的 warning，未知字段静默忽略；缓存没有 TTL、来源/版本绑定、容量上限、provider 删除清理或撤销回执。cache DB 以 `0666` 模式打开，写入失败只记 cache 路径和原始错误，调用方无法区分持久化失败或过期状态。
+- 本轮仅静态读取固定归档，未发起 provider 请求、未构造或持久化真实 `subscription-userinfo`、未启动 core、未使用 ADB，未读取设备缓存、配置、节点、URL、凭据、Cookie、日志或网络内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，proxy-provider `subscription-userinfo` 缓存与配额字段边界静态审计）
+
+- focused commit `a42e9d5` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash HTTP/SOCKS/mixed 入站认证与 UDP 边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`listener/inbound/mixed.go`=`93844489F2101CBB3B9CFEA9CFFFD79641C24481547132DF53DF8D405648D361`；`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/auth.go`=`D80505C45B1E3B02D5109B77D5FF5A00E10DB5EFA728F37CEDB945746D70098E`；`component/auth/auth.go`=`93F4E431F51124258E43AB75B858DD351C9586A892EDEE56A74E8FC132ECD542`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`。
