@@ -2666,6 +2666,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider filter 分隔符与编译失败边界静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52`。固定 `NewProxiesParser` 按反引号拆分 `filter`/`exclude-filter` 后编译 regexp2；当前证据未见反引号转义或字面量规则、空片段语义、表达式数量上限，也未见编译失败的稳定 `Unavailable`/`VersionMismatch` 分类。
+- 因而空表达式、连续分隔符、包含反引号的字面量和多个表达式的错误边界不能由固定源码形成可核验契约；编译错误仍可能以普通 error 进入上层，未见旧 provider 快照保留或逐表达式结果。
+- 结论：XToolpro adapter 必须先限制分隔符/表达式数量和长度，定义空项与转义语义，在受限 regexp2 编译阶段返回脱敏、可分类的错误，并在 staging 失败时保留旧快照；完成空表达式、转义、恶意正则、编译失败和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未执行 regexp2 编译、未解析真实 provider、未发起 HTTP 请求、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider filter 分隔符与编译失败边界静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
