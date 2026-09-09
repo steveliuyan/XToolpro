@@ -2328,6 +2328,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller core updater artifact 信任与回滚契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/updater/update_core.go`=`2AE3F527FA7DC2CC7E304BCB832DC30A0D70A93A89A2EFB9B3E3B50E4D695304`；管理路由 `core/Clash.Meta/hub/route/upgrade.go`=`6C3F995D1786076A80913D83812BEF199281BC6D008D986E6BCAB321038F0332`。
+- 固定 core updater 以约 90 秒 context 下载并限制 32MB，按 channel/force 获取 latest version；未见签名、发布 hash、来源绑定、ABI/版本 manifest 或安装前兼容性校验。下载包、路径和版本可能进入日志。
+- Windows 替换路径先将当前 executable rename 为 `meta-backup`，再复制新文件；替换、重启或新进程健康失败时未见旧文件恢复、last-known-good 标记、超时/取消或稳定 terminal receipt。管理路由成功只返回 `{"status":"ok"}`，不能证明新 core 已启动并健康。
+- XToolpro 只能在 adapter 层先校验签名 manifest 与 ABI/版本，使用 staging+原子切换保留可验证 last-known-good，启动后核验 core/bridge/TUN 健康，失败时自动恢复并输出脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`；隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未调用 `/upgrade`、未下载或替换 core、未启动/重启进程、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller core updater artifact 信任与回滚契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
