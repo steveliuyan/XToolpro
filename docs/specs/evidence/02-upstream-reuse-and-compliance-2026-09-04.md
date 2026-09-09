@@ -1843,6 +1843,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 成功路径分别启动 Accept 与 ReadFrom 循环，并为每个连接/数据包派生 goroutine；循环仅依赖 `closed` 标志退出，未见 context、deadline、并发预算或 terminal receipt。`PatchTunnel` 对创建错误只写日志并继续，`updateTunnels` 不汇总逐项结果，无法区分部分成功、资源泄漏、取消或重试。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未创建 tunnel、未发起请求，未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+#### 本检查点远端备份状态（2026-09-09，Tunnel listener target 解析失败与资源回收静态审计）
+
+- focused commit `428b4ee` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
