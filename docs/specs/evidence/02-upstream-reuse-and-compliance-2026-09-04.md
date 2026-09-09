@@ -1644,6 +1644,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 强停后 3 秒为进程不存在、`vpn_connected_markers=0`、`all_tun_interfaces=0`；launcher 启动后 8 秒为进程存在但 `vpn_connected_markers=0`、`all_tun_interfaces=0`；最终强停后 3 秒保持全 0，app-op 始终为 `allow`。
 - 本轮未发送流量，未读取 UI、日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只支持本轮无新 START 请求时未观察到 VPN/TUN 意外恢复，不替代 crash/reboot/always-on 或 core health proof；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，强停后 launcher 冷启动无意恢复复核）
+
+- focused commit `df32aa8` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，Phase 02 gate 计数一致性复核）
 
 - focused commit `3b57460` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
