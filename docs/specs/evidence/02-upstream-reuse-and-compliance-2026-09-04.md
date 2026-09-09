@@ -1994,6 +1994,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `a9bde50` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller DNS query API 字段与输入边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/dns.go`=`25AACDDA7D48F73BBC80F226AF0A8DCEFA0A5AE7577675C7C2F747A3A685402F`；路由鉴权与传输边界同 `core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- `dnsRouter` 暴露 `GET /query`，由 `router` 在 secret 管理 group 内挂载；本地 Unix/named-pipe transport 传入空 secret，故该 API 在这些传输上不经过 `authentication()`。`name` query 直接交给 `dns.Fqdn`，未见名称长度、标签、字符集或敏感查询限制；`type` 缺省为 `A`，未知类型返回 400。
+- 查询使用 `resolver.DefaultDNSTimeout`，resolver 错误直接返回原始 `err.Error()`。成功响应包含 DNS header 状态位、Question，以及 Answer/Authority/Additional 中每条 RR 的完整 name、type、TTL 与 data；未见响应大小、并发预算或字段最小化/脱敏策略。
+- 本轮仅静态读取固定归档，未启动 core、未调用 `/dns/query`、未发送 DNS 查询、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller DNS query API 字段与输入边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
