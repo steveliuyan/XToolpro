@@ -1879,6 +1879,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - TUN 接口计数命令受 shell 权限限制，记录为 `unavailable` 而非将其解释为无 TUN。没有发送 START、STOP、TOGGLE 或权限 grant/revoke；没有读取日志、配置、通知正文、UI 节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由、DNS 或流量内容。
 - 结果只确认本次可观测停止态摘要，不能证明 core/TUN 健康或否定其他运行态 proof；矩阵状态保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+#### 本检查点远端备份状态（2026-09-09，受限 ADB 停止态状态复核）
+
+- focused commit `f82a201` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，TUN 运行时配置 PATCH 的原子性与失败回执静态审计）
 
 - focused commit `9f49b8a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
