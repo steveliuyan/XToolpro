@@ -1817,6 +1817,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `10ac147` 已创建但尚未 push；本次仅修改 parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash 多地址 HTTP/SOCKS listener 创建与连接资源边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`；`listener/http/server.go`=`5F155948A183E63186481123AFCA464CE99EACDFDD7871C2424ED956960DA1F8`；`listener/socks/tcp.go`=`7A4E5DDDA9C6B3C2415081898309E66F9D3207ED10D22911FC82E4C02391637E`；`listener/socks/udp.go`=`A641A6E552DF1EC4FB2FC006FCB523D0E7DE90A7F47D41AF09813BFB4CC5A416`。
+- `inbound.HTTP.Listen` 和 `inbound.Socks.Listen` 按逗号分隔的地址逐项创建 TCP listener；SOCKS 在 `udp=true` 时为每个地址继续创建 UDP listener。底层 HTTP/SOCKS `NewWithConfig` 先绑定 TCP，再初始化 certificate/private-key、ECH、client-auth CA 或 Reality。
+- 任一 TLS/证书/Reality 初始化失败会直接返回，已绑定的 socket 未见统一关闭；多地址中后续地址或 UDP listener 创建失败时，先前已创建的实例同样没有统一回收，调用方无法得到部分成功、资源泄漏、回滚或单地址失败分类。
+- 接受连接后以 goroutine 分派握手；SOCKS4/5 协议错误、认证失败或 UDP 数据包解析失败会关闭/丢弃，但固定 HTTP/SOCKS listener 路径未见统一 read/write deadline、请求体上限或 adapter 级并发预算。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未修改监听器或证书，未读取设备文件、日志、节点、URL、凭据、Cookie 或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
