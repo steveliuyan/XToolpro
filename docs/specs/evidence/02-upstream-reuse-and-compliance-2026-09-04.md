@@ -1948,6 +1948,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `cdc2187` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller DoH 路由鉴权与错误边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`core/Clash.Meta/hub/route/doh.go`=`4CA2A97F7E2B4EC62C38921E29EDD4FC0AF8345138EADF80F038BD89A942B883`。
+- `router` 先建立 secret 保护的管理 group，再在 group 外执行 `r.Mount(dohServer, dohRouter())`；DoH 因此不经过 `authentication()`，也没有从 `dohServer` 路径看到来源限制或管理面 allowlist。Unix/named-pipe 传输调用同一 router 时传入空 secret，故该 DoH 挂载也随本地传输边界继承未鉴权语义。
+- `dohHandler` 在 `resolver.DefaultResolver == nil` 时返回 HTTP 500 和固定 `DNS section is disabled`；GET 以 `base64.RawURLEncoding` 解码 `dns` query，POST 要求 `Content-Type: application/dns-message` 并用 `io.LimitReader(r.Body, 65535)` 后 `io.ReadAll`，其他方法返回 405。base64 解码、DNS relay 失败和非法 content-type 分别直接返回原始 `err.Error()` 或固定文本；未见统一脱敏错误码、来源绑定、响应/并发预算或 terminal receipt。
+- 本轮仅静态读取固定归档，未启动 core、未调用 DoH、未发送 DNS 请求、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller DoH 路由鉴权与错误边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
