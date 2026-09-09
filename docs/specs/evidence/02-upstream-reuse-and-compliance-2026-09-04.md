@@ -1644,6 +1644,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 强停后 3 秒为进程不存在、`vpn_connected_markers=0`、`all_tun_interfaces=0`；launcher 启动后 8 秒为进程存在但 `vpn_connected_markers=0`、`all_tun_interfaces=0`；最终强停后 3 秒保持全 0，app-op 始终为 `allow`。
 - 本轮未发送流量，未读取 UI、日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只支持本轮无新 START 请求时未观察到 VPN/TUN 意外恢复，不替代 crash/reboot/always-on 或 core health proof；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
 
+### FlClash DNS/Fake-IP cache 持久化与 DNS 日志边界静态审计（2026-09-09）
+
+- 审计对象为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未启动 core、未发起 DNS/网络请求、未读取设备数据或使用 ADB。关键文件及 SHA-256：`core/Clash.Meta/dns/client.go` `9EC3B48BCA8954EFF66C4A45A9275A7FA803186857789E45FB91F723689889D5`；`dns/util.go` `963C52846ED690B96C60CFDCB7F900E35FBE8BE8481CEA80B016C37B9AC374F3`；`component/fakeip/pool.go` `99E1323AF5E5D25013F08A1E63201463E86319859FAF892B4F419196BB134817`；`component/fakeip/cachefile.go` `D2B685FEA40EE7795ED5163EFA9BA784AFA06071EB488011F17FD0F1AA5ED749`；`component/profile/cachefile/cache.go` `F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`。
+- `fakeip` 的 cachefile store 将 host↔fake-IP、IPv4/IPv6 pool 偏移和 cycle marker 委托给 profile bbolt cache；`cache.go` 以 `0666` 打开 cache，`bbolt.Batch` 写 selected/cache bucket，遇到 `ErrInvalid`、checksum 或 version mismatch 时先 `os.Remove(C.Path.Cache())` 再重建。固定路径没有应用层加密、同目录 staging/read-back、旧 cache 保留或恢复 receipt；删除/重建失败会把 cache path 和原始 error 送入 warning log。
+- DNS client 使用 `DialContext` 和 5 秒 DNS client timeout，但固定 `miekg/dns ExchangeWithConn` 路径的取消语义受库限制；`dns/client.go`、`dns/util.go` 的 debug/warn 模板包含 DNS server address、query name、ECS prefix、截断重试和 cache/ACME 分支信息。未见统一字段脱敏、DNS query 日志开关边界、cache 清除/过期 terminal receipt 或独立 Fake-IP/Host/sniffing health/capability API。
+- 结论：上游具备 DNS transport、有限 timeout、内存/持久 Fake-IP 映射和 5 分钟 server-failure cache 规则，但 cache 文件权限、错误恢复和 DNS/Fake-IP 诊断字段不满足 XToolpro 的最小化、加密、可回滚和稳定错误合同。未执行真实解析、Fake-IP 冲突、cache 损坏、取消或嗅探验证；对应矩阵行保持 `Partial`，Proxy 台账和 Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，强停后 launcher 冷启动无意恢复复核）
 
 - focused commit `df32aa8` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
