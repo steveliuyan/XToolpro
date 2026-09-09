@@ -2072,7 +2072,20 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 #### 本检查点远端备份状态（2026-09-09，External-controller 代理、代理组与规则管理 API 字段和回执边界静态审计）
 
-- focused commit 尚未创建：两次受控 `git add`/`git commit` 均因当前执行环境无法写入 `D:\xtoolpro\.git\index.lock`（`Permission denied`，审批超时）而失败；未发现残留 `index.lock`，也未运行任何删除/覆盖命令。本检查点未能建立 Git 备份，未备份路径为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件。其他工作树改动和临时产物未纳入；按要求不得自动 push，须先获得用户明确确认并先恢复可写 Git 元数据权限。
+- focused commit `513d241` 与 evidence-only commit `4b3bc75` 已由用户在本机 PowerShell 创建，均尚未 push；涉及路径仅为本 checkpoint 的矩阵与 evidence 文档，其他工作树改动和临时产物未纳入。
+
+### FlClash External-controller `/configs` GET/PUT/PATCH 与 Geo 更新边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/configs.go`=`B4058F78C4CE3E975A84976A4B7F546F378DB3FB429BE87E904D04403153C390`；`hub/executor/executor.go`=`3AE623D0272443453ED2957B4E973532FBBB2CC759232E646C3DE1DAAF1F17FE`；`config/config.go`=`49296DD48FB4BFBE1EB3B8236DE72FD07FB9E8EFFB122D09B137DD3D44982B86`。
+- 固定路由提供 `GET /configs`、非 embed 模式下 `PUT /configs`、`PATCH /configs` 与 `POST /configs/geo`；路由位于 secret 管理 group，但 Unix/named-pipe transport 传入空 secret，因此本地传输继承未鉴权边界。
+- `GET /configs` 直接序列化 `executor.GetGeneral()`，包含端口、TUN、TUIC、认证用户、IP 前缀、模式、日志级别、接口和 Geo URL 等运行态字段。`PATCH` 通过指针 schema 接收部分 general/TUN/TUIC 字段，却在一次请求中按固定顺序重建多个 listener/TUN，并修改 mode、DNS、日志和接口；未见请求体大小、数值范围、字段互斥、generation、回读或逐字段结果，底层副作用可能先发生后才暴露错误。
+- `PUT` 只解码 `{path,payload}`。payload 非空时完整内容交给 `config.Parse`，未见请求体上限或字段白名单；path 为空使用默认配置路径，非空仅检查绝对路径和 `C.Path.IsSafePath` 后直接 `ParseWithPath` 读取。解析失败返回 400 原始文本；解析成功后调用带进程级 mutex 的 `executor.ApplyConfig(cfg, force)`，依次更新用户、代理、规则、嗅探、hosts、general/listener、DNS、provider、profile、updater，没有事务、快照、阶段性 health check、取消或失败回滚，最终无条件返回 204。
+- `config.Parse` 会先解密 age 内容再做 YAML 解码；默认配置预填网络、Geo、外部 UI 等字段，未见未知字段拒绝、秘密字段脱敏或配置 generation。`POST /geo` 仅返回无正文 204/500，不能表达逐资源成功、部分失败、取消或版本错配。
+- 本轮仅静态读取固定归档，未启动 core、未调用 `/configs`、未读取或写入设备配置、未更新 Geo 数据、未使用 ADB，未读取日志、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller `/configs` GET/PUT/PATCH 与 Geo 更新边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
