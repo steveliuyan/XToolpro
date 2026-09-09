@@ -2016,6 +2016,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `cb45f9b` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller traffic/memory 流式端点取消与资源边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；统计实现位于固定归档 `core/Clash.Meta/component/tunnel/statistic` 路径，本轮未修改或执行该组件。
+- `traffic` 与 `memory` 同时支持普通 HTTP 流和 websocket；每秒从 `statistic.DefaultManager` 读取瞬时/累计上下行或内存值，编码后 flush。两条路径都以 `for range ticker.C` 持续运行，仅在 JSON 编码、HTTP 写入或 websocket 写入错误时退出，未见对 `r.Context().Done()` 的显式监听、订阅数量上限、连接关闭回执或逐订阅 terminal receipt。
+- 这些快照字段未直接包含节点名或请求正文，但累计流量和内存值仍属于运行态诊断数据；固定 endpoint 未见采样节流、权限分级、字段最小化或取消分类。客户端断开若写错误未及时返回，可能遗留 goroutine/ticker；websocket close 同样依赖写路径发现。
+- 本轮仅静态读取固定归档，未启动 core、未请求 `/traffic` 或 `/memory`、未建立 websocket、未读取设备日志或运行态数据、未使用 ADB，未读取配置、通知、节点、URL、地址、路由、DNS、流量内容、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller traffic/memory 流式端点取消与资源边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
