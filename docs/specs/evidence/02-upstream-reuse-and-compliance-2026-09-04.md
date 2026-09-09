@@ -2482,6 +2482,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash PackageResolver 应用清单隐私、空态与重试契约静态审计（2026-09-10）
+
+- 固定来源为 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72`；复核路径为 Android `PackageResolver`、`AppPlugin.getPackages`、`lib/views/access.dart` 与 `SystemAction.getPackages`。既有固定源码审计确认：`PackageResolver` 使用 `PackageManager.getInstalledPackages(GET_PERMISSIONS)`，排除自身与 `android` 后输出包名、显示标签、系统应用标记、`INTERNET` 标记和最后更新时间；`AppPlugin` 通过 Gson 将完整集合跨 MethodChannel 传给 Flutter。
+- 该应用清单属于敏感设备使用信息，固定路径未见字段最小化、专用脱敏、访问审计或默认不持久化合同。`AccessView` 只在页面初始化时请求一次；异常没有稳定错误码，空列表直接显示“无数据”，未区分权限缺失、查询失败、解析失败和暂时不可用，也没有刷新或重试入口。
+- 这条包清单数据流不能证明 `find-process` 的运行时归因能力；固定 `FindProcessMode` 只把开关写入 core 参数，没有 per-request attribution receipt、能力探测或性能预算。XToolpro 只能在用户显式进入按应用/归因流程后按需获取最小字段，仅内存使用并禁止日志、导出和遥测，返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 与可重试状态。
+- 本轮仅复核固定源码与既有证据，未调用 `getPackages`、未读取设备应用清单或进程名、未使用 ADB，未读取配置、日志、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash PackageResolver 应用清单隐私、空态与重试契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
