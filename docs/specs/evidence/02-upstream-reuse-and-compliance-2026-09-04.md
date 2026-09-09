@@ -1672,6 +1672,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定实现没有 XToolpro-facing 证书策略、取消/超时/错误分类、每上游 health/capability 或终端回执；连接/拨号错误日志可能包含上游地址、耗时和原始错误。未执行真实 DoH/DoT/DoQ、证书失败、取消、重试或隐私边界验证。
 - 结论：上游具备三类加密 DNS transport、有限超时和连接重建能力，但这些实现不能直接证明 XToolpro 的证书策略、可取消性、稳定错误/健康合同或脱敏边界；对应矩阵行保持 `Partial`，Proxy 台账与 Phase 02 gate 不变。
 
+### FlClash 应用更新 metadata 与 artifact 信任边界静态审计（2026-09-09）
+
+- 审计对象为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，只读 `lib/common/request.dart`（SHA-256 `8073CEFF3D34FF7F2487AA0BE2EC8309AD3A68B5CFB63C0C8404ADB634E09095`）、`lib/views/about.dart`（`671166BF7057D4C3E7DC29DC86DF9E694EA9678443809683BEE05052CCE5CBCF`）和 `lib/providers/actions/common.dart`（`9AA4F5391C40485EC1A869B5329A6D0979AE458C5389DBF298BA0ABB879EAD6B`）；未发起 GitHub 请求、未下载 release asset、未安装 APK、未读取设备数据或使用 ADB。
+- `checkForUpdate()` 只调用固定 GitHub `releases/latest` URL，检查 HTTP 200，读取 `tag_name`，与本地 `packageInfo.version` 比较；异常被记录为无敏感的固定 warning 文本并返回空结果。更新提示只解析 release body 摘要；用户确认后打开固定 GitHub latest 页面，自动检查被拒绝后可关闭自动检查偏好。固定路径不选择或下载 asset。
+- 未发现 artifact 签名/哈希、来源绑定、staging、ABI/版本兼容校验、安装回滚或 update terminal receipt；“已是最新版”只代表 metadata 比较结果，不能证明可安装 artifact 或 native core 兼容。未执行真实更新、恶意/错误 metadata、取消、下载失败、安装失败或回滚验证。
+- 结论：固定上游仅提供 release metadata 提示和外部页面跳转，不能作为 XToolpro 的更新信任链或回滚证明；对应矩阵行保持 `Partial`，Proxy 台账与 Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
 
 - focused commit `8b141c8`（DoH/DoT/DoQ DNS transport 静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
