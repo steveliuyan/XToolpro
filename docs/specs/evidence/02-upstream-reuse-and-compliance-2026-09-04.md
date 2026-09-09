@@ -2834,6 +2834,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider healthcheck singleflight 参数隔离静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/adapter/provider/healthcheck.go`、`core/Clash.Meta/adapter/provider/provider.go`；沿用已记录的固定提交和文件哈希，仅补充 singleflight 合并边界。
+- 固定 provider 级 singleflight 在约 1 秒窗口合并重复检查，但未见合并 key 明确绑定 test URL、filter、timeout、provider/config generation 或 force 标志；不同参数、不同代次或显式强制检查可能共享同一 in-flight/结果，调用方也拿不到被合并请求的关联回执。
+- 结论：XToolpro adapter 必须按稳定参数和 generation 构造 singleflight key，禁止跨来源/代次复用，返回被合并、跳过、取消和完成的脱敏状态；完成参数隔离、重复请求、force、generation 切换和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未运行 healthcheck、未发起测速或网络请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider healthcheck singleflight 参数隔离静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
