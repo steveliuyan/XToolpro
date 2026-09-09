@@ -2424,6 +2424,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller DoH 请求解码与响应/并发预算静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/doh.go`=`4CA2A97F7E2B4EC62C38921E29EDD4FC0AF8345138EADF80F038BD89A942B883`；路由边界 `core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- GET 以 `base64.RawURLEncoding` 解码 `dns` query；POST 仅接受 `application/dns-message`，使用 `io.LimitReader(..., 65535)` 后 `io.ReadAll`。固定路径未见 GET query 长度、DNS message 记录数、响应大小或并发上限，也未见检测 LimitReader 截断。
+- DoH 在 secret 管理 group 外挂载，未复用 authentication，也未见 Origin/来源 allowlist；base64、relay、DNS disabled 和 content-type 错误直接返回原始文本或固定内部错误，无稳定 `Unavailable`/`Cancelled`/`EngineCrashed` terminal receipt。
+- XToolpro 只能在 adapter 层绑定本地范围与鉴权，设置输入/输出/并发预算、检测截断并归一化错误；隔离契约测试完成前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态读取固定归档，未调用 DoH、未发送 DNS message、未启动管理 server、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller DoH 请求解码与响应/并发预算静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
