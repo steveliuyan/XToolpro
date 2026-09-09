@@ -1767,6 +1767,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `3ea2060` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider 更新后的连接收敛与 healthcheck 并发边界静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`；`core/Clash.Meta/adapter/provider/healthcheck.go`=`5D839304F21C054811B4EF4E34C8DAE1FB8EC7BF0A36CE877CD5B6D581D3A4AA`；`core/Clash.Meta/tunnel/statistic/tracker.go`=`5F82775600E8F068D53C51A543601BAFE71B7890F422C67B6E92543393C30943`。
+- `baseProvider.setProxies` 在 provider mutex 下替换 proxies、递增 version、更新 healthcheck 列表并异步触发检查；但 `HealthCheck.setProxies` 未持有 `mu`，与 `execute` 遍历 `hc.proxies` 并发时没有锁或不可变快照。healthcheck 以 1 秒 singleflight、errgroup 最多 10 并发和每 proxy timeout 执行，`Close()` 只取消内部 context，不等待 in-flight 检查完成。
+- `proxySetProvider.Initial()` 完成初次加载后才调用 `closeAllConnections()`；后续 Fetcher 更新经 `setProxies` 不再清理 provider chain 中的活动 tracker，tracker `Close()` 错误也被忽略。固定实现没有版本关联、逐 proxy 结果、旧连接策略或取消/完成回执。
+- 本轮仅静态读取固定归档，未启动 core、未更新 provider、未运行 healthcheck、未关闭连接、未使用 ADB，未读取设备连接、节点、URL、配置、凭据、Cookie、日志或流量内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-10，proxy-provider 更新后的连接收敛与 healthcheck 并发边界静态审计）
+
+- focused commit `810042d` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash proxy-provider `subscription-userinfo` 缓存与配额字段边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`；`core/Clash.Meta/adapter/provider/subscription_info.go`=`123565A529C8C5CD74F836AEAE79092007533DB7A8D49256EF91C90283E021B1`；`core/Clash.Meta/component/profile/cachefile/subscriptioninfo.go`=`07D9A7FCFB4C5112CC2FE3A603A9227959F1E5F165EE22B50500FEB32F26A92E`；cache 初始化实现位于 `cache.go`（`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`）。
