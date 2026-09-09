@@ -1651,6 +1651,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - DNS client 使用 `DialContext` 和 5 秒 DNS client timeout，但固定 `miekg/dns ExchangeWithConn` 路径的取消语义受库限制；`dns/client.go`、`dns/util.go` 的 debug/warn 模板包含 DNS server address、query name、ECS prefix、截断重试和 cache/ACME 分支信息。未见统一字段脱敏、DNS query 日志开关边界、cache 清除/过期 terminal receipt 或独立 Fake-IP/Host/sniffing health/capability API。
 - 结论：上游具备 DNS transport、有限 timeout、内存/持久 Fake-IP 映射和 5 分钟 server-failure cache 规则，但 cache 文件权限、错误恢复和 DNS/Fake-IP 诊断字段不满足 XToolpro 的最小化、加密、可回滚和稳定错误合同。未执行真实解析、Fake-IP 冲突、cache 损坏、取消或嗅探验证；对应矩阵行保持 `Partial`，Proxy 台账和 Phase 02 gate 不变。
 
+### FlClash HTTP/TLS/QUIC sniffing dispatcher 边界静态审计（2026-09-09）
+
+- 固定来源关键文件及 SHA-256：`component/sniffer/dispatcher.go` `4B04CBFA8D4A21C5C305DEB6E8E5B8719D6FC047CB3F7A176C6805C7C2045B81`；`base_sniffer.go` `B11A1E3C557C8F38ECA3C1C289E12313BB83641D9874F987363AF41D09238C20`；`http_sniffer.go` `383EFD22A42E50AF06C62B5C4C833096DDBF1307156CCB075A27F11EFBCD79F2`；`tls_sniffer.go` `CE8EF5E462226143F8950F3F9974960141CDCF8C077406A7A7F7F5CD7546045E`；`quic_sniffer.go` `C451AC34D588B2FD180DAC75A2EC3904CC3274902AB72A9FF8451DA7430EA5E1`。本轮只读固定归档，未启动 core、未发送流量或读取设备数据。
+- dispatcher 支持 HTTP/TLS/QUIC sniffer，按 network/port、源/目的地址、skip/force domain、`forceDnsMapping` 和 `parsePureIp` 决定是否读取首包；成功后会改写 `Metadata.SniffHost`、`Host` 和必要时 `DstIP`/`DNSMode`，失败会按目的地址写入 128 项、600 秒 LRU skip cache。未知 sniffer 类型会返回 `unsupported sniffer`，全部 sniffer 失败返回 `all sniffer failed`，但未形成 XToolpro 可消费的 capability、取消、超时或 terminal receipt。
+- debug/error 日志模板包含源/目的地址、目标/嗅探 host、sniffer protocol、首包不足和失败原因；固定路径未见统一字段脱敏、首包大小/时间预算的外部合同或 sniff 数据生命周期清理。该能力可以改变规则匹配的 host/destination 语义，不能以“sniffer 代码存在”推断已启用、命中或安全。
+- 结论：上游具备协议级嗅探与有限失败退避，但 XToolpro 仍需默认关闭敏感 host/address 诊断，显式声明可探测能力和取消/超时/失败分类，并在受控 fixture 覆盖 HTTP/TLS/QUIC、skip/force、DNS mapping、失败缓存和 metadata 改写前保持 `Partial`。
+
 #### 本检查点远端备份状态（2026-09-09，DNS/Fake-IP cache 静态审计）
 
 - focused commit `55b0836` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
