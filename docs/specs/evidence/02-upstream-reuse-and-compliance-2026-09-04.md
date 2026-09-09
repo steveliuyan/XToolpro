@@ -2710,6 +2710,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider inline payload 所有权与不可变快照静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。固定 parser 支持 `inline` vehicle，但当前证据未见 payload 的深拷贝/所有权转移、不可变 snapshot 边界、字节/字段上限，或 override 后原始 inline payload 是否保持不变的回读回执。
+- 因此 inline payload 在筛选、`dialer-proxy`、override 和 `adapter.ParseProxy` 之间的可变性与失败隔离不能由固定源码形成外部契约；未知字段、超大 payload 或部分合并失败也没有独立分类和旧 payload 保留证明。
+- 结论：XToolpro adapter 必须先将 inline/HTTP 输入复制到受限 staging snapshot，限制字节/字段/嵌套深度，禁止对原始输入就地修改，并在解析失败时保留旧版本返回脱敏 `Unavailable`/`Cancelled`/`VersionMismatch`；完成 inline payload 深拷贝、超限、未知字段、override 失败和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未构造或解析 inline payload、未执行 override、未发起 HTTP 请求、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider inline payload 所有权与不可变快照静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
