@@ -1577,6 +1577,8 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 ### FlClash external-controller 管理面与认证边界静态审计（2026-09-09）
 
+- 补充核验：`startUnix` 与 `startPipe` 均以空 secret 调用同一 `router`，因此 Unix socket/named pipe 管理面绕过 `Authorization: Bearer` 与 websocket query token 校验；Unix socket 随后以 `os.Chmod(addr, 0o666)` 暴露 socket 文件。固定 `core/Clash.Meta/hub/route/server.go` SHA-256 为 `15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。本轮仅只读源码，未创建 socket、未请求管理 API、未读取设备配置或 secret；新增 parity 行保持 `Partial`。
+
 - 审计对象仍为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未启动管理面、未请求 API、未读取设备配置/secret、未使用 ADB。相关源码为 `core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/config/config.go`、`lib/common/task.dart`。
 - `hub/route/server.go:92-135,162-245,249-325` 可并行创建 TCP、TLS、Unix socket 和 named pipe server；HTTP/TLS 共享同一个 router，路由包含 configs、proxies、groups、rules、connections、providers、cache 等管理面。
 - `authentication(secret)` 仅在 `secret != ""` 时挂 middleware；普通 HTTP 使用 `Authorization: Bearer <secret>`，websocket 在缺少自定义 header 时接受 query `token=<secret>`。secret 为空时整套路由无鉴权。比较使用 constant-time compare，但未见 secret 轮换、过期、权限分级、审计事件或限流合同。
@@ -1917,6 +1919,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 #### 本检查点远端备份状态（2026-09-09，Tunnel listener target 解析失败与资源回收静态审计）
 
 - focused commit `428b4ee` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller 本地传输鉴权边界静态审计）
+
+- 本检查点文档增量已完成验证，focused commit 将仅包含 parity matrix 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。
 
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
