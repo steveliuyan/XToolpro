@@ -2460,6 +2460,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash HTTP/SOCKS/mixed 认证失败与 UDP association 资源/回执契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`listener/inbound/mixed.go`=`93844489F2101CBB3B9CFEA9CFFFD79641C24481547132DF53DF8D405648D361`；`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/auth.go`=`D80505C45B1E3B02D5109B77D5FF5A00E10DB5EFA728F37CEDB945746D70098E`。
+- 固定入站路径在 SOCKS 握手或 HTTP `Proxy-Authorization` 解析/认证失败时仅关闭连接；未见稳定错误类别、失败次数/审计事件或调用方可确认的拒绝 receipt。mixed 的 `udp=true` 按 TCP 地址创建独立 UDP listener，但该边界未给出每地址 association 数量、包/字节/空闲时长预算、来源绑定、取消传播或关闭后的逐会话结果；listener close 只聚合底层 error。
+- 这项补充不把既有“HTTP/SOCKS/mixed 入站认证与 UDP 边界”静态行重复计为实现成功，而是明确指出认证拒绝和 UDP 生命周期仍缺少可核验终态。XToolpro 只能在受控 bind 范围内限制认证尝试、UDP association 数量与生命周期，并在 TCP/UDP 部分成功或失败时返回脱敏逐项 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` receipt。
+- 本轮仅复核固定归档与既有文件哈希，未启动 listener、未发起代理或 UDP 请求、未使用 ADB，未读取设备配置、凭据、Cookie、节点、URL、日志或网络内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-10，HTTP/SOCKS/mixed 认证失败与 UDP association 资源/回执契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
