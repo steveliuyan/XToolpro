@@ -2143,6 +2143,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller Authorization、WebSocket token 与 CORS 组合边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`config/config.go`=`49296DD48FB4BFBE1EB3B8236DE72FD07FB9E8EFFB122D09B137DD3D44982B86`。
+- HTTP 请求要求 `Authorization: Bearer <secret>`，比较使用常量时间函数；WebSocket 因浏览器不能自定义 header，支持 query `token`，缺少 token 时回退解析 Authorization header。失败统一返回 401 JSON，但未见失败次数限制、轮换、过期、审计事件、来源绑定或稳定错误码；query token 可能进入 URL 历史、代理和访问日志边界。
+- CORS 全局允许配置的 origins、`Content-Type`/`Authorization` header 和可选 private-network 请求，默认 `AllowOrigins=["*"]`、`AllowPrivateNetwork=true`；未见凭据与宽泛跨源策略互斥校验或按路由分级。`/debug`、`/ui`、DoH 等 group 外挂载不受 middleware 保护；Unix/named-pipe 传空 secret，管理 API 无需 header。
+- 本轮仅静态读取固定归档，未发送鉴权请求、未建立 WebSocket、未读取或记录任何 secret/token、未启动服务、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller Authorization、WebSocket token 与 CORS 组合边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
