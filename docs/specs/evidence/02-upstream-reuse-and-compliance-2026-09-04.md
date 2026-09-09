@@ -1708,6 +1708,21 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `/rules` 返回 index/type/payload/proxy/size 以及 disabled、hitCount、hitAt；PATCH `/rules/disable` 按 index 改变运行态。RuleSet 找不到 provider 时静默返回 false。固定路径未见签名/来源绑定、原子 staging/read-back、规则版本 hash、逐项更新 receipt、稳定错误分类或 payload/host 脱敏。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未下载或修改规则数据，未读取设备规则、域名、IP、配置、订阅 URL、凭据、Cookie、日志或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash HTTP/SOCKS/mixed 入站认证与 UDP 边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`listener/inbound/mixed.go`=`93844489F2101CBB3B9CFEA9CFFFD79641C24481547132DF53DF8D405648D361`；`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/auth.go`=`D80505C45B1E3B02D5109B77D5FF5A00E10DB5EFA728F37CEDB945746D70098E`；`component/auth/auth.go`=`93F4E431F51124258E43AB75B858DD351C9586A892EDEE56A74E8FC132ECD542`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`。
+- HTTP、SOCKS4/5、mixed listener 均把 `users` 转换为内存 `AuthStore`；缺失用户时使用 default store，空用户列表使用 nil store。mixed 读取首字节后分派 SOCKS4、SOCKS5 或 HTTP；`udp=true` 时为每个 TCP 地址建立独立 UDP listener。
+- 入站空地址默认归一到 `0.0.0.0`；默认 listener 额外执行远端地址拒绝与 skip-auth 规则。SOCKS 握手或 HTTP `Proxy-Authorization` 解析/认证失败时关闭连接；listener close 聚合错误，但没有独立 health、失败分类或完成回执。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未发起代理请求，未读取设备配置、凭据、Cookie、节点、URL、日志或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+### FlClash 命名 inbound listener 重载与失败回滚静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`listener/listener.go`=`5D9BCDED93B4ED821D80827DF0A6EB198F844AA27EB10C74AC887C8FFD3FE019`；`listener/parse.go`=`D66DC47E30E10F7112EB8CFD85037A30C5CA5366526CB453B297774095FE7EC5`；`config/config.go`=`49296DD48FB4BFBE1EB3B8236DE72FD07FB9E8EFFB122D09B137DD3D44982B86`；`hub/executor/executor.go`=`3AE623D0272443453ED2957B4E973532FBBB2CC759232E646C3DE1DAAF1F17FE`。
+- `parseListeners` 逐项调用 `listener.ParseListener`，缺失 `type`、未知协议、解码失败或重复 listener name 会使整个 map 返回错误；不会产生部分成功的命名 listener 集合。`hub/executor.updateListeners` 随后调用 `PatchInboundListeners(listeners, tunnel.Tunnel, true)`。
+- `PatchInboundListeners` 在同名配置变化时先关闭旧 listener，再调用新 listener 的 `Listen`；新 listener 失败时只写错误日志并继续，旧 listener 仍可能以已关闭实例保留在 `inboundListeners` map 中。只有 `dropOld=true` 且名称从新 map 消失时才删除旧项；函数不返回错误、健康状态、回滚或完成 receipt。
+- 内置 HTTP/SOCKS/redir/tproxy/mixed 等端口由 `updateListeners` 后续的 `ReCreate*` 函数单独重建，不能据此证明命名 listener 在 Android bridge 上具有同样的可用性或失败语义。XToolpro 需要在 adapter 层执行 prepare/validate、原子切换和可核验的失败/取消/重试结果。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未修改配置或监听器，未读取设备文件、日志、节点、URL、凭据、Cookie 或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-09，代理组策略静态审计）
 
 - focused commit `e5b2f3a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
