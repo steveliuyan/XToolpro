@@ -2244,6 +2244,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash provider healthcheck interval/lazy 调度与关闭语义静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/healthcheck.go`=`5D839304F21C054811B4EF4E34C8DAE1FB8EC7BF0A36CE877CD5B6D581D3A4AA`；`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。
+- 固定 provider healthcheck 以 `interval` 驱动周期检查，并支持 `lazy`/touch 路径在无需探测时跳过集合；实际执行仍受 provider 级 singleflight、每轮最多 10 个并发和单 proxy timeout 约束。周期检查、手动触发和 provider 更新后的触发共享同一 healthcheck 状态，但未形成持久化调度记录。
+- 静态路径未见 interval/lazy 的最小周期、范围、抖动或总耗时预算校验，未见跨进程恢复、调度 generation、重复 watcher 防护或“为何跳过”的对外回执。`Close()` 只取消内部 context，不等待进行中的检查；关闭与下一轮 ticker/touch 触发之间也未见统一生命周期锁，无法从 API 得到停止已生效或所有探测已退出的确认。
+- XToolpro 只能在 adapter 层把周期调度建模为可持久化状态机：对 interval/lazy 做有界校验，记录下一次触发与跳过原因，串行化 update/healthcheck/close，停止时传播取消并等待 in-flight 收敛，再输出脱敏的 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt；在隔离契约测试完成前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档进行静态审计，未启动 core、未触发周期或 lazy healthcheck、未更新 provider、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，provider healthcheck interval/lazy 调度与关闭语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
