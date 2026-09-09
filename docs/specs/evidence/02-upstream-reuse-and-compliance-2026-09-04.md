@@ -2038,6 +2038,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `b9ceaf8` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller `/logs` 流式订阅取消与背压边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`core/Clash.Meta/log/log.go`=`1F474A4091999E04A8C07D498DAF18260575A907316D73B95E6D7B123D22A5D8`；`core/Clash.Meta/common/observable/observable.go`=`B6A3D1B2F6D604430D0FAABE1C20D490F09117E64642BF2715EA06DDBFEE4C5F`；`subscriber.go`=`E44A28BF2A21E48778B32E32F58C565652E698D2D7C6EFCA29419FB336FDDB22`。
+- `getLogs` 支持 `level`/`format=structured` 和 HTTP/websocket；每个请求调用 `log.Subscribe()`，建立 200 容量 subscriber，再由 goroutine 转发到 1024 容量 `ch`。转发使用非阻塞 `select`，`ch` 满时静默丢弃日志事件；没有丢弃计数、告警或订阅级 terminal receipt。
+- 主循环只在 JSON 编码、HTTP 写入或 websocket 写入错误时退出，未显式监听 `r.Context().Done()` 或 websocket close。退出后才经 `defer log.UnSubscribe` 关闭 subscriber。`Observable.process` 持有全局 mutex 逐个调用阻塞式 `Subscriber.Emit`；慢 subscriber 的 200 缓冲耗尽时可阻塞整个日志生产者，放大背压影响。
+- 本轮仅静态读取固定归档，未启动 core、未请求 `/logs`、未建立 websocket、未读取设备日志或日志正文、未使用 ADB，未读取配置、通知、节点、URL、地址、路由、DNS、流量内容、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller `/logs` 流式订阅取消与背压边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
