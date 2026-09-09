@@ -2699,6 +2699,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider file/http path confinement 与 symlink 边界静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `core/Clash.Meta/component/resource/vehicle.go`=`2B5AE763906EF70523A40830FCF04EAF1FE0076F54DCD36AFE4E7033D4327AFF`。固定 parser 对显式 path 执行安全路径检查，HTTP 缓存路径按 URL hash 派生；当前证据未形成 no-follow/symlink、canonical 根目录绑定、TOCTOU 或路径 generation 的独立回执。
+- 因此路径在检查后被替换、重定向或跨 profile/cache 根时，固定调用链不能向调用方说明最终文件是否仍在授权范围；读写/解析失败也没有稳定区分 path violation、permission、missing、corrupt 或 cancelled。
+- 结论：XToolpro adapter 必须绑定专用根目录与配置 generation，使用 canonical/no-follow 检查和临时文件原子发布，限制文件大小并将路径越界、权限失败、损坏、取消映射为脱敏终态；完成 symlink、TOCTOU、跨根、权限丢失和回滚契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未创建、读取或修改任何 provider 文件/缓存，未解析真实 provider、未发起 HTTP 请求、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider file/http path confinement 与 symlink 边界静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
