@@ -2132,6 +2132,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller TCP/TLS/Unix/named-pipe 监听与重建边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- `ReCreateServer` 并行启动 TCP、TLS、Unix 与可选 named-pipe listener；每个启动函数先关闭旧 server 引用再创建新 listener，但关闭/Serve 错误只写日志，没有统一启动 generation、等待旧 listener 完全退出、端口冲突回滚或健康回执。TCP/TLS 使用配置地址和 routing mark；TLS 动态加载证书并按 `ClientAuthType`/client CA 启用 mTLS，但未见证书 pin、最小 TLS 版本/密码套件、握手超时或 client-auth 失败的稳定类别。
+- Unix 路径经 `C.Path.Resolve`，父目录自动 `MkdirAll(0755)`，bind 前 unlink 旧 socket，随后 `Chmod(0666)`；named-pipe 仅校验 `\\.\pipe\` 前缀。Unix/named-pipe handler 传入空 secret，所有管理 group 路由继承未鉴权边界；不同传输也共享 CORS/router 配置。
+- 本轮仅静态读取固定归档，未启动、关闭或重建任何 listener，未调用管理 API，未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller TCP/TLS/Unix/named-pipe 监听与重建边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
