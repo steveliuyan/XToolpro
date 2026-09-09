@@ -2099,6 +2099,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `/restart` 生命周期与回执契约静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/restart.go`=`0F3B70A1B7A23283882F41DBE2333042965DF4F5FE1F889F9A3AB5FB291ED5E9`；`hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 非 embed 模式注册 `POST /restart`；路由位于 secret 管理 group，但 Unix/named-pipe transport 传入空 secret，继承本地未鉴权边界。handler 先获取 `os.Executable()`，立即返回 `{"status":"ok"}` 并 flush，然后在后台 goroutine 执行 `executor.Shutdown()` 与进程重启，因此 HTTP 成功不代表停止、启动、listener/TUN 清理或新进程健康。
+- Windows 路径使用 `exec.Command` 启动同一路径后 `os.Exit(0)`，失败直接 `log.Fatalln`；其他平台使用 `syscall.Exec`，失败同样 fatal。固定实现没有旧进程保活、超时、取消、崩溃归因、last-known-good 或失败回滚，也没有返回任务 ID、版本/健康核验或 terminal receipt；重启日志包含可执行路径、参数和原始错误。
+- embed 模式不注册该端点。本轮仅静态读取固定归档，未启动或重启 core、未调用 `/restart`、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller `/restart` 生命周期与回执契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
