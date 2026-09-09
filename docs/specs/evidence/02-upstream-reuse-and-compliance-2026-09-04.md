@@ -2049,6 +2049,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `20c3684` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller `/connections` 快照、关闭与 websocket interval 边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/connections.go`=`FBE4948D9B506F661E4AC5936E493F82AFC1FB2F1DC84DB8BA7FF108423AD83A`；`core/Clash.Meta/tunnel/statistic/manager.go`=`D6633D8CA012523924C7BB8103800189679EF2E127524C1EFFFDFDDF40FFDB3F`；`tracker.go`=`5F82775600E8F068D53C51A543601BAFE71B7890F422C67B6E92543393C30943`。
+- `connectionRouter` 暴露 `GET /`、`DELETE /` 和 `DELETE /{id}`，整体位于 secret 管理 group 内；本地 Unix/named-pipe transport 的空 secret 继承未鉴权边界。`getConnections` 的 HTTP 快照直接序列化 `statistic.Snapshot`，每条 `TrackerInfo` 含 `Metadata`、provider/代理链、rule、rulePayload、开始时间和上传/下载计数；固定路径未见字段最小化或脱敏。
+- 单项与批量关闭均忽略 `Tracker.Close()` 返回值并无条件返回 204，无法区分不存在、关闭失败、部分成功或取消。websocket `interval` 只调用 `strconv.Atoi`，0 或负数未拒绝，随后传入 `time.NewTicker` 可能触发 panic；推送循环也未监听 request context、websocket close、订阅上限或 terminal receipt。
+- 本轮仅静态读取固定归档，未启动 core、未调用 `/connections`、未建立 websocket、未关闭任何连接、未读取设备日志/连接正文或地址、未使用 ADB，未读取配置、通知、节点、URL、路由、DNS、流量内容、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller `/connections` 快照、关闭与 websocket interval 边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
