@@ -2493,6 +2493,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash Fake-IP 缓存持久化、失效重建与清理回执契约静态审计（2026-09-10）
+
+- 固定归档关键文件 SHA-256：`core/Clash.Meta/component/fakeip/pool.go`=`99E1323AF5E5D25013F08A1E63201463E86319859FAF892B4F419196BB134817`；`component/fakeip/cachefile.go`=`D2B685FEA40EE7795ED5163EFA9BA784AFA06071EB488011F17FD0F1AA5ED749`；`component/profile/cachefile/cache.go`=`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`。
+- 固定 Fake-IP pool 将 host↔fake-IP 映射和偏移持久化到 bbolt cache；cache 文件以宽松 `0666` 模式创建，遇到 `ErrInvalid`、checksum 或 version mismatch 会删除现有 cache 后重建，并将完整路径/原始错误写入日志。该行为只证明固定源码的失效处理路径，不证明任何设备上实际读取或重建了用户缓存。
+- 固定边界未见 profile/generation 绑定、条目/文件大小上限、TTL/撤销、显式清理任务 ID、清理前后计数或逐项失败回执；缓存键和值还可能保留访问 host 语义。XToolpro 必须使用受保护存储和最小化映射，设置有界容量与生命周期，按版本/配置隔离，并在失效、清理、取消和损坏重建时返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch` 终态。
+- 本轮仅静态复核固定归档及既有文件哈希，未启动 DNS/Fake-IP、未读取缓存或 host、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、流量、凭据或 Cookie；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash Fake-IP 缓存持久化、失效重建与清理回执契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
