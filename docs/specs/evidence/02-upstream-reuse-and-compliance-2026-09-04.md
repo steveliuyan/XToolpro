@@ -1982,6 +1982,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `ed9768d` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller upgrade UI/core/geo 更新与回滚边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/upgrade.go`=`6C3F995D1786076A80913D83812BEF199281BC6D008D986E6BCAB321038F0332`；`core/Clash.Meta/component/updater/update_core.go`=`2AE3F527FA7DC2CC7E304BCB832DC30A0D70A93A89A2EFB9B3E3B50E4D695304`；`update_ui.go`=`2646A4FDF535A2591593939E6392BA238C1F92D5E87E86AC95096787AC1F6196`；`update_geo.go`=`DB3D1C9B1A82C9BD1F7DF9B5018BA33FDC81BCBC95970D3C9C5E8CB09202F882`；`utils.go`=`C566506140F87D703A4543ED35678523A8BB6B994CF114A81FC5D172DF93D772`。
+- `upgradeRouter` 暴露 `POST /ui`、非 embed 模式下的 `POST /`（core）和 `POST /geo`；这些路由位于 secret 管理 group 内，但本地 Unix/named-pipe 传输传入空 secret，因而继承未鉴权边界。成功路径统一返回 `{"status":"ok"}`，core/UI 随后 flush 或继续更新；错误以 HTTP 500 和原始 error 文本返回。
+- Core updater 以 90 秒 context 下载并限制 32MB，按 channel/force 读取 latest version；固定实现未见签名、发布 hash、来源/ABI/版本 manifest 或安装前 artifact 兼容性校验。Windows 路径先将当前 executable rename 到 `meta-backup`，随后复制新文件替换；替换或重启失败没有统一旧文件恢复、启动健康核验或 terminal receipt。下载包与路径、版本会进入日志。
+- UI updater 的 `downloadForBytes` 只设 90 秒超时后直接 `io.ReadAll`，未设响应大小上限；解压前清理临时目录，随后先清空现有 UI 目录再移动新文件，移动/准备失败可能留下不完整 UI，未见旧版本保留或原子切换。Geo updater 对 MMDB/ASN/GeoIP/GeoSite 按内容 hash 跳过相同数据并在加载后写入，但更新函数并发执行且只返回聚合 error，路由无法报告逐数据库状态、取消或部分成功。
+- 本轮仅静态读取固定归档，未启动 core、未调用任何 `/upgrade` 路由、未下载或替换 UI/core/Geo 文件、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller upgrade UI/core/geo 更新与回滚边界静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
