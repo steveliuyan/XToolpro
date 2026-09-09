@@ -2552,6 +2552,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash core event priority/bulk 跨类别顺序与饥饿边界静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/message.go`、`core/hub.go`、`core/lib.go`、`core/constant.go`、`lib/core/event.dart`、`lib/manager/core_manager.dart`；本轮沿用已记录的固定提交与哈希，仅复核 priority/bulk 消费边界。
+- 固定 batcher 同时消费 priority 与 bulk 两个容量 256 的 channel，各类别满载只丢弃本类别最旧事件；源码没有对跨类别顺序、优先级抢占、单类连续生产时另一类最大等待时间或公平性作公开合同，也没有 sequence/generation 字段供 Dart 侧重排或检测饥饿。
+- 停止/解绑时没有跨队列统一 drain 顺序，也没有按类别的 drop、等待或取消回执；因此即使单类容量和批量大小已知，也无法由固定路径判断优先事件是否及时交付、bulk 是否长期挤压 priority，或某次丢弃发生在哪一类。
+- 结论：上游具备双队列事件转发，但不能直接作为 XToolpro 的公平性、顺序或背压合同。XToolpro 只能在 adapter 层为 priority/bulk 建立明确的顺序与最大等待预算，记录每类丢弃/延迟并在停止时返回脱敏 `Success`/`Cancelled`/`Unavailable`/`EngineCrashed`/`VersionMismatch`；完成受控压力、顺序、饥饿和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档，未启动 core、未注入事件压力、未读取日志/请求/配置/通知/节点/URL/地址/路由/DNS/流量/凭据/Cookie/设备文件，未使用 ADB；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=128`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash core event priority/bulk 跨类别顺序与饥饿边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
