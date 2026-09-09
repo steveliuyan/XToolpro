@@ -1694,6 +1694,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 组级失败计数默认达到 5 次后触发健康检查；provider 检查按 interval 周期运行、lazy 模式可跳过、每轮最多 10 并发且每代理默认 5 秒 timeout。未见空 provider、全成员失败、超时、选择失败或 core 同步失败的稳定用户状态、取消/回滚回执；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
 - 本轮未使用 ADB，未读取设备 UI、配置、节点、订阅 URL、凭据、Cookie、日志或网络内容；未修改 SDK、缓存、上游归档或构建产物。
 
+### FlClash 实时流量、连接快照与详情字段静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/tunnel/statistic/manager.go`=`D6633D8CA012523924C7BB8103800189679EF2E127524C1EFFFDFDDF40FFDB3F`；`tracker.go`=`5F82775600E8F068D53C51A543601BAFE71B7890F422C67B6E92543393C30943`；`hub/route/connections.go`=`FBE4948D9B506F661E4AC5936E493F82AFC1FB2F1DC84DB8BA7FF108423AD83A`；`hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`lib/models/common.dart`=`A9188ABFDC22B3935AB8B63F17DFBE8C09E474561C2E2A8CEFFB0F425A450BB5`；`lib/views/dashboard/widgets/network_speed.dart`=`54A288630E3900BE129FA7EAF6CED4E4B37AB3EA7933A1CA32EB792C25032860`；`lib/views/dashboard/widgets/traffic_usage.dart`=`1D6D2C7A15DD46EA5EA37E8F805851B53BF1CA2B5D72C99C82A20D174BE6AC39`；`lib/views/connection/connections.dart`=`33680C6754F305A5550867AC6CEC587814D4CB3486267E8D2CD0B0A1D3A6D8BC`；`lib/views/connection/item.dart`=`EB8B5A571B5388BD9D55DF8DBFBE4EC56DA8F18305DB32F1895DCF5672753815`。
+- `statistic.Manager` 维护瞬时速率与累计字节，`PushUploaded/PushDownloaded` 对 DIRECT 链路和 proxy 链路分别累计；`Snapshot()` 聚合当前连接及上下行累计值。`/traffic` 使用 1 秒 ticker 推送 `up/down/upTotal/downTotal`，`/connections` 的 REST 请求返回一次 snapshot，WebSocket 默认每 1000ms 推送并接受自定义 `interval`；单条和全部关闭调用 tracker `Close()` 后返回无正文 204，未提供逐项失败/取消结果。
+- Flutter `Traffic`/dashboard provider 消费速率和累计值；连接页通过 polling reader 刷新列表，支持清空全部和关闭单条。`TrackerInfo`/`Metadata` 与详情页直接覆盖 UID、进程/路径、网络、host、源/目的 IP/端口、规则 payload、GeoIP/ASN、DNS mode、special proxy/rules、remote destination、上下行字节和代理链；列表搜索只覆盖部分字段。该字段集合和原始错误写日志的路径尚无脱敏/最小化边界，且关闭、重置流量与请求缓存清理并非同一 terminal receipt。
+- 本轮仅审计固定源码，未启动 core、未使用 ADB、未读取设备连接正文、地址、节点、配置、订阅 URL、凭据、Cookie、日志或网络内容；对应矩阵行从 `Verified` 调整为 `Partial`，Proxy 台账保持 `Investigating`。
+
 #### 本检查点远端备份状态（2026-09-09，代理组策略静态审计）
 
 - focused commit `e5b2f3a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
