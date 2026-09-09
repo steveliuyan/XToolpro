@@ -1658,6 +1658,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - debug/error 日志模板包含源/目的地址、目标/嗅探 host、sniffer protocol、首包不足和失败原因；固定路径未见统一字段脱敏、首包大小/时间预算的外部合同或 sniff 数据生命周期清理。该能力可以改变规则匹配的 host/destination 语义，不能以“sniffer 代码存在”推断已启用、命中或安全。
 - 结论：上游具备协议级嗅探与有限失败退避，但 XToolpro 仍需默认关闭敏感 host/address 诊断，显式声明可探测能力和取消/超时/失败分类，并在受控 fixture 覆盖 HTTP/TLS/QUIC、skip/force、DNS mapping、失败缓存和 metadata 改写前保持 `Partial`。
 
+#### 本检查点远端备份状态（2026-09-09，sniffing dispatcher 静态审计）
+
+- focused commit `1c4a864` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，DNS/Fake-IP cache 静态审计）
 
 - focused commit `55b0836` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
