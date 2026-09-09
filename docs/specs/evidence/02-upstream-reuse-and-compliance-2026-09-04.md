@@ -1722,6 +1722,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `/rules` 返回 index/type/payload/proxy/size 以及 disabled、hitCount、hitAt；PATCH `/rules/disable` 按 index 改变运行态。RuleSet 找不到 provider 时静默返回 false。固定路径未见签名/来源绑定、原子 staging/read-back、规则版本 hash、逐项更新 receipt、稳定错误分类或 payload/host 脱敏。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未下载或修改规则数据，未读取设备规则、域名、IP、配置、订阅 URL、凭据、Cookie、日志或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash `/providers/rules` 管理 API 静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/provider.go`=`6B3A4B59E42AA13E8E04544F3BA269FE9906695B3BCC7BD46B80CEFA4B3DAD80`；`core/Clash.Meta/rules/provider/provider.go`=`3B37837D9A3B25CB9BC8A1D06E18E1CDC0143D379AC5000F4FC3B024DC9B7E6A`；`core/Clash.Meta/rules/provider/parse.go`=`763F74A57B32688AACEA86BA389DE52FDC2F74FB5829874AE296DB6E32C2B472`；`core/Clash.Meta/constant/provider/interface.go`=`01F7FFE95C10540254FC8482C0CE25A651FDF23463410EE72DCD00BBA5191FA9`。
+- `server.go` 在 secret 管理 group 下挂载 `GET /providers/rules` 和 `PUT /providers/rules/{name}`。列表响应为 `providers` map；`RuleSetProvider.MarshalJSON` 暴露 `behavior`、`format`、`name`、`ruleCount`、`type`、`vehicleType`、`updatedAt`，inline provider 另外暴露完整 `payload`。找不到 provider 返回 404；`Update()` 成功返回空正文 204，失败返回 503 并包装原始错误文本。
+- `ruleSetProvider.Update()` 调用 `resource.Fetcher.Update()`，其 fetch 使用可取消 context，解析成功后替换 strategy 并触发 `RuleUpdateCallback`；`inlineProvider.Update()` 仅刷新时间戳并返回成功，不改变既有 payload。parser 支持 `file`、`http`、`inline` vehicle，校验安全路径，HTTP vehicle 的缓存路径默认按 URL hash 生成。
+- 固定路径未见请求体/并发/generation 限制、版本回读、逐项 terminal receipt、稳定错误类别或 payload/来源脱敏；Unix/named-pipe transport 传入空 secret，继承本地管理面未鉴权边界。XToolpro 未来只能在受鉴权 adapter 中复用最小字段，并增加来源/版本绑定、原子 staging、取消传播和脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 结果。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未发起 provider 更新、未下载或修改规则数据，未读取设备规则、域名、IP、配置、订阅 URL、凭据、Cookie、日志或网络内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，`/providers/rules` 管理 API 静态审计）
+
+- focused commit `aababa7` 已创建但尚未 push；本次仅修改 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash HTTP/SOCKS/mixed 入站认证与 UDP 边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`listener/inbound/mixed.go`=`93844489F2101CBB3B9CFEA9CFFFD79641C24481547132DF53DF8D405648D361`；`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/auth.go`=`D80505C45B1E3B02D5109B77D5FF5A00E10DB5EFA728F37CEDB945746D70098E`；`component/auth/auth.go`=`93F4E431F51124258E43AB75B858DD351C9586A892EDEE56A74E8FC132ECD542`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`。
