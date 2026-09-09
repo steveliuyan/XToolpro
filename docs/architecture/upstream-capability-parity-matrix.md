@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=82`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=83`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -100,6 +100,7 @@
 | External-controller DNS query API 字段与输入边界 | `core/Clash.Meta/hub/route/dns.go`、`core/Clash.Meta/hub/route/server.go` | 受控 DNS 查询、名称/type 校验和脱敏响应 | Partial：`GET /dns/query` 位于 secret 管理 group 内，但 Unix/named-pipe 空 secret 传输继承未鉴权边界。`name` query 直接进入 `dns.Fqdn`，未见长度、标签、字符集或敏感名称策略；`type` 无值默认 `A`，未知值返回 400。查询仅使用 resolver timeout，relay 错误以原始文本返回；成功响应包含 Question、Answer、Authority、Additional 的完整名称、TTL 和 RR data，未见字段最小化、响应大小/并发预算或稳定脱敏错误码。XToolpro 需限制输入与输出范围，统一鉴权、本地绑定和 `Unavailable`/`EngineCrashed`/`VersionMismatch` 回执，保持 `Partial`。 |
 | External-controller 外部路由注册与并发边界 | `core/Clash.Meta/hub/route/external.go`、`core/Clash.Meta/hub/route/server.go` | 扩展管理路由的注册时机、鉴权继承和生命周期安全 | Partial：`Register` 将回调追加到进程级 `externalRouters` slice，`addExternalRouters` 在 secret 管理 group 内逐项调用，因此已注册路由继承 group 的认证；但 slice 无 mutex、generation 或重复注册防护，注册与 server 重建/路由遍历并发时未见同步或快照语义。外部回调可直接向传入 router 挂载任意路径，固定代码未见 allowlist、命名空间、方法/资源预算或独立失败回执；XToolpro 需在 adapter 层采用不可变路由快照、白名单和最小权限扩展接口，保持 `Partial`。 |
 | External-controller traffic/memory 流式端点取消与资源边界 | `core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/component/tunnel/statistic` | 流量/内存状态流、连接断开检测和可核验终态 | Partial：`/traffic` 与 `/memory` 在 secret 管理 group 内提供 HTTP chunked 与 websocket 两种每秒推送；响应包含累计/瞬时上下行字节或进程内存值，不含节点名，但固定循环仅以 ticker 和写入错误退出，未监听 `r.Context().Done()`、连接关闭回执、并发订阅预算或 terminal receipt。HTTP 客户端断开若未及时触发写错，循环可持续占用 goroutine/ticker；websocket 也没有独立 close/取消状态。XToolpro 需以 context 取消、订阅上限、稳定脱敏快照和可核验 `Cancelled`/`EngineCrashed` 终态实现，保持 `Partial`。 |
+| External-controller 根/版本健康响应语义 | `core/Clash.Meta/hub/route/server.go` | 最小健康检查、版本/构建标识和运行态可用性 | Partial：`GET /` 返回固定 `{"hello":"mihomo"}`，`GET /version` 返回 `C.Meta` 与 `C.Version`；两者均位于 secret 管理 group 内，但 Unix/named-pipe 空 secret 传输继承未鉴权边界。响应未绑定 core、listener、TUN、DNS 或 VPN 实际健康状态，也没有 generation、capability 集合、ABI/bridge 版本或 terminal receipt；HTTP 成功只能证明 router 可响应，不能证明引擎可用或版本配对正确。XToolpro 需将健康检查与 engine handshake、能力/版本 manifest 和稳定 `Unavailable`/`VersionMismatch` 结果绑定，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 
