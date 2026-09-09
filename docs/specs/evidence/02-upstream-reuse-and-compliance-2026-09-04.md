@@ -2412,6 +2412,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller 外部路由命名空间与重复注册契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/external.go`=`08B3D320DD060E141953E56E88AED131502E7699F2F318051E1F6C45FEC92ACD`；`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 固定 `Register` 接受任意 externalRouter 回调并追加到进程级 slice；未校验命名空间、路径冲突、HTTP 方法、资源预算或 capability allowlist，重复注册也不会去重。server 重建或多 goroutine 注册/遍历时 slice 无 mutex、generation 或不可变快照，可能重复挂载同一路由或产生竞态。
+- 回调异常没有独立扩展级错误/版本回执；固定路由仅继承管理 group 的鉴权，扩展本身不能声明最小权限边界。本轮未注册任何扩展、未启动 server、未调用管理 API、未使用 ADB。
+- XToolpro 只能在 adapter 层限定命名空间、方法和资源白名单，按名称/version 去重并使用不可变快照；单扩展失败不得影响其他路由，并返回脱敏 `Success`/`Unavailable`/`VersionMismatch` 结果，保持 `Partial`。
+- 本轮未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller 外部路由命名空间与重复注册契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
