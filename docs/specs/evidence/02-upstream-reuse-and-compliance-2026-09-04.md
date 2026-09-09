@@ -1591,6 +1591,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `healthcheck.go` 使用 provider 级 singleflight 防重复，errgroup 最多 10 个并发，单代理使用 context timeout（默认 5 秒）；自动检查 ticker、lazy touch 和 extra URL/filter 会改变执行集合。日志直接拼接 proxy name、测试 URL、alive 和 delay，固定路径未见字段最小化、URL 脱敏或日志开关边界。
 - 结论：上游具备可取消拉取、解析后替换、RWMutex/version 和并发健康探测，但管理 API 和日志仍会暴露节点对象、测试 URL、subscription usage 与原始错误/探测字段，且缺少稳定的逐节点 terminal contract。对应 parity 行保持 `Partial`，不得将 provider version、healthcheck HTTP 204 或 API JSON 当作 XToolpro 的 engine health proof。
 
+### FlClash 原生 START/STOP 与 VPN 标记/TUN 收敛受限复核（2026-09-09）
+
+- 设备为已授权测试设备 `bf353dda`；仅使用已解析的 dev 组件 `com.follow.clash.dev/com.follow.clash.QuickActionActivity` 和固定 action `com.follow.clash.dev.action.START`/`STOP`。每次 mutation 前后只采集允许的进程存在性、`POST_NOTIFICATION` app-op、系统 `VPN CONNECTED` 标记计数和所有 `tun*` 接口计数；未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。
+- 操作前停止基线为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。发送 START 后等待 7 秒，结果为进程存在、app-op 仍为 `allow`、`vpn_connected_markers=1`，但 `all_tun_interfaces=0`；随后发送同一 STOP 并等待 7 秒，结果为 `vpn_connected_markers=0`、`all_tun_interfaces=0`，进程和 app-op 不变。
+- 该轮没有发起流量，也没有把系统 VPN 标记解释为 TUN、core 或转发成功。它仅证明该 action 序列的系统标记可收敛；START 的标记/TUN 分离再次说明 UI/系统标记、service 请求和实际 TUN 健康不是同一完成回执。对应矩阵行保持 `Partial`，Phase 02 gate、Proxy 台账 `Investigating` 和 `engine-proxy` 未变。
+
 #### 本检查点远端备份状态（2026-09-09，GeoData 更新链路静态审计）
 
 - focused commit `7c23efa` 已创建但尚未 push；随后将以 evidence-only commit 固化本 hash 与未 push 状态。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
