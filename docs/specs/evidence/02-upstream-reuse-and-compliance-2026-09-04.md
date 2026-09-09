@@ -2316,6 +2316,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller UI 更新 staging 与目录切换契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/updater/update_ui.go`=`2646A4FDF535A2591593939E6392BA238C1F92D5E87E86AC95096787AC1F6196`；管理路由 `core/Clash.Meta/hub/route/upgrade.go`=`6C3F995D1786076A80913D83812BEF199281BC6D008D986E6BCAB321038F0332`。
+- UI updater 下载使用约 90 秒 context 后直接 `io.ReadAll`，未见响应大小、Content-Type、签名/哈希或来源绑定预检。解压前清理临时目录，发布阶段先清空现有 UI 目录，再移动新目录；任一准备/移动失败都可能留下空目录或不完整资产。
+- 固定实现没有目录级原子切换、旧版本保留、last-known-good、发布后静态入口健康核验或失败恢复。`POST /upgrade/ui` 成功只返回 `{"status":"ok"}`，无法证明新 UI 已完整可服务；Unix/named-pipe 管理传输还继承空 secret 的未鉴权边界。
+- XToolpro 只能在 adapter 层以受限下载和签名 manifest 校验为前置，将解压放入 staging，使用目录级原子 rename 保留 last-known-good，发布后核验入口并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`，失败时恢复旧版本；隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未调用 `/upgrade/ui`、未下载或替换 UI、未启动管理 server、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller UI 更新 staging 与目录切换契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
