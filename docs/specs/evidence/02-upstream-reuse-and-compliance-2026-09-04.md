@@ -2121,6 +2121,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External UI 静态服务与下载发布边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`component/updater/update_ui.go`=`2646A4FDF535A2591593939E6392BA238C1F92D5E87E86AC95096787AC1F6196`。
+- 当 `uiPath` 非空时，router 在管理 group 外挂载 `/ui`；`GET /ui` 重定向到 `/ui/`，`GET /ui/*` 通过 `http.FileServer(http.Dir(uiPath))` 提供静态文件，因此不经过 `authentication(secret)`，Unix/named-pipe 也共享该未鉴权边界。`SetUIPath` 仅调用 `C.Path.Resolve`；配置阶段只检查 external-ui 路径安全和 external-ui-name 为本地路径，未见公开服务绑定/来源 allowlist、资源预算、缓存控制、内容类型白名单或资产版本回执。
+- UI updater 可按配置从 `external-ui-url` 下载；`AutoDownloadUI` 仅以目标目录是否非空决定跳过。下载后先清理目标目录，再移动临时解包目录，未见签名/哈希/来源校验、原子目录切换、旧版本保留或启动健康核验，失败可能留下不完整 UI；固定路径的错误/调试日志可包含 UI URL、路径和原始异常。
+- 本轮仅静态读取固定归档，未启动 UI server、未请求 `/ui`、未下载或替换 UI、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External UI 静态服务与下载发布边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
