@@ -2688,6 +2688,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider dialer-proxy 引用与循环边界静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。固定 parser 在筛选后可写入 `dialer-proxy`，但当前证据未见独立的目标存在性、同名自引用、循环链、跨 provider 引用或引用深度预算检查。
+- 目标缺失、循环或引用解析失败没有稳定的逐引用结果、旧 snapshot 保留或 `VersionMismatch`/`Unavailable` 分类；这些错误可能与普通 proxy 解析错误合并返回，调用方无法区分“节点本身无效”和“dialer 链无效”。
+- 结论：XToolpro adapter 必须在 staging 阶段构建并校验引用图，限制 provider 边界和最大深度，拒绝自引用/循环，失败时保留旧快照并返回脱敏终态；完成缺失目标、自引用、循环、跨 provider 和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未解析真实 provider、未执行引用解析、未发起 HTTP 请求、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider dialer-proxy 引用与循环边界静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
