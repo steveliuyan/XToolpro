@@ -1971,6 +1971,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `efbba6d` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
 
+### FlClash External-controller cache flush 清理范围与完成回执静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/cache.go`=`B9DCE3EA2745EB7878C7876DB98C1D3436E7D751E79822A17A33FF20937C4E23`；`core/Clash.Meta/dns/resolver.go`=`076C077A14DDDCB744CDE2087D83FF05E2888718F33BFF58490EB5BA04115EF7`；`core/Clash.Meta/dns/enhancer.go`=`55B47DA94B15CD4C7E576DDDD8C11651B6F165998D58F00098C8A34DC924CF91`；`core/Clash.Meta/component/fakeip/pool.go`=`99E1323AF5E5D25013F08A1E63201463E86319859FAF892B4F419196BB134817`。
+- `cacheRouter` 暴露 `POST /fakeip/flush` 和 `POST /dns/flush`，由 `router` 在 secret 管理 group 内挂载；`startUnix`/`startPipe` 将空 secret 传入同一 router，因此本地传输上的 cache flush 不经过 `authentication()`。Fake-IP flush 调用 resolver enhancer，按实际存在的 IPv4/IPv6 pool 逐项 `FlushFakeIP()`，成功后才重置 pool cycle/offset；错误以 HTTP 400 返回原始 `err.Error()`，没有稳定脱敏类别。
+- DNS flush 调用全局 `resolver.ClearCache()`；该函数对 DefaultResolver 与 SystemResolver 分别启动 goroutine，Resolver 内部仅调用 cache.Clear，没有等待、错误返回、generation、前后计数或取消信号。路由立即返回 HTTP 204，无法证明两个 resolver 已完成清理、部分失败或在停止/重载期间收敛。
+- 本轮仅静态读取固定归档，未启动 core、未调用 `/cache`、未清理任何 Fake-IP/DNS cache、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller cache flush 清理范围与完成回执静态审计）
+
+- focused commit 将仅包含 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；按要求不得自动 push，须先获得用户明确确认。其他工作树改动和临时产物未纳入。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
