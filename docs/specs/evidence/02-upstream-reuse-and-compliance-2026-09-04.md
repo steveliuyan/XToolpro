@@ -2721,6 +2721,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider ParseProxy 未知协议与单项失败边界静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。固定解析链在筛选、`dialer-proxy` 与 override 后调用 `adapter.ParseProxy`；当前证据未见未知 proxy type/字段的白名单、稳定拒绝码、单项失败清单或候选索引到输出的映射回执。
+- 一个未知协议、字段类型冲突或单项 ParseProxy 错误可能与整个 provider 的普通 error 合并，调用方无法区分全部不可用、部分成功与筛选为空，也无法确认旧 snapshot 是否继续服务。
+- 结论：XToolpro adapter 必须在 staging 阶段执行版本化 proxy schema 校验并收集逐项失败，成功项仅在整体校验完成后原子发布；任一取消、崩溃、版本错配或部分失败都要返回脱敏终态并保留旧快照。契约测试完成前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未解析真实 provider、未执行 `ParseProxy`、未发起 HTTP 请求、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider ParseProxy 未知协议与单项失败边界静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
