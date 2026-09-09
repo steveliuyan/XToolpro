@@ -2540,6 +2540,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller Unix socket / named-pipe 权限与路径生命周期静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`config/config.go`=`49296DD48FB4BFBE1EB3B8236DE72FD07FB9E8EFFB122D09B137DD3D44982B86`。
+- 固定 Unix transport 解析配置路径后自动 `MkdirAll(0755)`，bind 前 unlink 旧 socket，再将 socket `Chmod(0666)`；未见 owner/group/ACL/no-follow 校验、最小权限默认值或旧路径删除的结果回读。宽松文件模式与 router 传入空 secret 叠加时，不能把“本地 socket 可连接”解释为受鉴权管理面。
+- named-pipe 仅校验 `\\.\pipe\` 前缀，未见名称 allowlist、ACL/owner 绑定、实例代次或停止后的存在性确认；Unix/pipe 重建与其他 transport 并行，固定路径未提供冲突、关闭、取消或清理完成回执。
+- 结论：上游具备本地 IPC 监听实现，但不满足 XToolpro 的最小权限、路径绑定和可回收终态合同。XToolpro 只能在 adapter 层限制目录和 pipe 命名空间，默认拒绝宽松权限，创建后核验 owner/mode，停止时等待清理并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch` 终态；完成受控本地 IPC 权限、路径冲突和清理契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档与既有文件哈希，未创建、连接或删除 Unix socket/named pipe，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件，未使用 ADB；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=127`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller Unix socket / named-pipe 权限与路径生命周期静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
