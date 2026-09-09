@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=4`、`Partial=56`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=4`、`Partial=57`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -68,6 +68,8 @@
 
 | 配置导出 `FilesProvider` 范围与 URI 授权 | `android/app/.../FilesProvider`、Android manifest、配置导出路径 | 最小化 SAF 导出与可撤销授权 | Partial：固定 Android `FilesProvider` 以 `MANAGE_DOCUMENTS` 保护，但把整个 app `filesDir` 暴露为根目录；canonical path 检查只阻止越出该根，普通文件仍可按请求模式打开且标记为可写。既有真机仅验证配置导出 SAF 选择器可达和文件名对应，未打开、读取或验证 URI grant 撤销；不能把 provider 可达性等同于最小范围、只读或导出完成。XToolpro 必须将配置导出限制在专用临时目录和最小只读 URI，采用一次性/可撤销 grant 与提交后清理，并以 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` terminal receipt 验证 |
 | 应用更新 metadata 与 artifact 信任边界 | `lib/common/request.dart`、`lib/views/about.dart`、`lib/providers/actions/common.dart`、发布元数据入口 | 版本检查、签名 artifact、可回滚安装 | Partial：固定路径只请求 FlClash Release metadata 并比较 `packageInfo.version`；真机“检查更新”显示已是最新版，未进入下载或安装。静态补充：固定 `request.dart`（SHA-256 `8073CEFF3D34FF7F2487AA0BE2EC8309AD3A68B5CFB63C0C8404ADB634E09095`）调用固定 GitHub `releases/latest` URL，仅检查 HTTP 200、读取 `tag_name` 并用 `compareVersions` 判断更新；`about.dart`（`671166BF7057D4C3E7DC29DC86DF9E694EA9678443809683BEE05052CCE5CBCF`）和 `providers/actions/common.dart`（`9AA4F5391C40485EC1A869B5329A6D0979AE458C5389DBF298BA0ABB879EAD6B`）只展示 release body 摘要并打开固定 GitHub latest 页面，未选择或下载 release asset。未发现 artifact 签名/哈希、来源绑定、安装前 staging、ABI/版本兼容校验、失败回滚或 update terminal receipt；请求异常被压成空结果/通用提示，自动检查关闭偏好可被用户拒绝更新后持久化。不能把 metadata 检查或“前往下载”入口视为已验证更新能力。XToolpro 必须以受签名 manifest 校验版本、来源、hash、兼容性和回滚，并区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch` |
+
+| 代理组策略、健康选择与空成员回退 | `core/Clash.Meta/adapter/outboundgroup/{parser,groupbase,selector,urltest,fallback,loadbalance}.go`、`adapter/provider/healthcheck.go` | 组策略、健康状态和失败回退合同 | Partial：固定归档只注册 `select`、`url-test`、`fallback`、`load-balance`，`relay` 明确返回移除错误；空结果统一回落 `empty-fallback`（默认 `COMPATIBLE`）。`select` 成员不存在时回到首项；`url-test` 使用 10 秒单飞缓存、fixed selection 和 tolerance；`fallback` 优先健康成员，固定成员失效后清除并回退；`load-balance` 支持 consistent-hashing、round-robin、sticky-sessions，可用成员耗尽时回到首项且 `Now()` 为空。健康检查默认 5 秒 timeout、5 次失败触发、provider 单轮最多 10 并发并可 lazy 跳过。未形成空 provider、全失败、超时、选择失败或 core 同步失败的稳定 UI 状态和回滚回执，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 

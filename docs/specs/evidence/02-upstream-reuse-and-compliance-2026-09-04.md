@@ -1686,6 +1686,14 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - Flutter 代理页只有通用搜索输入、布局/展开与 provider 入口；固定源码未形成协议、地区、标签的独立筛选模型、结果原因、空态/重试或 terminal receipt。未执行恶意正则、空结果、重复名称或真实 provider fixture 验证。
 - 结论：上游存在基于类型/名称的 provider parser 过滤能力，但不能证明 FlClash Android UI 提供用户级协议/地区/标签筛选，也不能直接作为 XToolpro 的筛选合同；对应矩阵行保持 `Partial`，Proxy 台账与 Phase 02 gate 不变。
 
+### FlClash 代理组策略、健康选择与空成员边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`parser.go`=`1F7D0AE433C0DCC501D8354646D7BDD4685B8B170426F19831C8A509E1638DEA`；`groupbase.go`=`13964372390663420A63BD06C787A083CA40712CE52E5F2B1739AFEEA2F08EC2`；`selector.go`=`682FCEF95A0E9D7F97FB0ADDA6A72C82F772839ADC0C1E5FFB4A6D51B29AF1B9`；`urltest.go`=`5970E1AB00F269C53108213F677702F00B8F690E06A5880E74F58F0AFDEC7E36`；`fallback.go`=`EA6FDC60688ABF5813A77E25D8A6E16874B21F41FA0E4DA8B51465021DC2E7F5`；`loadbalance.go`=`DD8E5C052E614F744E810778B88234E85721BF91CA5FA62A2182120376D87270`；`healthcheck.go`=`5D839304F21C054811B4EF4E34C8DAE1FB8EC7BF0A36CE877CD5B6D581D3A4AA`。
+- `ParseProxyGroup` 只注册 `url-test`、`select`、`fallback`、`load-balance`；`relay` 返回已移除错误。`GroupBase.GetProxies` 应用 filter/exclude 规则并按 provider version 缓存；空结果返回 `empty-fallback`，默认名为 `COMPATIBLE`。
+- `select` 只接受现有成员，选择名不存在时使用首项；`url-test` 以 10 秒 singleflight 缓存健康选择，支持 fixed selection 与 tolerance；`fallback` 优先健康成员，固定成员失效后清除并回退首项；`load-balance` 支持 consistent-hashing、round-robin、sticky-sessions，可用成员耗尽时回退首项且 `Now()` 为空。
+- 组级失败计数默认达到 5 次后触发健康检查；provider 检查按 interval 周期运行、lazy 模式可跳过、每轮最多 10 并发且每代理默认 5 秒 timeout。未见空 provider、全成员失败、超时、选择失败或 core 同步失败的稳定用户状态、取消/回滚回执；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未使用 ADB，未读取设备 UI、配置、节点、订阅 URL、凭据、Cookie、日志或网络内容；未修改 SDK、缓存、上游归档或构建产物。
+
 #### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
 
 - focused commit `8b141c8`（DoH/DoT/DoQ DNS transport 静态审计）已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
