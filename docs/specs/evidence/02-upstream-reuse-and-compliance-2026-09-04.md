@@ -1638,6 +1638,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 对 `docs/architecture/upstream-capability-parity-matrix.md` 的状态列做只读正则统计，当前为 `Verified=4`、`Partial=56`、`Pending=29`、`Unavailable=1`、`Blocked=0`。矩阵顶部汇总已同步为该数值；此前 evidence 中的 `Partial=51` 与矩阵顶部旧值 `Partial=54` 均保留为历史 checkpoint，不作为当前 gate。
 - 四域 upstream ledger 仍为 `Investigating`，`engine-proxy` 仍只有壳模块和测试计划；本次只修正文档计数，没有改变任何能力状态、台账状态、实现或集成范围。Phase 02 acceptance gate 继续不通过。
 
+### FlClash 强停后 launcher 冷启动无意恢复受限复核（2026-09-09）
+
+- 设备为已授权测试设备 `bf353dda`；对 `com.follow.clash.dev` 执行强停，等待 3 秒后以 launcher 启动包，等待 8 秒，再次强停恢复停止基线。只采集进程存在性、`POST_NOTIFICATION` app-op、系统 `VPN CONNECTED` 标记计数和所有 `tun*` 接口计数。
+- 强停后 3 秒为进程不存在、`vpn_connected_markers=0`、`all_tun_interfaces=0`；launcher 启动后 8 秒为进程存在但 `vpn_connected_markers=0`、`all_tun_interfaces=0`；最终强停后 3 秒保持全 0，app-op 始终为 `allow`。
+- 本轮未发送流量，未读取 UI、日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只支持本轮无新 START 请求时未观察到 VPN/TUN 意外恢复，不替代 crash/reboot/always-on 或 core health proof；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，Phase 02 gate 计数一致性复核）
 
 - focused commit `3b57460` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
