@@ -1855,6 +1855,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `PatchInboundListeners` 仅持有 `inboundMux`，`PatchTunnel` 仅持有 `tunnelMux`；`StopListener` 未获取任一 mutex，且仅关闭全局 listener 变量。停止与配置重载并发时，源码未提供全局生命周期锁、generation 检查或 in-flight 等待，可能出现交叉 close、stop 后重载重新创建，或 map 与实际 socket 状态不一致；未见统一 terminal receipt。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未并发调用 stop/reload，未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+#### 本检查点远端备份状态（2026-09-09，Listener 停止与配置重载并发串行化静态审计）
+
+- focused commit `69d646c` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，Tunnel 配置对象校验与未知 network 处理静态审计）
 
 - focused commit `5e3f4cb` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
