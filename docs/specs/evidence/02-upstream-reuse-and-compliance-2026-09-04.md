@@ -2232,6 +2232,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash provider healthcheck 额外 URL、过滤器与 timeout 输入契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/healthcheck.go`=`5D839304F21C054811B4EF4E34C8DAE1FB8EC7BF0A36CE877CD5B6D581D3A4AA`；`core/Clash.Meta/adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。
+- 固定 healthcheck 同时支持 provider 默认 `testUrl`、按调用传入的额外 URL，以及按 filter 改变待测 proxy 集合；执行层对每个 proxy 建立独立 context timeout，默认约 5 秒，并通过 provider 级 singleflight 将约 1 秒内的重复检查合并。额外 URL/filter 会改变实际执行集合，而不是只改变展示字段。
+- 固定入口未见对额外 URL 的 scheme/host/长度、重定向或来源绑定做统一校验，未见对 filter 表达式复杂度/输入大小或 timeout 上下限、总耗时预算做 adapter 级约束。空集合、无效 URL、超时和取消不会形成独立的稳定终态；管理路由也不接收请求 context，不返回任务 ID、逐 proxy 状态或取消确认，错误/探测日志可包含 proxy 名称、测试 URL、alive 与 delay。
+- XToolpro 只能在受鉴权 adapter 入口接受受限 URL、过滤器与 timeout：应先完成 schema/大小/复杂度/总 deadline 预检，再以有界并发和可取消 context 执行，并将空集合、超时、取消、版本错配和引擎崩溃归一为脱敏 `Unavailable`/`Cancelled`/`VersionMismatch`/`EngineCrashed` terminal receipt；在真实隔离契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档进行静态审计，未启动 core、未调用 healthcheck API、未发送测速请求、未触发 provider 更新、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，provider healthcheck 额外 URL、过滤器与 timeout 输入契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
