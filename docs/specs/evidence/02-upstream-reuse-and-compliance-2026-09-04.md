@@ -2528,6 +2528,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller TLS client-auth 失败与证书生命周期静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`config/config.go`=`49296DD48FB4BFBE1EB3B8236DE72FD07FB9E8EFFB122D09B137DD3D44982B86`。
+- 固定 TLS listener 按 `ClientAuthType` 与 client CA 配置装配 `tls.Config`，证书在 listener 创建时动态加载；未见证书链/用途/有效期或 pin 校验、最小 TLS 版本/密码套件约束、握手 deadline、证书轮换 generation 或旧证书回滚。
+- 客户端证书缺失、链不受信或证书加载失败只落到底层 handshake/Serve error；固定重建路径没有把这些失败映射为稳定 `Unavailable`/`VersionMismatch`/`Cancelled` 终态，也无法证明旧证书已退出、新证书已生效。TLS listener 的启动/关闭与其他 transport 并行，缺少跨 transport 的逐项完成确认。
+- 结论：上游具备可选 mTLS 装配能力，但不能直接作为 XToolpro 的证书信任、轮换或失败回执合同。XToolpro 只能在 adapter 层先校验证书来源、有效期和用途，采用版本化 staging+原子切换，限制握手资源并以脱敏逐 transport 回执报告成功、拒绝、取消和崩溃；完成受控证书 fixture、轮换、失败回滚和 mTLS 契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档与既有文件哈希，未启动或重建 TLS listener、未建立 TLS 连接、未读取证书内容、设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件，未使用 ADB；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=126`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller TLS client-auth 失败与证书生命周期静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
