@@ -1872,6 +1872,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/configs.go`=`B4058F78C4CE3E975A84976A4B7F546F378DB3FB429BE87E904D04403153C390`；`core/Clash.Meta/listener/listener.go`=`5D9BCDED93B4ED821D80827DF0A6EB198F844AA27EB10C74AC887C8FFD3FE019`。
 - `patchConfigs` 先应用 allow-lan、认证、bind address 等运行态 mutation，再调用 `ReCreateTun`；该函数在配置变化时先关闭旧 TUN，再调用 `sing_tun.New`。创建失败只写日志，将保存的 TUN 配置置为 disabled，不恢复旧实例，且函数无返回结果。
 - `patchConfigs` 不收集任一 listener 重建结果，最后无条件 `render.NoContent`（HTTP 204）；请求方无法区分 TUN 成功、失败、部分更新、取消或回滚。本轮未调用管理面、未启动 core、未使用 ADB，未读取配置、日志、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 同一 `tunSchema` 声明 `Inet4Address` 与 `Inet6Address`；但 `pointerOrDefaultTun` 中 `Inet4Address` 的赋值块被注释，`Inet6Address` 正常合并。故 `inet4-address` PATCH 可在无错误的 204 回执下被静默忽略；本轮未调用该管理面，保持 `Partial`。
 
 ### FlClash 受限 ADB 停止态状态复核（2026-09-09）
 
