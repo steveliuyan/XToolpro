@@ -2633,6 +2633,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider age-secret-key 生命周期与失败脱敏静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52`、`provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B` 与 `component/age` 路径。固定解析路径支持校验并解密 `age-secret-key`，但当前证据未建立 key 条目数/长度预算、来源或配置 generation 绑定、解密后清理/零化，以及失败时不携带 key 或解密上下文的稳定错误类别。
+- 解析失败可能与 proxy index、filter、解密或 YAML/V2Ray 转换错误一起折叠为普通 error；静态路径未见将密钥材料、解密上下文或底层错误统一映射为脱敏 terminal receipt，也未见旧快照是否继续可用的回读确认。
+- 结论：XToolpro adapter 必须在受控边界校验 key 数量/长度和来源代次，仅在短生命周期 staging 中持有密钥，完成解密后尽快清理临时材料，并将 `Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 与敏感错误正文分离；完成错误脱敏、密钥清理、generation 绑定和失败回滚契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未提供或使用真实 age key、未解析真实 provider、未发起 HTTP 请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider age-secret-key 生命周期与失败脱敏静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
