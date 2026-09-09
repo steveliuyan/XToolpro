@@ -1885,6 +1885,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 发送 START 后等待 7 秒，摘要为：进程存在、app-op=`allow`、VPN marker=`1`、TUN 计数仍为 `unavailable`。随后发送 STOP 作为回滚；7 秒后 marker 回到 `0`，进程存在且 app-op 未变，TUN 计数仍为 `unavailable`。START/STOP 是本轮唯一设备 mutation，未使用 root、权限 grant/revoke、配置变更、流量生成或其他 action。
 - 未读取日志、配置、通知正文或 extras、UI 节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由、DNS 或流量内容。系统 VPN marker 只能说明本次启动/停止可观察地收敛，不能证明 TUN、core 或可转发性；矩阵状态保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+#### 本检查点远端备份状态（2026-09-09，受限原生 START/STOP 生命周期复核）
+
+- focused commit `9cd9aff` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，受限 ADB 停止态状态复核）
 
 - focused commit `f82a201` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
