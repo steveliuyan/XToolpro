@@ -1829,6 +1829,20 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 接受连接后以 goroutine 分派握手；SOCKS4/5 协议错误、认证失败或 UDP 数据包解析失败会关闭/丢弃，但固定 HTTP/SOCKS listener 路径未见统一 read/write deadline、请求体上限或 adapter 级并发预算。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未修改监听器或证书，未读取设备文件、日志、节点、URL、凭据、Cookie 或网络内容；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+### FlClash 全局停止对命名 inbound/tunnel listener 的清理覆盖静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/listener/patch.go`=`36281094CCBE59F5365D49759385027641353EDCB79B875D80F9EAF3EF82BE15`；`core/Clash.Meta/listener/listener.go`=`5D9BCDED93B4ED821D80827DF0A6EB198F844AA27EB10C74AC887C8FFD3FE019`。
+- `listener.StopListener()` 仅关闭全局 `socks/http/redir/tproxy/mixed`、TUN、ShadowSocks、VMess 与 TUIC listener 变量；源码未见遍历或清空 `inboundListeners`、`tunnelTCPListeners`、`tunnelUDPListeners`。后者在 `listener.go:42-44` 定义为进程级 map；命名 inbound 仅在 `PatchInboundListeners` 删除差异项时移除，tunnel map 仅在 `PatchTunnel` 差异路径删除。
+- 调用链静态核对：`core/hub.go:handleStopListener` 与 `core/common.go:stopListeners` 直接调用 `listener.StopListener()`；`core/Clash.Meta/hub/executor/executor.go:Shutdown` 调用 `listener.Cleanup()`，而 `listener.Cleanup()`（`listener.go:725`）只调用 `closeTunListener()`。未发现其他停止/Shutdown 路径会统一关闭并清空上述 map，也未见 in-flight 等待、失败分类或 terminal receipt。
+- 该结果仅证明固定源码的清理覆盖缺口，不能断言某次设备运行必然遗留 socket；本轮未启动 core、未使用 ADB、未读取日志、配置、通知、节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由、DNS 或流量内容。矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+### FlClash Tunnel listener target 解析失败与资源回收静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/listener/tunnel/tcp.go`=`90EAD0ED90B273E967AFCC34BE085F89895EEFEE5E9C83C27B0737136F002048`；`core/Clash.Meta/listener/tunnel/udp.go`=`158FA0EFD7382AAB3B3CFB09DDB94EE44D1586278DF4BDD676E3EEDA4CAAE288`。
+- `tunnel.New` 与 `NewUDP` 先执行 `lc.Listen`/`lc.ListenPacket`，随后才解析 `target`。当 `socks5.ParseAddr(target)` 返回 nil 时，函数直接返回 `invalid target address`，未见对已绑定 TCP/UDP socket 的 `Close`；因此失败路径存在资源回收缺口。
+- 成功路径分别启动 Accept 与 ReadFrom 循环，并为每个连接/数据包派生 goroutine；循环仅依赖 `closed` 标志退出，未见 context、deadline、并发预算或 terminal receipt。`PatchTunnel` 对创建错误只写日志并继续，`updateTunnels` 不汇总逐项结果，无法区分部分成功、资源泄漏、取消或重试。
+- 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未创建 tunnel、未发起请求，未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。

@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=63`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=65`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -78,6 +78,8 @@
 | 内置 HTTP/SOCKS/redir/tproxy/mixed 端口重建与 UDP 失败边界 | `core/Clash.Meta/listener/listener.go`、`core/Clash.Meta/hub/executor/executor.go` | Android 端口重建、部分失败与回滚合同 | Partial：固定 `ReCreate*` 路径按 `allow-lan`/`bind-address` 计算地址，并以独立 mutex 保护重建。地址变化时先关闭旧 listener；HTTP/TProxy 失败后不恢复旧实例，SOCKS/mixed 在 UDP listener 创建失败时关闭新 TCP 但仅经日志返回，redir/TProxy 的 UDP 创建失败仅写 warning 仍保留 TCP listener 并记录主监听成功。端口为 `0` 或空时直接返回，调用方拿不到成功/失败/部分成功结果；`updateListeners` 也不等待或汇总这些重建结果。XToolpro 需以 prepare/validate、原子切换、TCP/UDP 部分成功分类和可核验 terminal receipt 覆盖端口重建失败、取消、重试及旧实例保留，保持 `Partial`。
 
 | 多地址 HTTP/SOCKS listener 创建与连接资源边界 | `core/Clash.Meta/listener/inbound/{http,socks}.go`、`listener/{http,socks}/{tcp,udp}.go` | 多地址入站、TLS/client-auth 和资源上限合同 | Partial：固定 HTTP/SOCKS inbound 将 `listen` 地址按逗号拆分并逐项创建 listener；每个 SOCKS 地址还可创建独立 UDP listener。底层先绑定 TCP socket，再初始化证书、ECH、client-auth CA 或 Reality；任一初始化失败会直接返回而不统一关闭已绑定 socket。后续地址创建或 UDP 创建失败同样不会清理此前已成功实例，调用方只能得到普通错误，无法区分部分成功、资源泄漏、回滚或单地址失败。连接处理按 goroutine 分派，握手失败关闭连接；固定路径未见统一 read/write deadline、请求体上限或 adapter 级并发/连接预算。XToolpro 需在 adapter 层预校验全部地址与证书，采用逐项资源回收、原子发布、超时/大小/并发边界和可核验 terminal receipt，保持 `Partial`。 |
+| 全局停止对命名 inbound/tunnel listener 的清理覆盖 | `core/Clash.Meta/listener/patch.go`、`listener/listener.go`、`core/common.go`、`core/hub.go`、`core/Clash.Meta/hub/executor/executor.go` | 停止/重启时的完整 listener 回收与可核验终态 | Partial：固定 `listener.StopListener()` 仅逐项关闭全局 socks/http/redir/tproxy/mixed/TUN/ShadowSocks/VMess/TUIC 实例，未遍历或清空 `inboundListeners`、`tunnelTCPListeners`、`tunnelUDPListeners`。`core/hub.go:handleStopListener` 与 `core/common.go:stopListeners` 直接调用该函数；`core/Clash.Meta/hub/executor/executor.go:Shutdown` 另调 `listener.Cleanup()`，而 `listener.Cleanup()` 仅调用 `closeTunListener()`。因此停止/Shutdown 静态路径可能遗留命名 inbound 与 tunnel listener map 项；未见统一 close、map 清空、in-flight 等待、失败分类或 terminal receipt。XToolpro 需在 adapter 层覆盖所有 listener 注册表并以可核验 Success/Cancelled/EngineCrashed 终态收敛，保持 `Partial`。 |
+| Tunnel listener target 解析失败与资源回收 | `core/Clash.Meta/listener/tunnel/{tcp,udp}.go`、`core/Clash.Meta/listener/listener.go`、`core/Clash.Meta/hub/executor/executor.go` | tunnel 创建失败分类、socket 回收与并发边界 | Partial：固定 `tunnel.New`/`NewUDP` 先调用 `Listen`/`ListenPacket` 绑定 TCP/UDP socket，再调用 `socks5.ParseAddr(target)`；target 无效时直接返回错误，未关闭已绑定的 socket。成功后分别启动无界 Accept/ReadFrom 循环，并为每个连接/数据包派生 goroutine；除 `closed` 标志外无 context、deadline、并发预算或 terminal receipt。`PatchTunnel` 逐项创建时仅记录错误并继续，调用方不能区分部分成功、资源泄漏、取消或重试；`updateTunnels` 不汇总结果。XToolpro 需在 adapter 层先校验 target、失败时回收已分配资源并提供有界并发与稳定失败分类，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 
