@@ -2256,6 +2256,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `/delay` 输入与组状态副作用静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/proxies.go`=`51205BD6EDDDA36D7F8F60004E9E54E1171EABD4D5BCD2164A2EFD2FA9935F82`；`groups.go`=`BAAD47C7E2E3393BF914DD4D5F4A22446E8D1FBC8235381F604ED780A3B270ED`；`adapter/outboundgroup/selector.go`=`682FCEF95A0E9D7F97FB0ADDA6A72C82F772839ADC0C1E5FFB4A6D51B29AF1B9`；`adapter/outboundgroup/urltest.go`=`5970E1AB00F269C53108213F677702F00B8F690E06A5880E74F58F0AFDEC7E36`。
+- 固定 `proxyRouter` 与 `groupRouter` 的 `/delay` 接受 timeout、测试 URL 和 expected-status 参数；handler 主要做整数/无符号解析后进入 URLTest。单代理 timeout 走 504，其他错误多走 503；未见统一的 URL scheme/host/长度/重定向约束、timeout 下限或批量总 deadline，也未见请求 context 取消映射为稳定 `Cancelled`。
+- group delay 在开始测试前会清空当前选择，候选测试失败、为空或部分超时时没有恢复旧选择的事务/快照；API 不返回逐节点结果、generation 或选择变更回执。固定代码因此可能让 UI 保存的选择与 core 当前选择短暂不一致，且失败原因可能以原始 error 形式返回。
+- XToolpro 只能在受鉴权 adapter 中先校验 URL、timeout、并发和总 deadline，复制不可变选择快照后执行可取消、有界批量测速；成功时原子发布新选择，失败/取消时恢复旧快照，并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt。完成隔离契约测试前，新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态读取固定归档，未调用 `/delay`、未发送测速请求、未切换代理组、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller `/delay` 输入与组状态副作用静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
