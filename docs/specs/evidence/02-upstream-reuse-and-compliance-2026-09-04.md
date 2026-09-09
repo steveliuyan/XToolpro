@@ -2644,6 +2644,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider YAML/V2Ray 回退格式判定与预算静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `common/convert` 路径。固定解析链先尝试 YAML，YAML 失败后回退 V2Ray 转换；当前证据未见显式 payload 格式标记或先验 schema 判定。
+- 固定路径未见回退深度/总耗时预算、转换输入字节上限、取消传播或能区分 YAML 失败、V2Ray 转换失败与最终 `ParseProxy` 失败的稳定 terminal receipt；多阶段失败仍可能汇总为普通 error 并携带原始解析上下文。
+- 结论：XToolpro adapter 必须先做有界格式判定，限制回退次数、输入大小和总时限，在 staging 中完成转换与 proxy schema 校验后再发布不可变快照，并将 `Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 与底层解析正文分离；完成 YAML/V2Ray fixture、超限、取消和分阶段失败契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未解析真实 provider、未执行 YAML/V2Ray 转换、未使用 age key、未发起 HTTP 请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider YAML/V2Ray 回退格式判定与预算静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
