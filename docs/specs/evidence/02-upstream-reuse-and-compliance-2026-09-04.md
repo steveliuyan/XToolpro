@@ -2610,6 +2610,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及本 evidence 文件，未纳入其他工作树改动或临时产物；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider 重复名称归一化与冲突保留边界静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。`NewProxiesParser` 的去重路径以解析得到的原始名称作为 map key；静态路径未见大小写折叠、Unicode 规范化或前后空白清理。
+- 因此名称仅在原始字符串完全相同时进入重复路径；固定实现没有向调用方报告冲突数量、被保留项或稳定的冲突选择顺序。该结果不能外推不同输入顺序下的可见节点列表，也不能替代重复名称契约测试。
+- 结论：XToolpro adapter 必须在 staging 阶段定义名称规范化、冲突策略和可审计计数，且将冲突/无效名称映射为脱敏结果；在不同大小写、Unicode、空白、空名称和输入顺序 fixture 的契约测试完成前，矩阵行保持 `Partial`、Proxy 台账保持 `Investigating`。
+- 本轮仍未解析真实 provider、未发起 HTTP 请求、未使用 age key、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider 重复名称归一化与冲突保留边界静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
