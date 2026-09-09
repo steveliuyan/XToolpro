@@ -1665,6 +1665,13 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 固定实现未见文件大小/行数预算、canonical provenance、显式 cache 清除/过期回执或针对 hosts 内容的字段最小化合同。虽然此组件本身没有新增日志调用，但 host/IP 映射会进入 resolver/routing metadata，不能把“静默空结果”误认作不存在 hosts 覆写或功能成功。
 - 结论：上游可使用 platform hosts 作为 DNS/路由输入，但 XToolpro 必须在隔离边界提供最小化、可撤销的 hosts 配置、读取失败的稳定状态和缓存生命周期；完成受控 hosts fixture、缺失/权限失败、超限、更新、清除、取消和 version mismatch 契约前，对应矩阵行保持 `Partial`。
 
+### FlClash DoH/DoT/DoQ DNS transport 静态审计（2026-09-09）
+
+- 审计对象为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，只读 `core/Clash.Meta/dns/doh.go`（SHA-256 `4B37A02973B0E97C94FEEDCF1979B9E821D798BC541ED95B7C474EC50005CA24`）、`dot.go`（`02FB4DA8A303AC26E68C591A48ADB931D6ACB09ED7F2E7DB87A5C6B2448B788C`）和 `doq.go`（`0E41381374782B541AA875AD1D3751D25F7151823C061E2FDD7221327C413588`）；未启动 core、未发起 DNS/网络请求、未读取设备数据或使用 ADB。
+- DoH 使用 context-bound HTTP 请求、10 秒拨号/TLS 握手预算、5 分钟 idle/30 秒 ping 参数、TLS 1.2 minimum、连接复用与超时/QUIC/0-RTT reset 后最多两次重建重试；DoT/DoQ 使用 context-aware 拨号、默认 5 秒 DNS timeout、复用连接失败重试和显式 Reset/Close，DoQ 区分 idle/stateless reset 等可重试错误。三者均接受 `skip-cert-verify` 与 `name-cert-verify` 参数。
+- 固定实现没有 XToolpro-facing 证书策略、取消/超时/错误分类、每上游 health/capability 或终端回执；连接/拨号错误日志可能包含上游地址、耗时和原始错误。未执行真实 DoH/DoT/DoQ、证书失败、取消、重试或隐私边界验证。
+- 结论：上游具备三类加密 DNS transport、有限超时和连接重建能力，但这些实现不能直接证明 XToolpro 的证书策略、可取消性、稳定错误/健康合同或脱敏边界；对应矩阵行保持 `Partial`，Proxy 台账与 Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，platform hosts resolver 静态审计）
 
 - focused commit `0bbfe95` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
