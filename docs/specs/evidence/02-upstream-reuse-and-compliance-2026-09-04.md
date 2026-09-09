@@ -1615,6 +1615,12 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 操作前为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。立即 START→STOP 后 7 秒和 14 秒均为 `vpn_connected_markers=1`、`all_tun_interfaces=0`，进程和 app-op 不变；再次发送 STOP 后 5 秒回到 `vpn_connected_markers=0`、`all_tun_interfaces=0`。
 - 本轮未发送流量，未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果表明已提交 STOP 与最终系统停止摘要存在可观察延迟/竞态，不能证明取消已覆盖 setup、service callback 或 core health；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
 
+### FlClash 快速 STOP→START 启动收敛受限复核（2026-09-09）
+
+- 设备为已授权测试设备 `bf353dda`；在停止基线对已解析 dev `QuickActionActivity` 连续发送 STOP 后立即发送 START。7 秒、14 秒及最终再次 STOP 后 5 秒，仅采集进程存在性、`POST_NOTIFICATION` app-op、系统 `VPN CONNECTED` 标记计数和所有 `tun*` 接口计数。
+- 操作前为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。立即 STOP→START 后 7 秒和 14 秒均为 `vpn_connected_markers=1`、`all_tun_interfaces=0`；再次 STOP 后 5 秒回到 `vpn_connected_markers=0`、`all_tun_interfaces=0`，进程和 app-op 不变。
+- 本轮未发送流量，未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只证明后到 START 可保留系统标记，不能证明实际 TUN/core 运行、命令串行化或取消覆盖；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
+
 #### 本检查点远端备份状态（2026-09-09，快速 START→STOP 取消收敛复核）
 
 - focused commit `064bd7a` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
