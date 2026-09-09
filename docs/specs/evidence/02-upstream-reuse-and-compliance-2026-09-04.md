@@ -1745,6 +1745,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash provider ETag/304 缓存与敏感 URL 持久化边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/component/resource/vehicle.go`=`2B5AE763906EF70523A40830FCF04EAF1FE0076F54DCD36AFE4E7033D4327AFF`；`core/Clash.Meta/component/profile/cachefile/etag.go`=`477D1BBBE97EF51DDE00ABEBF7B82293006F60EC34EF4BE54C790914A4670D6A`；`core/Clash.Meta/component/profile/cachefile/cache.go`=`F78DB1582F01FAAFF1BB6260398A2A747809ABFF30C67EE03AC0F477ADE3227B`；`core/Clash.Meta/hub/executor/executor.go` 中 `resource.SetETag(general.ETagSupport)` 的调用将配置开关同步到进程级状态。
+- ETag 开启且旧 hash 有效时，HTTP vehicle 只在缓存 hash 与当前 hash 一致并存在 ETag 时发送 `If-None-Match`；304 返回旧 hash，Fetcher 将其视为 same 并刷新时间。2xx 响应则将 ETag、内容 hash 和时间写入 bbolt `etag` bucket。
+- `SetETagWithHash` 直接以完整 URL 作为 bbolt key；固定代码未见 URL 脱敏/不可逆标识、TTL、容量/条目上限、配置移除后的清理或逐项 terminal receipt。cache DB 以 `0666` 模式打开，ETag 读取/反序列化错误不向调用方返回，写入失败只记 cache 路径和原始错误，无法区分命中、持久化失败或版本错配。
+- 本轮仅静态读取固定归档，未开启 ETag、未发送 HTTP 请求、未读写 cache DB、未启动 core、未使用 ADB，未读取设备规则、配置、订阅 URL、凭据、Cookie、日志或网络内容；新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，provider ETag/304 缓存与敏感 URL 持久化边界静态审计）
+
+- focused commit `c8257a3` 已创建但尚未 push；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 ### FlClash HTTP/SOCKS/mixed 入站认证与 UDP 边界静态审计（2026-09-09）
 
 - 固定归档文件 SHA-256：`listener/inbound/mixed.go`=`93844489F2101CBB3B9CFEA9CFFFD79641C24481547132DF53DF8D405648D361`；`listener/inbound/http.go`=`0E6AA5C473793663DEBED926F37316C7C2C16C2053F9C697FA7411727C5C9A73`；`listener/inbound/socks.go`=`7C40D8EA28C04F970E3F6151B1131B30AD3576509D4D6D6396A519767EB29777`；`listener/inbound/auth.go`=`D80505C45B1E3B02D5109B77D5FF5A00E10DB5EFA728F37CEDB945746D70098E`；`component/auth/auth.go`=`93F4E431F51124258E43AB75B858DD351C9586A892EDEE56A74E8FC132ECD542`；`listener/inbound/base.go`=`ACC0AF28BF0C444261134006B255DEC9ECA3FD8A83BC48097913F268012A7A86`。
