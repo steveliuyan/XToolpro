@@ -2280,6 +2280,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `/dns/query` 名称/type 与响应预算契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/dns.go`=`25AACDDA7D48F73BBC80F226AF0A8DCEFA0A5AE7577675C7C2F747A3A685402F`；路由传输与鉴权边界同 `core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 固定 `dnsRouter` 将 `name` 直接交给 `dns.Fqdn`，空 `type` 默认 `A`，未知类型返回 400；未见名称长度、标签数量、字符集、内部域名或批量查询限制。查询使用 resolver 默认 timeout，但错误通常直接序列化原始文本。
+- 成功响应包含完整 DNS header、Question 以及 Answer/Authority/Additional 中每条 RR 的 name、type、TTL 与 data；未见响应字节/记录数上限、字段白名单、并发预算或 request-context 取消回执。Unix/named-pipe transport 传入空 secret，使该管理路由继承本地未鉴权边界。
+- XToolpro 只能在 adapter 入口执行名称/type/schema 与大小限制，绑定 request context 和并发预算，按隐私策略裁剪 RR 字段，并以脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` terminal receipt 结束查询；完成隔离契约测试前，新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态读取固定归档，未调用 `/dns/query`、未发送 DNS 查询、未读取设备 DNS/路由或日志、未使用 ADB，未读取配置、通知、节点、URL、地址、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller `/dns/query` 名称/type 与响应预算契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
