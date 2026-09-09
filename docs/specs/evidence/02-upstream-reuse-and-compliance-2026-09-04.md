@@ -2655,6 +2655,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider override schema 与类型冲突静态补充（2026-09-10）
+
+- 沿用固定归档 `core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52` 与 `provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`。固定路径在 `adapter.ParseProxy` 前就地应用 override，但未见字段白名单、未知键拒绝、类型约束、嵌套深度/成员数预算或 schema/version 绑定。
+- 因此未知字段、类型不匹配或部分嵌套合并失败没有稳定的逐字段结果；错误仍可能作为普通解析 error 返回，且未见旧 mapping 快照、部分成功清单或 generation 回执。
+- 结论：XToolpro adapter 必须定义版本化 override schema，限制字段、类型、嵌套深度与成员数量，在 staging 中完成校验和合并后原子发布；未知字段、类型冲突、取消和失败必须映射为脱敏终态，并保留旧快照。契约测试完成前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未执行真实 override、未解析 provider、未使用 age key、未发起 HTTP 请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider override schema 与类型冲突静态补充）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
