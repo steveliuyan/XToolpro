@@ -2576,6 +2576,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-group health 结果 freshness 与失效回执静态审计（2026-09-10）
+
+- 固定归档关键文件 SHA-256：`adapter/outboundgroup/groupbase.go`=`13964372390663420A63BD06C787A083CA40712CE52E5F2B1739AFEEA2F08EC2`；`selector.go`=`682FCEF95A0E9D7F97FB0ADDA6A72C82F772839ADC0C1E5FFB4A6D51B29AF1B9`；`urltest.go`=`5970E1AB00F269C53108213F677702F00B8F690E06A5880E74F58F0AFDEC7E36`；`fallback.go`=`EA6FDC60688ABF5813A77E25D8A6E16874B21F41FA0E4DA8B51465021DC2E7F5`；`loadbalance.go`=`DD8E5C052E614F744E810778B88234E85721BF91CA5FA62A2182120376D87270`；`healthcheck.go`=`5D839304F21C054811B4EF4E34C8DAE1FB8EC7BF0A36CE877CD5B6D581D3A4AA`。
+- 固定 `url-test` 对健康选择使用约 10 秒 singleflight 缓存，组级失败计数达到阈值后才触发检查；`fallback`/`load-balance` 在成员失效或可用集合耗尽时按首项/空 `Now()` 回退。固定对象未见对外暴露健康样本时间、缓存 generation、检查进行中/过期标记或全成员失败的稳定 `Unavailable`/`Cancelled` 状态。
+- provider 更新、healthcheck 关闭与组当前选择之间没有版本绑定或回滚回执；调用方不能仅凭当前选择名区分新鲜健康结果、过期缓存、检查尚未完成或所有成员均失败。该缺口不推断设备上实际出现错误选择，只说明固定源码没有可核验终态。
+- 结论：上游具备健康选择和回退策略，但不能直接作为 XToolpro 的 freshness、失效传播或可重试合同。XToolpro 只能在 adapter 层把选择结果绑定 provider/config generation，明确 freshness 上限和过期策略，并对检查中、过期、无可用成员和取消返回脱敏终态；完成受控时间推进、全成员失败、provider 更新和取消契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态复核固定归档与既有文件哈希，未启动 core、未运行 healthcheck、未读取设备连接或节点数据、未使用 ADB，也未读取日志、配置、通知、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件；新增 parity 行保持 `Partial`，Phase 02 gate 计数更新为 `Verified=3`、`Partial=130`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-group health 结果 freshness 与失效回执静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
