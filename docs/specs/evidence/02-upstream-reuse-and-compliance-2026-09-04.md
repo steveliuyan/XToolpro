@@ -2364,6 +2364,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller root/version 健康探针与运行态绑定静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- 固定 `GET /` 仅返回常量 `{"hello":"mihomo"}`，`GET /version` 仅返回 `C.Meta` 与 `C.Version`。两者未探测 core 初始化、listener/TUN/DNS/VPN 实际状态，也未返回 capability 集合、generation、bridge/native ABI 或 engine handshake 结果。
+- 管理面 HTTP 成功只能证明 router 可响应，无法区分 engine unavailable、version mismatch、启动中或停止中；Unix/named-pipe transport 传入空 secret，健康探针继承本地未鉴权边界。固定路径没有 terminal receipt 或失败分类。
+- XToolpro 只能在 adapter 层将健康探针绑定签名版本 manifest、engine handshake、TUN/listener 状态和持久化 generation，明确返回脱敏 `Success`/`Unavailable`/`VersionMismatch`/`EngineCrashed`；在隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未请求 `/` 或 `/version`、未启动管理 server、未读取设备运行态或版本信息、未使用 ADB，未读取配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller root/version 健康探针与运行态绑定静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
