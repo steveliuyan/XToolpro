@@ -2600,6 +2600,16 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash Phase 02 受限设备残留状态复核（2026-09-10）
+
+- 目标设备 `bf353dda` 返回 `device`，固定 dev 包为 `com.follow.clash.dev`。本轮仅执行 AGENTS.md 允许的无内容状态摘要：目标进程存在（`pidof` 返回一个 PID）、`POST_NOTIFICATION` app-op=`allow`、系统 `VPN CONNECTED` marker 计数=`0`、`/sys/class/net/tun0` 存在性=`0`。
+- 本轮没有发送 START/STOP/TOGGLE、没有授予或撤销权限，也没有读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS、流量或其他 UI 用户数据；因此该复核只证明当前没有遗留 VPN/TUN，不能证明启动、停止、通知可见性、native health 或任何 engine contract。
+- 结论：不改变任何矩阵状态；FlClash 四域台账仍为 `Investigating`，Phase 02 gate 仍为 `Verified=3`、`Partial=131`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash Phase 02 受限设备残留状态复核）
+
+- focused commit 待创建；本检查点只涉及本 evidence 文件，未纳入其他工作树改动或临时产物；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
