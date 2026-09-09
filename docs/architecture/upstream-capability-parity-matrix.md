@@ -8,7 +8,7 @@
 
 这份矩阵是四个固定上游提交的完整能力基线。`XToolpro 映射`描述能力应位于哪个 `engine-*` 合同后；它不允许把上游能力改写成相似的自研版本。`Verified` 表示该合并行内的能力均有真实上游行为证据；`Partial` 表示只验证了其中一部分或仅确认真机入口；`Pending` 表示仍未形成足够真机证据。每一行必须有真实上游调用、依赖/许可证记录和对应测试证据后，才能将状态改为 `Verified`。
 
-2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=74`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
+2026-09-09 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=75`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
@@ -92,6 +92,7 @@
 
 | External-controller 重建并发与失败回执 | `core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/hub/hub.go` | 管理面重载、旧实例回收和 transport terminal receipt | Partial：`hub.ApplyConfig` 每次配置应用都调用 `ReCreateServer`；该函数并发启动 TCP/TLS/Unix/named-pipe 四个 `start*` goroutine。各路径独立关闭并写入全局 server 指针，未见 generation/lifecycle lock、旧实例保留或跨 transport 的重建顺序；监听、证书、目录、socket 和 Serve 失败仅写日志并返回，调用方拿不到成功、部分成功、取消或失败聚合回执。XToolpro 需以串行重载、prepare/validate、逐 transport 结果和可核验 terminal receipt 覆盖，保持 `Partial`。 |
 | External-controller `/restart` 完成与失败回执 | `core/Clash.Meta/hub/route/restart.go`、`hub/route/server.go` | 管理面重启、shutdown、exec 结果与可恢复状态 | Partial：`POST /restart` 在取得 executable path 后立即返回 `{"status":"ok"}` 并 flush，随后后台调用 `executor.Shutdown()` 和 `syscall.Exec`/Windows `cmd.Start`。重启失败仅以 `log.Fatalln` 处理，调用方没有等待、失败分类、旧实例保留、回滚或新的健康回执；路由还在非 embed 模式下统一挂载。XToolpro 需把重启建模为可取消、有界、可核验的 terminal operation，保持 `Partial`。 |
+| External-controller debug 路由鉴权边界 | `core/Clash.Meta/hub/route/server.go` | profiler/GC 调试入口的鉴权与禁用策略 | Partial：`router` 在受 secret 保护的管理 group 之前单独挂载 `/debug`，debug 模式下的 profiler 与 `PUT /debug/gc` 不经过 `authentication()`；因此 secret 非空不能覆盖该调试入口。XToolpro 需默认禁用 debug 路由，并将任何诊断操作置于独立、最小权限且可审计的本地授权边界，保持 `Partial`。 |
 
 ## sdmaid-se：设备维护能力
 

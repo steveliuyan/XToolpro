@@ -1593,6 +1593,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 固定 `core/Clash.Meta/hub/route/restart.go` SHA-256 为 `0F3B70A1B7A23283882F41DBE2333042965DF4F5FE1F889F9A3AB5FB291ED5E9`。`restart` 在 `os.Executable()` 成功后立即返回 JSON `{"status":"ok"}` 并 flush，再以后台 goroutine 调用 `executor.Shutdown()` 和 `syscall.Exec`（Windows 为 `cmd.Start`）；执行失败只调用 `log.Fatalln`，没有可等待的完成回执、失败分类、旧实例保留、回滚或重启后健康确认。本轮未调用 `/restart`、未启动/停止 core、未改配置、未使用 ADB；新增 parity 行保持 `Partial`。
 
+### FlClash external-controller debug 路由鉴权边界静态审计（2026-09-09）
+
+- 固定 `core/Clash.Meta/hub/route/server.go` SHA-256 为 `15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。`router` 先在 secret 保护的管理 group 外挂载 `/debug`，debug 模式下提供 profiler 与 `PUT /debug/gc`；后续 group 才按非空 secret 挂载 `authentication()`。因此 debug 路由不继承 controller Bearer/query-token 鉴权。本轮未启用 debug、未请求路由、未读取设备数据或配置；新增 parity 行保持 `Partial`。
+
 ### FlClash proxy-provider 订阅、健康检查与 API 字段边界静态审计（2026-09-09）
 
 - 审计对象仍为固定归档 `FlClash-62addf738a76b1a492e19af2dbabdb6d572b9e72`，未发起订阅请求、未读取节点/配置/设备数据、未使用 ADB。相关源码为 `core/Clash.Meta/adapter/provider/provider.go`、`core/Clash.Meta/adapter/provider/healthcheck.go`、`core/Clash.Meta/hub/route/provider.go`。
