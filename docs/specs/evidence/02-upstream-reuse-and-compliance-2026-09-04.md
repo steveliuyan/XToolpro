@@ -2448,6 +2448,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller debug profiler/GC 资源预算与操作回执契约静态审计（2026-09-10）
+
+- 固定归档路由文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。本检查点沿用此前对固定 `middleware.Profiler` 挂载和 `runtime/debug.FreeOSMemory()` 调用的只读源码追踪，专门拆分资源预算与终态回执缺口，不把鉴权边界重复计为新证据。
+- 固定 router 只按 `isDebug` 条件整体挂载 profiler 与 `PUT /debug/gc`；在该路由边界未见按端点区分的最大执行时长、采样/输出大小、并发数、排队上限或请求 context 预算。因而 profiler 采样可能成为长运行、占用 CPU/内存且不可由调用方稳定取消的诊断操作；本结论不推断某个设备上实际发生资源耗尽。
+- `/debug/gc` 直接同步调用 `runtime/debug.FreeOSMemory()`，返回无正文成功，未返回 task/operation ID、耗时、回收前后摘要或失败分类；崩溃、超时和部分完成不能由响应区分。固定源码也未提供诊断操作审计事件或可重放的完成 receipt。
+- XToolpro 只能在独立授权边界下为每项诊断设置总 deadline、输出/采样预算、并发闸门和可取消任务，并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 终态；资源预算、取消和回执契约测试完成前，新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`，不进入正式 engine 集成。
+- 本轮仅复核固定源码路径与既有固定文件哈希，未启动 server、未调用 profiler 或 GC、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller debug profiler/GC 资源预算与操作回执契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
