@@ -2436,6 +2436,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller CORS 通配来源与凭据组合契约静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；`config/config.go`=`49296DD48FB4BFBE1EB3B8236DE72FD07FB9E8EFFB122D09B137DD3D44982B86`。
+- 固定默认 CORS 为 `AllowOrigins=["*"]`，允许 `Authorization` header，并可开启 `AllowPrivateNetwork`；未见启动时拒绝“通配来源+凭据/私网”组合、按管理/DoH/UI/debug 路由分级或预检审计。
+- Bearer 鉴权只覆盖部分管理 group；WebSocket token 可出现在 URL query，`/debug`、`/ui`、DoH 等 group 外路径不经过同一 middleware，跨源策略可能扩大未鉴权入口和 token 泄露面。固定实现未提供 CORS 违规或来源拒绝的稳定 terminal receipt。
+- XToolpro 只能在 adapter 层强制显式 origin allowlist，禁止通配来源与凭据/私网并用，按路由分级并默认拒绝 URL token；鉴权失败、来源拒绝和版本错配需归一为脱敏结果，隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未发送跨源请求、未建立 WebSocket、未读取或记录 secret/token、未启动 server、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller CORS 通配来源与凭据组合契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
