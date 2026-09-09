@@ -1633,6 +1633,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - 停止基线为 `vpn_connected_markers=0`、`all_tun_interfaces=0`、dev 进程存在、`POST_NOTIFICATION=allow`。START 后 7 秒为 `vpn_connected_markers=1`、`all_tun_interfaces=0`；双 TOGGLE 后 7 秒仍为 `vpn_connected_markers=1`、`all_tun_interfaces=0`；STOP 后 5 秒回到 0/0，进程和 app-op 不变。
 - 本轮未发送流量，未读取日志、通知正文或 extras、配置、节点、请求、路由、DNS、文件、凭据、Cookie、URL 或流量。结果只证明该轮运行态偶数切换保留系统标记并可由 STOP 清理，不能证明实际 TUN/core 运行、线性化、中间反向状态或资源安全；对应矩阵行保持 `Partial`，Phase 02 gate 不变。
 
+#### 本检查点远端备份状态（2026-09-09，运行态快速双 TOGGLE 复核）
+
+- focused commit `6dd5293` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，重复 START 请求最终收敛复核）
 
 - focused commit `de53d07` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
