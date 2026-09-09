@@ -2388,6 +2388,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `/connections` WebSocket interval 与关闭回执静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/connections.go`=`FBE4948D9B506F661E4AC5936E493F82AFC1FB2F1DC84DB8BA7FF108423AD83A`；`core/Clash.Meta/tunnel/statistic/manager.go`=`D6633D8CA012523924C7BB8103800189679EF2E127524C1EFFFDFDDF40FFDB3F`；`tracker.go`=`5F82775600E8F068D53C51A543601BAFE71B7890F422C67B6E92543393C30943`。
+- 固定 WebSocket `interval` 仅做整数解析，未拒绝 0 或负数，随后传入 `time.NewTicker` 可能 panic；循环主要依赖写入错误退出，未监听 request context/close，也没有最大订阅数或生命周期预算。
+- 单项与批量 DELETE 忽略 `Close()` 错误并固定返回 204，无法区分不存在、部分成功、取消或连接仍存活；未提供逐项结果、generation 或连接收敛确认。管理面本地 Unix/named-pipe 传输继续继承空 secret 的未鉴权边界。
+- XToolpro 只能在 adapter 入口限制正 interval 与订阅预算，绑定取消并等待连接关闭，逐项返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`；隔离契约测试完成前保持 `Partial`。
+- 本轮仅静态读取固定归档，未建立 `/connections` WebSocket、未发送 interval 或 DELETE 请求、未读取连接快照或设备数据、未使用 ADB，未读取日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller `/connections` WebSocket interval 与关闭回执静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
