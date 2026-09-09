@@ -2621,6 +2621,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider HTTP vehicle 请求重定向与响应预算静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/adapter/provider/parser.go`=`47616A987CFDC9E793D7C431F2EB450DB02A3E7EA492E02F1DAA134B00D3CD52`；`core/Clash.Meta/component/resource/vehicle.go`=`2B5AE763906EF70523A40830FCF04EAF1FE0076F54DCD36AFE4E7033D4327AFF`。
+- `ParseProxyProvider` 将 HTTP provider 的 header、proxy、size-limit 等字段传入 vehicle；缓存路径按 URL hash 或显式安全路径派生。固定调用链没有形成可核验的重定向 allowlist/次数上限、最终来源绑定、Content-Type/长度预检、统一连接/读取/总时限或请求 context 取消回执。
+- HTTP vehicle 的请求、ETag/304 缓存、文件写入与 provider 解析之间未见跨阶段 generation、旧快照保留或失败后回滚确认；因此一次来源变化、超限或解析失败可能只能以普通 error 暴露，不能向调用方说明失败阶段或旧版本是否仍可用。
+- 结论：XToolpro adapter 必须在边界限制 scheme/host、重定向次数、响应字节和总时限，绑定来源与配置 generation，并以 staging+原子发布和脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch` 回执隔离旧快照；完成受控重定向、超限、取消、来源变化和失败回滚契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未发起 HTTP 请求、未解析真实 provider、未读取或写入缓存、未启动 core、未使用 age key 或 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider HTTP vehicle 请求重定向与响应预算静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
