@@ -2087,6 +2087,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller proxy-provider 管理与 healthcheck 契约静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/provider.go`=`6B3A4B59E42AA13E8E04544F3BA269FE9906695B3BCC7BD46B80CEFA4B3DAD80`；`adapter/provider/provider.go`=`546ED6CDACF36E1BA14F619C065F4BF59F2CBAB7E89DC25BC56E04F40C6B290B`；`adapter/provider/healthcheck.go`=`5D839304F21C054811B4EF4E34C8DAE1FB8EC7BF0A36CE877CD5B6D581D3A4AA`。
+- 固定路由提供代理 provider 列表/单项 GET、`PUT /{providerName}` 更新、provider 级与单节点 healthcheck，以及 rule-provider 列表和更新；路由位于 secret 管理 group，但 Unix/named-pipe transport 传入空 secret，继承本地未鉴权边界。
+- provider JSON 直接暴露名称、类型、vehicleType、完整 proxy 列表、testUrl、expectedStatus、updatedAt 和 `subscription-userinfo` 解析结果；单节点 GET 继续返回完整 proxy JSON。`PUT` 成功无正文 204，失败 503 包装原始 error；找不到 provider/proxy 返回 404，未见请求体/并发限制、更新 generation、旧版本回滚或逐项结果。
+- healthcheck 路由只调用 `HealthCheck()` 即返回 204；实现以 provider 级 singleflight 合并约 1 秒窗口、errgroup 最多 10 并发和每 proxy timeout，但不接受请求 context 取消、不返回任务 ID/完成状态/逐节点结果，healthcheck 日志包含 proxy 名称、URL、alive 与 delay。`setProxies` 先替换切片并递增 version，再触发自动检查；更新期间没有原子快照与失败后保留旧状态的对外确认。
+- 本轮仅静态读取固定归档，未启动 core、未调用 provider API、未触发更新或 healthcheck、未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller proxy-provider 管理与 healthcheck 契约静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
