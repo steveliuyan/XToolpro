@@ -2352,6 +2352,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller `/traffic`/`/memory` 流式订阅生命周期静态审计（2026-09-10）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`；统计实现位于固定归档 `core/Clash.Meta/component/tunnel/statistic` 路径。
+- `traffic` 与 `memory` 同时支持 HTTP chunked 和 WebSocket；每秒从默认 statistic manager 读取累计/瞬时上下行或内存快照并 flush。循环主要以 ticker 持续运行，仅在 JSON 编码或写入错误时退出，未见统一监听 `r.Context().Done()`、WebSocket close/ping 超时、订阅并发上限或单订阅生命周期预算。
+- 固定 endpoint 不返回订阅 ID、丢弃/背压计数、取消确认或 terminal receipt；客户端断开若未及时触发写错，goroutine/ticker 可能继续占用。快照虽不直接包含节点名或请求正文，累计流量与内存值仍属运行态诊断数据，未见权限分级和采样预算。
+- XToolpro 只能在 adapter 层绑定 request context，设置订阅上限、背压和最大生命周期，在断开/取消时等待资源回收并返回脱敏 `Cancelled`/`EngineCrashed`/`VersionMismatch`；隔离契约测试完成前，新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅静态读取固定归档，未请求 `/traffic` 或 `/memory`、未建立 WebSocket、未读取设备运行态数据或日志、未使用 ADB，未读取配置、通知、节点、URL、地址、路由、DNS、流量内容、凭据或 Cookie。
+
+#### 本检查点远端备份状态（2026-09-10，External-controller `/traffic`/`/memory` 流式订阅生命周期静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
