@@ -1849,6 +1849,10 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 - `Tunnel.UnmarshalYAML` 在字符串输入时校验 network、address、target；对象输入（YAML/JSON map）则直接解码到 `inner` 后赋值，未执行同等 schema/host:port 校验。`PatchTunnel` 随后只对 `network == "tcp"` 选择 TCP，任意其他值都进入 UDP 分支，未知协议不会拒绝或产生稳定 `Unavailable` 分类。
 - 本轮仅静态读取固定归档，未启动 core、未使用 ADB、未提交配置或创建 tunnel，未读取设备日志、配置正文、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；新增矩阵行保持 `Partial`，Proxy 台账保持 `Investigating`。
 
+#### 本检查点远端备份状态（2026-09-09，Tunnel 配置对象校验与未知 network 处理静态审计）
+
+- focused commit `5e3f4cb` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
+
 #### 本检查点远端备份状态（2026-09-09，Tunnel listener target 解析失败与资源回收静态审计）
 
 - focused commit `428b4ee` 已创建但尚未 push；按要求不得自动 push，须先获得用户明确确认。涉及路径仅为 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物未纳入。
