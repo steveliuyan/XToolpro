@@ -2154,6 +2154,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller WebSocket 升级、帧写入与关闭边界静态审计（2026-09-09）
+
+- 固定归档文件 SHA-256：`core/Clash.Meta/hub/route/common.go`=`FFB303C61FC0BD4535741F5BBFB49E31A3B97EB98C4C2EDF02B64F88625E6739`；`hub/route/server.go`=`15EACD2A4122A8BEECB57E679CBAE1FB1F42BB1A0C2C27E41FA4FD3901214C65`。
+- `wsUpgrade` 手工校验 GET、HTTP/1.1、Host、Upgrade/Connection、24 字节 `Sec-WebSocket-Key` 和版本 13；失败直接写原始 handshake error 文本。Hijack 后清除所有 deadline，写入 101 响应并把连接交给流式 handler；未见 Origin 校验、握手/读写 deadline、最大帧/消息大小或 ping/pong 保活。
+- 服务器帧写入允许任意 payload 长度；客户端断开主要依赖写错误。`traffic`、`memory`、`logs`、`connections` 等循环缺少统一 request-context/close 监听和订阅上限，部分路径仅在写失败后退出并 defer close；hijack 后错误无法再转换为结构化 HTTP 回执。
+- 本轮仅静态读取固定归档，未建立 WebSocket、未发送帧、未读取连接内容、未使用 ADB，未读取设备日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据或 Cookie；矩阵新增行保持 `Partial`，Proxy 台账保持 `Investigating`。
+
+#### 本检查点远端备份状态（2026-09-09，External-controller WebSocket 升级、帧写入与关闭边界静态审计）
+
+- focused commit 待创建；本检查点只涉及 `docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
