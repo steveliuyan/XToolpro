@@ -2913,6 +2913,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `a3ab489` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller transport 旧实例指针与重建代次竞态静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/hub/route/server.go`、`core/Clash.Meta/hub/hub.go`；沿用已记录的固定提交和文件哈希，本轮只补充 transport 旧实例和重建代次边界。
+- `ReCreateServer` 的各 transport 启动协程分别关闭旧引用、创建新 listener 并写回全局 server 指针；固定路径未见统一 lifecycle lock、不可变 server generation，或在 Serve/关闭回调提交前验证当前代次。连续配置重载时，较早 transport 的关闭/错误可能晚于新实例完成，旧 goroutine 仍可能覆盖指针或将旧失败写入当前状态；调用方也拿不到“旧实例已退出、新实例已监听”的顺序证明。
+- 结论：XToolpro adapter 必须为每次重建分配 generation，按 prepare→publish→drain 顺序提交，旧代次结果在提交前丢弃，并返回逐 transport 脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`；完成连续重载、端口冲突、慢关闭和旧结果丢弃契约测试前，新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未触发配置重载、未启动或停止 listener、未建立 TCP/TLS/Unix/named-pipe 连接，未启动 core、未使用 ADB，也未读取日志、配置、通知、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或设备文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller transport 旧实例指针与重建代次竞态静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
