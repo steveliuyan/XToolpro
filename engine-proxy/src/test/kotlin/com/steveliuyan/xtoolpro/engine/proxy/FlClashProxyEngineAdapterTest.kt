@@ -202,6 +202,51 @@ class FlClashProxyEngineAdapterTest {
         pinnedIdentity.copy(artifactManifestSha256 = "not-a-sha256")
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun blankTaskIdIsRejectedForSuccessReceipt() {
+        ProxyEngineResult.Success(
+            taskId = "",
+            identity = pinnedIdentity,
+            connectionState = ProxyConnectionState.CONNECTED,
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun blankTaskIdIsRejectedForUnavailableReceipt() {
+        ProxyEngineResult.Unavailable(
+            taskId = " ",
+            capability = ProxyUnavailableCapability.VPN_PERMISSION,
+            recoveryAction = ProxyRecoveryAction.REQUEST_VPN_PERMISSION,
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun blankTaskIdIsRejectedForCancelledReceipt() {
+        ProxyEngineResult.Cancelled(
+            taskId = "\t",
+            confirmedAtEpochMillis = 1_725_000_000_000,
+            cleanupStatus = ProxyCleanupStatus.COMPLETED,
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun blankTaskIdIsRejectedForEngineCrashedReceipt() {
+        ProxyEngineResult.EngineCrashed(
+            taskId = "",
+            identity = pinnedIdentity,
+            fault = ProxyEngineFault.RUNTIME_FAILURE,
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun blankTaskIdIsRejectedForVersionMismatchReceipt() {
+        ProxyEngineResult.VersionMismatch(
+            taskId = " ",
+            expected = pinnedIdentity,
+            actual = pinnedIdentity,
+        )
+    }
+
     @Test
     fun versionMismatchBlocksRuntimeExecution() {
         val runtime =

@@ -60,6 +60,10 @@ enum class ProxyEngineFault {
     RUNTIME_FAILURE,
 }
 
+private fun requireTaskId(taskId: String) {
+    require(taskId.isNotBlank()) { "taskId must not be blank" }
+}
+
 sealed interface ProxyEngineResult {
     val taskId: String
 
@@ -67,31 +71,51 @@ sealed interface ProxyEngineResult {
         override val taskId: String,
         val identity: ProxyEngineIdentity,
         val connectionState: ProxyConnectionState,
-    ) : ProxyEngineResult
+    ) : ProxyEngineResult {
+        init {
+            requireTaskId(taskId)
+        }
+    }
 
     data class Unavailable(
         override val taskId: String,
         val capability: ProxyUnavailableCapability,
         val recoveryAction: ProxyRecoveryAction,
-    ) : ProxyEngineResult
+    ) : ProxyEngineResult {
+        init {
+            requireTaskId(taskId)
+        }
+    }
 
     data class Cancelled(
         override val taskId: String,
         val confirmedAtEpochMillis: Long,
         val cleanupStatus: ProxyCleanupStatus,
-    ) : ProxyEngineResult
+    ) : ProxyEngineResult {
+        init {
+            requireTaskId(taskId)
+        }
+    }
 
     data class EngineCrashed(
         override val taskId: String,
         val identity: ProxyEngineIdentity,
         val fault: ProxyEngineFault,
-    ) : ProxyEngineResult
+    ) : ProxyEngineResult {
+        init {
+            requireTaskId(taskId)
+        }
+    }
 
     data class VersionMismatch(
         override val taskId: String,
         val expected: ProxyEngineIdentity,
         val actual: ProxyEngineIdentity,
-    ) : ProxyEngineResult
+    ) : ProxyEngineResult {
+        init {
+            requireTaskId(taskId)
+        }
+    }
 }
 
 interface ProxyEngine {
