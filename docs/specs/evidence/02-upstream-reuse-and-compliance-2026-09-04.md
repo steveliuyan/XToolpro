@@ -3054,6 +3054,19 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `1698713` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### Phase 02 acceptance gap closure triage（2026-09-10）
+
+- 本轮不新增上游能力行，仅将活动 phase spec、ledger 与 contract-test plan 对齐，判断当前工作是否能直接关闭 gate。
+- 仍未满足的硬条件：四域台账全部为 `Investigating`；`engine-proxy` 当前只有模块壳和测试计划，其他 engine 也没有获批的可执行 adapter；五类 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 仍未在各 engine 中执行；完整 capability-parity matrix 仍含 `Partial`/`Pending`，不存在可将台账改为 `Approved` 的完整证据链。
+- 可在当前授权范围内继续的工作仅限：固定提交/依赖/许可证/SBOM/NOTICE 的只读核对、隔离 proof 环境可用性复核，以及明确受限 ADB 的状态断言。它们只能补证据，不能替代完整 engine adapter 或真实五类契约。
+- 不应继续的低收益路径：在没有新 proof、没有 engine 实现或没有验收条件变化时，继续把同一上游风险拆成更多 `Partial` 行；这不会减少 `Partial/Pending`，也不会改变四域 `Investigating` 状态。
+- 下一条主线应是按优先级推进可真正关闭 gate 的项目：先恢复可重复的完整 upstream proof，再实现对应 engine contract，随后执行五类隔离测试和完整矩阵回填；若环境/授权仍不允许，应记录明确 blocker 与未回退路径，而不是继续细分静态审计。
+- 本轮仅做文档对齐和只读判断，未修改 ledger、engine、SDK、缓存、上游归档、构建产物或敏感配置，未使用 ADB，也未读取日志、配置、通知正文、节点、请求、数据库、文件、凭据、Cookie、订阅 URL 或网络内容。
+
+#### 本检查点远端备份状态（2026-09-10，Phase 02 acceptance gap closure triage）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。

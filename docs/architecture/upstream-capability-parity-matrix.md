@@ -10,6 +10,8 @@
 
 2026-09-10 Phase 02 gate 只读汇总：按本文件状态列重新统计为 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`。`Partial`/`Pending` 不是已批准能力；与四域台账仍均为 `Investigating`、五类 engine 结果尚只有测试计划而无可执行 adapter 证据一起，明确阻止 Phase 02 完成和任何正式 `engine-*` 集成。
 
+2026-09-10 acceptance gap triage：当前最短闭环不是继续拆分静态风险，而是补齐四域真实 proof、engine 五类契约测试、逐项 ledger/ADR 决策和许可证/SBOM/NOTICE 证据；在这些前置条件具备前，新增静态条目只会细化 `Partial`，不会改变批准状态。
+
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
 ## FlClash：代理能力
