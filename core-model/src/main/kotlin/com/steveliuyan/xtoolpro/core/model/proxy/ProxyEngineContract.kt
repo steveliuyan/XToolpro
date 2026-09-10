@@ -114,6 +114,7 @@ sealed interface ProxyEngineResult {
     ) : ProxyEngineResult {
         init {
             requireTaskId(taskId)
+            require(expected != actual) { "expected and actual identities must differ" }
         }
     }
 }

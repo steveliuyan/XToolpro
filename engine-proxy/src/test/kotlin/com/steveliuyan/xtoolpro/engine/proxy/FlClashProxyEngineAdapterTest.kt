@@ -304,6 +304,15 @@ class FlClashProxyEngineAdapterTest {
         )
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun equalIdentitiesAreRejectedForVersionMismatchReceipt() {
+        ProxyEngineResult.VersionMismatch(
+            taskId = "task-equal-identities",
+            expected = pinnedIdentity,
+            actual = pinnedIdentity,
+        )
+    }
+
     @Test
     fun versionMismatchBlocksRuntimeExecution() {
         val runtime =
