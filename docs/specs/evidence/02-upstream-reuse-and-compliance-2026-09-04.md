@@ -3107,6 +3107,19 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash 固定 AAR bridge 依赖闭包审计（2026-09-10）
+
+- 对同一固定 service/core `classes.jar` 执行 `jdeps --ignore-missing-deps -summary/-verbose:package/-verbose:class -filter:none`。service bytecode 的直接外部命名空间除 Android SDK/JDK 外包含 `com.follow.clash.common`、`com.follow.clash.core`、`androidx.core.app/content`、Kotlin stdlib、`kotlinx.coroutines`/Flow 与 Gson；core bridge bytecode 除 JDK 外仍依赖 Kotlin stdlib/function 类型。
+- service 对 common 的实际类引用包括 `BroadcastAction`、`ExtKt`、`GlobalState`、`AccessControlMode`、`Components`、`QuickAction` 和资源类，对 core 的实际引用为 `Core`。这些是 class-level 依赖事实，不是仅由 Gradle 声明推断。
+- 当前既有固定构建输出中只有 `build/core/outputs/aar/core-debug.aar` 与 `build/service/outputs/aar/service-debug.aar`，没有独立 common AAR；这不证明上游源码不能重组 common 边界，但证明当前两份 AAR 本身不是完整、可独立消费的 runtime closure。
+- service AAR manifest 还会贡献未导出的 `VpnService`/`ProxyService` 和导出的、受 `MANAGE_DOCUMENTS` 权限保护的 `${applicationId}.files` `FilesProvider`。后续不能在未审查 manifest merge、authority 和 provider root 边界时把 service AAR 直接加入正式应用。
+- 结论：真实 FlClash bridge proof 必须按一个受签名 bundle 锁定 core native/bridge、service、所需 common 边界、传递依赖版本与 manifest 裁剪/替换策略，并在隔离 host 中验证类加载、ABI、版本握手及五类结果；单个 service AAR 不能满足 `FlClashRuntime`。本轮仍不进入正式 engine 集成，VPN 行保持 `Partial`，Proxy 台账保持 `Investigating`，gate 数量不变。
+- 本轮仅读取固定构建产物的类依赖和 manifest 元数据，未修改 AAR、SDK、缓存、上游归档或构建产物，未使用 ADB，未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash 固定 AAR bridge 依赖闭包审计）
+
+- 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
