@@ -2970,6 +2970,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `755e2bf` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller rule-provider 更新 freshness 与 payload 代次静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/hub/route/provider.go`、`core/Clash.Meta/rules/provider/provider.go`、`core/Clash.Meta/component/resource/fetcher.go`；沿用固定 `/providers/rules` 管理面记录，本轮只补充规则快照与更新时间语义。
+- 固定 `ruleSetProvider.Update()` 在解析成功后替换 strategy 并触发全局 callback；inline provider 的 PUT 只刷新 `updatedAt`，不改变既有 payload。未见 provider/config generation、内容 hash、拉取完成时间与 strategy 快照绑定，也未见 callback 消费者确认已切换到新 strategy。
+- 更新失败、取消或解析完成与 callback 消费交错时，GET 返回的 `ruleCount`/`updatedAt` 不能证明当前规则已发布、仍在使用旧快照或已回退；固定路径也未给出旧内容保留和 stale/unknown 标记，inline “时间刷新”与真实内容更新没有统一终态语义。
+- 结论：XToolpro adapter 必须为每次规则更新生成不可变 snapshot/generation，在 callback 前后校验代次并保留 last-known-good，明确区分 inline 仅刷新时间与真实内容更新，返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`；完成 freshness、旧快照隔离、取消和 callback 顺序契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未调用 `/providers/rules`、未触发更新、未下载或修改规则数据、未启动 core、未使用 ADB，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller rule-provider 更新 freshness 与 payload 代次静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
