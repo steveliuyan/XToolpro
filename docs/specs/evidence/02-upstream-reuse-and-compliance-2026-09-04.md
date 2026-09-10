@@ -3018,6 +3018,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `277eb36` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash resolver ClearCache 双 resolver 并行清理与失败回执静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/dns/resolver.go`、`core/Clash.Meta/dns/enhancer.go`、`core/Clash.Meta/hub/route/cache.go`；沿用既有 DNS cache 与管理面记录，本轮只补充内部清理任务的并发和终态边界。
+- 固定 `resolver.ClearCache()` 对 `DefaultResolver` 与 `SystemResolver` 分别启动 goroutine，仅调用各自 cache 的 `Clear`；External-controller `/cache/dns/flush` 随后立即返回 204。未见等待两个 resolver 完成、错误聚合、前后计数、清理 generation、request context 取消或与查询/stop/reload 的生命周期锁。
+- 因此调用方不能区分双 resolver 均已清理、部分失败、仍在途或被新查询重新填充；HTTP 204 只表示清理已发起，不表示 cache 清空已收敛。
+- 结论：XToolpro adapter 必须把 DNS cache 清理建模为带 scope/generation 的可取消任务，等待所有目标收敛并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`；完成并发查询、部分失败和停止竞态契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未调用 cache flush、未发起 DNS 查询、未启动 core、未使用 ADB，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash resolver ClearCache 双 resolver 并行清理与失败回执静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
