@@ -2946,6 +2946,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash core event JNI callback 批次确认与旧引用回收静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/lib.go`、`core/message.go`、`android/core/src/main/cpp/core.cpp`、`android/app/.../plugins/ServicePlugin.kt`；本轮仅复核固定源码路径及既有归档记录，不进入 engine 集成。
+- 固定 batcher 将 priority/bulk 事件批量序列化后直接调用当前 `eventListener`；JNI/MethodChannel 链路没有 batch sequence、ack、callback generation 或失败重投，调用方无法取得逐批交付确认。
+- `setEventListener(nil)` 会释放旧 JNI global reference 后立即覆盖 listener 指针；固定 Go/C++ 路径未见与发送线程读取旧指针、in-flight JNI callback 或新 listener rebind 之间的生命周期屏障。engine detach/rebind 或 stop→start 交错时，旧批次可能丢弃、延迟送达或落入新 listener，无法稳定区分已交付、取消、过期和版本不匹配。
+- 结论：XToolpro adapter 必须为事件批次分配 generation/sequence，交付前校验 listener 代次；detach 前 drain 或显式取消并等待 in-flight callback 后再释放引用，并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch` 终态。完成 detach/rebind、stop→start、慢 callback、失败重投和背压契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅执行静态审计，未使用 ADB、未启动或停止 core/VPN、未触发 JNI/MethodChannel 回调，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash core event JNI callback 批次确认与旧引用回收静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
