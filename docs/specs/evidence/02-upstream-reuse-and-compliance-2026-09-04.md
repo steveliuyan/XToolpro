@@ -3094,6 +3094,19 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `8c81961` 已创建但尚未 push；本检查点只纳入 `core-model` contract、`engine-proxy` adapter/测试/构建配置、capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash 固定 core/service AAR bridge API 契约审计（2026-09-10）
+
+- 范围：只读检查既有固定构建产物 `.tmp-flclash-aar-verify/classes.jar` 与 `.tmp-flclash-service-aar-verify/classes.jar`；分别为 `9,138` 与 `93,765` 字节，SHA-256 分别为 `D664DEFC1895F189EAE538FF7976DB6C03E4B508C9455EB493F1AD400AC1FD89` 与 `ABB60E8611AFBC9596535FBF0931F511F54490431415AD19C9EDF86DC15CF88C`。未修改 AAR、上游归档、SDK、缓存或构建产物。
+- `jar tf` 与 `javap -public -s/-c -p` 确认 service AAR 的 `VpnService.LocalBinder.getService()` 暴露同进程 service 实例，`ManagedService.start()`/`stop()` 均返回 `void`。`VpnService.start()` 同步启动 service modules、读取 `ServiceConfig.vpnOptions`、建立 VPN descriptor 并调用 `Core.startTun()`；无返回值不携带 core health、TUN 收敛、generation 或版本 identity。
+- `VpnService.stop()` 在 cleanup 后调用 `stopSelf()`；`ServiceModules.stop()` 逐个停止 module 时捕获 `Throwable`，只构造并丢弃 Kotlin `Result` 后继续。因此 binder 调用正常返回也不能证明所有 module 均已清理，现有 `ProxyCleanupStatus.COMPLETED` 不能直接由该返回值生成。
+- core/service `classes.jar` 均未出现 `BuildConfig`、Version/Identity 或 terminal Result/Status/Health 类型。`VpnService.onStartCommand()` 发出的 `VPN_START_REQUESTED` 只表示请求到达，`VPN_REVOKED` 只表示系统撤销事件；二者都不是真实启动成功、停止完成或版本握手回执。
+- 结论：真实 `FlClashRuntime` 候选必须把 AAR 正常返回解释为“同步调用未抛出”，另行绑定受签名的固定 artifact identity，并用不读取敏感内容的状态收敛探针确认 START/STOP；任何 module cleanup 异常都必须归入稳定、脱敏结果。完成真实 bridge 的 success、unavailable、cancel、crash、version mismatch 测试前，VPN 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未使用 ADB，未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容；gate 数量保持 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash 固定 core/service AAR bridge API 契约审计）
+
+- 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
