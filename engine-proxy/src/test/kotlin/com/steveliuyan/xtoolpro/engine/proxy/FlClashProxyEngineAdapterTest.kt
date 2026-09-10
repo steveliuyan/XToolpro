@@ -43,6 +43,39 @@ class FlClashProxyEngineAdapterTest {
     }
 
     @Test
+    fun stopRequestIsForwardedToRuntime() {
+        var observedOperation: ProxyEngineOperation? = null
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity() = pinnedIdentity
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult {
+                    observedOperation = operation
+                    return FlClashRuntimeResult.Completed(ProxyConnectionState.DISCONNECTED)
+                }
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result =
+            adapter.execute(
+                ProxyEngineRequest(
+                    taskId = "task-stop",
+                    operation = ProxyEngineOperation.STOP,
+                ),
+            )
+
+        assertEquals(ProxyEngineOperation.STOP, observedOperation)
+        assertEquals(
+            ProxyEngineResult.Success(
+                taskId = "task-stop",
+                identity = pinnedIdentity,
+                connectionState = ProxyConnectionState.DISCONNECTED,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun missingVpnPermissionMapsToUnavailableWithRecovery() {
         val adapter =
             adapterFor(
@@ -121,6 +154,30 @@ class FlClashProxyEngineAdapterTest {
         assertEquals(
             ProxyEngineResult.EngineCrashed(
                 taskId = "task-runtime-failure",
+                identity = pinnedIdentity,
+                fault = ProxyEngineFault.RUNTIME_FAILURE,
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun identityRuntimeFailureDoesNotEscapeTheEngineBoundary() {
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity(): ProxyEngineIdentity =
+                    throw IllegalStateException("sensitive identity runtime detail")
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
+                    error("runtime must not execute when identity negotiation fails")
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result = adapter.execute(request("task-identity-runtime-failure"))
+
+        assertEquals(
+            ProxyEngineResult.EngineCrashed(
+                taskId = "task-identity-runtime-failure",
                 identity = pinnedIdentity,
                 fault = ProxyEngineFault.RUNTIME_FAILURE,
             ),
