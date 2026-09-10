@@ -182,6 +182,26 @@ class FlClashProxyEngineAdapterTest {
         )
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun nonPositiveContractVersionIsRejectedAtIdentityBoundary() {
+        pinnedIdentity.copy(contractVersion = 0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun blankUpstreamCommitIsRejectedAtIdentityBoundary() {
+        pinnedIdentity.copy(flClashCommit = " ")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun blankAbiIsRejectedAtIdentityBoundary() {
+        pinnedIdentity.copy(abi = "")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun malformedArtifactManifestSha256IsRejectedAtIdentityBoundary() {
+        pinnedIdentity.copy(artifactManifestSha256 = "not-a-sha256")
+    }
+
     @Test
     fun versionMismatchBlocksRuntimeExecution() {
         val runtime =

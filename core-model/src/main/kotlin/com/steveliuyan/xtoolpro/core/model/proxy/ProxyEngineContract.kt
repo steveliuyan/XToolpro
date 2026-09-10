@@ -6,7 +6,17 @@ data class ProxyEngineIdentity(
     val clashMetaCommit: String,
     val abi: String,
     val artifactManifestSha256: String,
-)
+) {
+    init {
+        require(contractVersion > 0) { "contractVersion must be positive" }
+        require(flClashCommit.isNotBlank()) { "flClashCommit must not be blank" }
+        require(clashMetaCommit.isNotBlank()) { "clashMetaCommit must not be blank" }
+        require(abi.isNotBlank()) { "abi must not be blank" }
+        require(artifactManifestSha256.matches(Regex("[0-9a-fA-F]{64}"))) {
+            "artifactManifestSha256 must be a SHA-256 hex digest"
+        }
+    }
+}
 
 enum class ProxyEngineOperation {
     START,
