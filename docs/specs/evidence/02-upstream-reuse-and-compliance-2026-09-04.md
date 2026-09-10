@@ -2845,6 +2845,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller provider PUT 回执与 healthcheck 完成时序静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/hub/route/provider.go`、`core/Clash.Meta/adapter/provider/provider.go`、`core/Clash.Meta/adapter/provider/healthcheck.go`；沿用已记录的固定提交和文件哈希，仅补充更新回执边界。
+- 固定 `PUT /providers/{name}` 在 `provider.Update()` 返回后立即以空正文 204 响应；后续 healthcheck/状态收敛没有任务 ID、generation、完成时间或逐节点结果可回读。204 只表示调用链返回，不能证明新 proxy 快照已健康、旧结果已失效或失败后已回滚。
+- 结论：XToolpro adapter 必须把 provider PUT 建模为可取消任务，返回版本化 receipt，分离解析成功、快照发布、healthcheck 完成和失败回滚，并以脱敏终态报告；契约测试完成前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未发送管理请求、未触发 provider 更新或 healthcheck、未发起网络请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller provider PUT 回执与 healthcheck 完成时序静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
