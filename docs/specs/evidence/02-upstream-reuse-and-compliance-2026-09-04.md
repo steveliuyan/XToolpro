@@ -2958,6 +2958,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `18326d5` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash core event JSON 批次大小、字段校验与序列化失败隔离静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/message.go`、`core/lib.go`、`lib/core/event.dart`、`lib/manager/core_manager.dart`；沿用固定提交与既有事件队列记录，本轮仅补充 payload 边界，不进入 engine 集成。
+- 固定 batcher 仅在存在 listener 时将 priority/bulk 批次整体 JSON 序列化后回调 Dart；未见逐事件 schema/字段白名单、嵌套深度或字节预算，也未见 malformed event 的隔离、截断、失败重试、失败计数或批次级稳定错误回执。
+- 序列化或 MethodChannel 交付失败时，固定调用链不能区分空批次、部分交付、整批丢弃和消费端解析失败；既有有界队列的丢弃行为也没有与 payload 超限或编码失败建立可回读关联。
+- 结论：XToolpro adapter 必须先做有界 schema 校验和字段最小化，按事件或批次返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`，并记录坏事件、超限和序列化失败的非敏感计数；完成 malformed payload、超限、部分失败和重试契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未构造或发送事件 payload，未启动 core/VPN，未触发 JNI/MethodChannel 回调，未使用 ADB，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash core event JSON 批次大小、字段校验与序列化失败隔离静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
