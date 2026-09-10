@@ -2890,6 +2890,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `b13db73` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash HTTP provider ETag/304 条件请求与陈旧数据语义静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/component/resource/vehicle.go`、`core/Clash.Meta/component/resource/fetcher.go`、`core/Clash.Meta/component/profile/cachefile/{etag,cache}.go`；沿用已记录的固定提交和文件哈希，本轮只补充条件请求与陈旧回退边界。
+- 固定 HTTP vehicle 仅在当前内容 hash 与缓存 hash 一致且 ETag 非空时发送 `If-None-Match`；收到 304 后直接复用旧缓存，Fetcher 将其视为内容未变化并刷新 `updatedAt`。静态路径没有显示 ETag 与 provider/profile/config generation、来源 host/certificate 或缓存内容 hash 的完整绑定，也没有显示 304 后的缓存完整性复核、最大陈旧时长、来源变更拒绝或“使用旧值”告警/回执。
+- ETag 读取/反序列化异常被折叠为空值，写入失败只记录 cache 路径和原始错误，调用方无法区分条件请求未命中、持久化失败、缓存损坏或 stale fallback；固定路径也未形成取消传播和旧版本保留的跨阶段 terminal receipt。
+- 结论：XToolpro adapter 必须用不可逆的 provider/profile/generation 标识绑定条件请求，304 复用前校验缓存完整性和 freshness，超过 stale 预算或来源变化时禁止静默回退，并以脱敏 `Success`/`Unavailable`/`VersionMismatch` 终态区分命中、损坏、过期和版本不匹配。完成 304、损坏缓存、来源切换、过期回退和取消契约测试前，新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未发送 HTTP 请求、未构造 304 响应、未读取或写入缓存，未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或设备文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash HTTP provider ETag/304 条件请求与陈旧数据语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
