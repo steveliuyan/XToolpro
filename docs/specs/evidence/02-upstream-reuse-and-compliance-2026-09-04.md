@@ -3006,6 +3006,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `67533a9` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash DNS resolver 查询隐私与错误日志字段最小化静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/dns/client.go`、`core/Clash.Meta/dns/util.go`、`core/Clash.Meta/dns/resolver.go`、`core/Clash.Meta/dns/enhancer.go`；沿用既有 DNS 与加密 DNS 记录，本轮只补充查询元数据和诊断日志边界。
+- 固定 resolver/client 路径的 debug/warn 日志可能携带 DNS server 地址、查询名、ECS 前缀、截断重试、缓存异常和原始 resolver error；未见字段白名单、host/query 哈希化、ECS 脱敏、调用者 scope 或默认关闭的诊断级别。
+- 查询失败、截断重试、缓存未命中、上游拒绝和取消未形成稳定 `Unavailable`/`Cancelled`/`VersionMismatch` 分类，调用方无法从日志与 resolver 返回确认最小化映射，也不能证明某条日志对应哪一代配置或上游。
+- 结论：XToolpro adapter 必须默认不记录原始 query、ECS、地址或上游错误，使用稳定脱敏错误码与可选采样计数，并分层返回 retry/cache/transport 原因；完成隐私日志、重试、取消和错误映射契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未发起 DNS/DoH/DoT/DoQ 查询，未读取设备日志、配置或网络内容，未启动 core、未使用 ADB，也未读取节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash DNS resolver 查询隐私与错误日志字段最小化静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
