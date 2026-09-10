@@ -2619,7 +2619,7 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 #### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider 重复名称归一化与冲突保留边界静态补充）
 
-- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+- focused commit `aa3c7c5` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
 ### FlClash proxy-provider HTTP vehicle 请求重定向与响应预算静态审计（2026-09-10）
 
