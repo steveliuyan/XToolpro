@@ -3156,6 +3156,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点将以只包含 `engine-proxy` adapter、单元测试、capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash 受限 START/STOP TUN 配对复核（2026-09-10）
+
+- 设备为已授权测试设备 `bf353dda`，固定 dev 包为 `com.follow.clash.dev`，组件为已预解析的 `com.follow.clash.dev/com.follow.clash.QuickActionActivity`；动作仅为 `com.follow.clash.dev.action.START` 与 `com.follow.clash.dev.action.STOP`。每次 mutation 前后只采集目标进程存在性、`POST_NOTIFICATION` app-op、系统 `VPN CONNECTED` marker 计数和 `/sys/class/net/tun0` 存在性。
+- START 前停止基线：进程存在=`1`、app-op=`allow`、VPN marker=`0`、`tun0=0`；发送 START 后等待 7 秒：进程=`1`、app-op=`allow`、VPN marker=`1`、`tun0=1`。
+- STOP 前摘要保持进程=`1`、app-op=`allow`、VPN marker=`1`、`tun0=1`；发送 STOP 后等待 7 秒：进程=`1`、app-op=`allow`、VPN marker=`0`、`tun0=0`。最终回到停止态，未遗留 TUN 或 VPN marker。
+- API 33 shell 的专用 runtime-permission 查询命令不可用，本轮将 runtime permission 标为 unknown，未用更宽的包/配置读取替代；app-op 摘要仍为 `allow`。该配对只证明本轮正确 dev action 可实际建立并清理 `tun0`，不证明 core health、可转发流量、取消、崩溃恢复、竞争 VPN 或版本握手，不改变 `Partial`/`Investigating` 状态。
+- 未读取日志、通知正文或 extras、配置、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容；未使用 root、未绕过安全控制，未修改系统 VPN 设置。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash 受限 START/STOP TUN 配对复核）
+
+- 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
