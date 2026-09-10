@@ -129,6 +129,52 @@ class FlClashProxyEngineAdapterTest {
     }
 
     @Test
+    fun nativeLinkageFailureMapsToSanitizedEngineFault() {
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity() = pinnedIdentity
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
+                    throw UnsatisfiedLinkError("sensitive native linkage detail")
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result = adapter.execute(request("task-native-linkage"))
+
+        assertEquals(
+            ProxyEngineResult.EngineCrashed(
+                taskId = "task-native-linkage",
+                identity = pinnedIdentity,
+                fault = ProxyEngineFault.NATIVE_PROCESS_TERMINATED,
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun identityLinkageFailureMapsToSanitizedEngineFault() {
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity(): ProxyEngineIdentity = throw ExceptionInInitializerError("sensitive identity linkage detail")
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
+                    error("runtime must not execute when identity negotiation fails")
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result = adapter.execute(request("task-identity-linkage"))
+
+        assertEquals(
+            ProxyEngineResult.EngineCrashed(
+                taskId = "task-identity-linkage",
+                identity = pinnedIdentity,
+                fault = ProxyEngineFault.NATIVE_PROCESS_TERMINATED,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun versionMismatchBlocksRuntimeExecution() {
         val runtime =
             object : FlClashRuntime {

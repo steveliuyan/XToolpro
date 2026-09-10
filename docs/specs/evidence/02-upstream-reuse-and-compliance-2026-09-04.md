@@ -3144,6 +3144,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点将以只包含 `engine-proxy` 单元测试、capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash engine adapter native linkage failure contract（2026-09-10）
+
+- TDD RED：先加入 `nativeLinkageFailureMapsToSanitizedEngineFault` 与 `identityLinkageFailureMapsToSanitizedEngineFault`；在 adapter 尚未捕获 `LinkageError` 时，强制重编译测试按预期失败，10 个测试中 2 个失败，原始类型分别为 `UnsatisfiedLinkError` 与 `ExceptionInInitializerError`。
+- GREEN：adapter 现在在 identity handshake 和 runtime execute 两个边界分别捕获 `LinkageError`，统一返回 `ProxyEngineResult.EngineCrashed`、固定期望 identity（handshake）或实际 identity（execute）及 `NATIVE_PROCESS_TERMINATED`；现有 `RuntimeException` 仍映射为 `RUNTIME_FAILURE`。最终命令 `$env:GRADLE_USER_HOME='D:\\xtoolpro\\.gradle-user-home'; .\\gradlew.bat :engine-proxy:testDebugUnitTest --tests com.steveliuyan.xtoolpro.engine.proxy.FlClashProxyEngineAdapterTest --offline --rerun-tasks` 通过，10 tests、0 failures、0 errors、0 skipped，Gradle `BUILD SUCCESSFUL in 30s`。
+- 局限：该边界只分类 Java/Kotlin linkage failure，不捕获 `OutOfMemoryError`、`ThreadDeath` 或其他广泛 `Error`；fake runtime 不能证明真实 native crash、动态 linker、TUN 清理或 VPN 健康。未加载或修改 AAR/native，未进入正式 engine 集成。
+- gate 数量保持 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`；VPN/engine identity 相关能力保持 `Partial`，Proxy 台账保持 `Investigating`。本轮未使用 ADB mutation；只做了受限只读摘要：`bf353dda` 上 `com.follow.clash.dev` 进程存在、`POST_NOTIFICATIONS` runtime check 为 denied/unknown、app-op 为 `allow`、VPN marker=0、TUN interface=0。未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash engine adapter native linkage failure contract）
+
+- 本检查点将以只包含 `engine-proxy` adapter、单元测试、capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。

@@ -42,7 +42,22 @@ class FlClashProxyEngineAdapter(
     private val runtime: FlClashRuntime,
 ) : ProxyEngine {
     override fun execute(request: ProxyEngineRequest): ProxyEngineResult {
-        val actualIdentity = runtime.identity()
+        val actualIdentity =
+            try {
+                runtime.identity()
+            } catch (_: LinkageError) {
+                return ProxyEngineResult.EngineCrashed(
+                    taskId = request.taskId,
+                    identity = pinnedIdentity,
+                    fault = ProxyEngineFault.NATIVE_PROCESS_TERMINATED,
+                )
+            } catch (_: RuntimeException) {
+                return ProxyEngineResult.EngineCrashed(
+                    taskId = request.taskId,
+                    identity = pinnedIdentity,
+                    fault = ProxyEngineFault.RUNTIME_FAILURE,
+                )
+            }
         if (actualIdentity != pinnedIdentity) {
             return ProxyEngineResult.VersionMismatch(
                 taskId = request.taskId,
@@ -54,6 +69,12 @@ class FlClashProxyEngineAdapter(
         val runtimeResult =
             try {
                 runtime.execute(request.operation)
+            } catch (_: LinkageError) {
+                return ProxyEngineResult.EngineCrashed(
+                    taskId = request.taskId,
+                    identity = actualIdentity,
+                    fault = ProxyEngineFault.NATIVE_PROCESS_TERMINATED,
+                )
             } catch (_: RuntimeException) {
                 return ProxyEngineResult.EngineCrashed(
                     taskId = request.taskId,
