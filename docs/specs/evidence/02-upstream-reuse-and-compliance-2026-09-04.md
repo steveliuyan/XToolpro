@@ -2982,6 +2982,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `4ac73cc` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash rule-provider 初始化 fallback 与旧内容发布语义静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/component/resource/fetcher.go`、`core/Clash.Meta/component/resource/vehicle.go`、`core/Clash.Meta/rules/provider/provider.go`；沿用固定文件哈希和既有 rule-provider 记录，本轮只补充初始化来源及旧内容状态边界。
+- 固定 `Fetcher.Initial()` 按本地文件、bundle 文件、远端 `Update()` 的顺序尝试；解析成功后才写入 vehicle 并触发 onUpdate，初次远端更新失败仍会启动 pull loop。该顺序提供实现级 fallback，但未形成 XToolpro 可消费的来源和终态合同。
+- 固定路径未见返回实际命中的来源、内容 generation、stale/unknown 标记或“旧内容仍可服务”的明确回执，也未见 local/bundle/remote fallback 之间的统一 provenance 与取消边界。启动成功、初次无内容、旧内容继续生效和后台稍后恢复可能共享普通返回/日志，调用方不能判定当前规则是否可用或属于哪一代。
+- 结论：XToolpro adapter 必须为每次初始化生成不可变 snapshot，记录脱敏来源与 freshness，区分 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`；旧内容继续服务时必须明确 stale 与 last-known-good 状态。完成 fallback、空内容、远端失败、后台恢复和进程重启契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未触发本地/bundle/远端加载、未下载或修改规则数据、未启动 core、未使用 ADB，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash rule-provider 初始化 fallback 与旧内容发布语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
