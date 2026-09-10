@@ -3080,6 +3080,20 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `38b3f1a` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash `engine-proxy` 最小五类结果映射契约（2026-09-10）
+
+- 范围：新增平台中立 `ProxyEngine` identity/request/result contract、隔离的 `FlClashRuntime` 边界、结果映射 adapter 及 JVM 单元测试；未引入 FlClash SDK、native artifact、上游源码归档、正式 engine 依赖或设备变更。
+- contract 使用 `contractVersion`、固定 FlClash/Clash.Meta commit identity 和 START/STOP operation；结果显式区分 `Success`、`Unavailable`、`Cancelled`、`EngineCrashed`、`VersionMismatch`，并只允许稳定枚举型 capability、recovery、cleanup 和 fault 信息跨边界。
+- 6 个映射测试覆盖：completed→`Success`、缺 VPN 权限→带恢复动作的 `Unavailable`、取消清理回执→`Cancelled`、runtime crash→脱敏 `EngineCrashed`、版本错配在执行前阻断→`VersionMismatch`，以及未预期 runtime 异常→`EngineCrashed(RUNTIME_FAILURE)`。
+- TDD RED：首次有效执行 `:engine-proxy:testDebugUnitTest --tests com.steveliuyan.xtoolpro.engine.proxy.FlClashProxyEngineAdapterTest` 时，6 个测试中 1 个失败；`unexpectedRuntimeFailureDoesNotEscapeTheEngineBoundary` 暴露 `IllegalStateException` 越过 adapter。随后仅在 runtime execute 边界捕获 `RuntimeException` 并返回稳定 fault；修正一次局部变量重命名编译遗漏后，同一测试类 6/6 通过，Gradle `BUILD SUCCESSFUL`。
+- 局限：测试使用仓库内 fake runtime，不调用真实 FlClash core，不证明 native health、TUN、流量、取消、崩溃恢复或版本握手；fake `Completed` 映射得到的 `Success` 不是上游真实 `Success` proof。仍须绑定固定、受签名的 artifact/bridge 并执行真实五类隔离测试后，才可推进批准状态。
+- 结论：本检查点把 `engine-proxy` 从“空壳和测试计划”推进到可执行的最小映射契约，但 acceptance gate 数量保持 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`，矩阵对应行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未使用 ADB，未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash `engine-proxy` 最小五类结果映射契约）
+
+- focused commit 待创建；预计只纳入 `core-model` contract、`engine-proxy` adapter/测试/构建配置、capability parity matrix 与本 evidence 文件；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
