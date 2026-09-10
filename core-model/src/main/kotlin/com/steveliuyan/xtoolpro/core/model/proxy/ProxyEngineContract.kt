@@ -16,7 +16,11 @@ enum class ProxyEngineOperation {
 data class ProxyEngineRequest(
     val taskId: String,
     val operation: ProxyEngineOperation,
-)
+) {
+    init {
+        require(taskId.isNotBlank()) { "taskId must not be blank" }
+    }
+}
 
 enum class ProxyConnectionState {
     CONNECTED,

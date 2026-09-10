@@ -174,6 +174,14 @@ class FlClashProxyEngineAdapterTest {
         )
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun blankTaskIdIsRejectedAtRequestBoundary() {
+        ProxyEngineRequest(
+            taskId = "   ",
+            operation = ProxyEngineOperation.START,
+        )
+    }
+
     @Test
     fun versionMismatchBlocksRuntimeExecution() {
         val runtime =

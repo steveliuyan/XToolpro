@@ -3168,6 +3168,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash engine request task ID 非空边界契约（2026-09-10）
+
+- TDD RED：先新增 `blankTaskIdIsRejectedAtRequestBoundary`，在 `ProxyEngineRequest` 尚未校验时执行专门测试，1 个测试按预期失败（`Expected exception`），证明空白 task ID 当前会穿过请求边界。
+- GREEN：`ProxyEngineRequest` 构造边界新增 `require(taskId.isNotBlank())`；随后执行 `$env:GRADLE_USER_HOME='D:\\xtoolpro\\.gradle-user-home'; .\\gradlew.bat :engine-proxy:testDebugUnitTest --tests com.steveliuyan.xtoolpro.engine.proxy.FlClashProxyEngineAdapterTest --offline --rerun-tasks`，11 tests、0 failures、0 errors、0 skipped，Gradle `BUILD SUCCESSFUL in 29s`。
+- 范围与局限：该检查只拒绝空字符串/全空白 ID，避免结果无法关联；不实现跨进程唯一性、持久化、重复提交幂等或取消状态机，这些仍需后续 task platform/engine integration 负责。未引入 FlClash SDK/native/AAR，也未进行设备 mutation。
+- gate 数量保持 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`；Proxy 台账保持 `Investigating`，相关 engine 行保持 `Partial`。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash engine request task ID 非空边界契约）
+
+- 本检查点将以只包含 `core-model` request contract、`engine-proxy` 单元测试、capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
