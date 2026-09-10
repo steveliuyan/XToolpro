@@ -3030,6 +3030,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `2a28e56` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash rule-provider RuleUpdateCallback 扇出、慢消费者与失败隔离静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/rules/provider/provider.go`、`core/Clash.Meta/rules/provider/rule_set.go`、`core/Clash.Meta/component/resource/fetcher.go`；沿用既有 rule-provider 更新与 freshness 记录，本轮只补充全局回调扇出边界。
+- 固定 provider 更新在 strategy 替换后触发进程级 `RuleUpdateCallback`，未见订阅者快照、回调顺序/代次、慢消费者隔离、队列容量或单订阅取消，也未见回调异常、重复通知或单消费者失败的独立计数与终态。
+- 更新线程与规则匹配并发时，调用方不能区分 callback 已交付、阻塞、丢弃或部分失败；全局回调可能把单个消费者问题传播到其他 provider/规则更新，且没有与已发布 snapshot 绑定的确认。
+- 结论：XToolpro adapter 必须采用版本化事件、独立有界队列和逐订阅 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`，单消费者失败不得阻塞或回滚已发布 snapshot；完成扇出、慢消费者、重复通知、取消和异常隔离契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未注册或触发 `RuleUpdateCallback`、未更新 provider、未启动 core、未使用 ADB，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash rule-provider RuleUpdateCallback 扇出、慢消费者与失败隔离静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
