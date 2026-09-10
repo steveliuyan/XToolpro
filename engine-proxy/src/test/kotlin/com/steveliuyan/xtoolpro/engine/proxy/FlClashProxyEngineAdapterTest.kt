@@ -76,6 +76,54 @@ class FlClashProxyEngineAdapterTest {
     }
 
     @Test
+    fun startWithDisconnectedStateMapsToRuntimeFailure() {
+        val adapter =
+            adapterFor(
+                FlClashRuntimeResult.Completed(ProxyConnectionState.DISCONNECTED),
+            )
+
+        val result = adapter.execute(request("task-start-inconsistent"))
+
+        assertEquals(
+            ProxyEngineResult.EngineCrashed(
+                taskId = "task-start-inconsistent",
+                identity = pinnedIdentity,
+                fault = ProxyEngineFault.RUNTIME_FAILURE,
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun stopWithConnectedStateMapsToRuntimeFailure() {
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity() = pinnedIdentity
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
+                    FlClashRuntimeResult.Completed(ProxyConnectionState.CONNECTED)
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result =
+            adapter.execute(
+                ProxyEngineRequest(
+                    taskId = "task-stop-inconsistent",
+                    operation = ProxyEngineOperation.STOP,
+                ),
+            )
+
+        assertEquals(
+            ProxyEngineResult.EngineCrashed(
+                taskId = "task-stop-inconsistent",
+                identity = pinnedIdentity,
+                fault = ProxyEngineFault.RUNTIME_FAILURE,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun missingVpnPermissionMapsToUnavailableWithRecovery() {
         val adapter =
             adapterFor(

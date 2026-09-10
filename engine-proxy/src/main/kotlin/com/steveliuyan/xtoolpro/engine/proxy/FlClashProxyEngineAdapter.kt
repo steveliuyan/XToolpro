@@ -84,12 +84,26 @@ class FlClashProxyEngineAdapter(
             }
 
         return when (runtimeResult) {
-            is FlClashRuntimeResult.Completed ->
-                ProxyEngineResult.Success(
-                    taskId = request.taskId,
-                    identity = actualIdentity,
-                    connectionState = runtimeResult.connectionState,
-                )
+            is FlClashRuntimeResult.Completed -> {
+                val expectedConnectionState =
+                    when (request.operation) {
+                        ProxyEngineOperation.START -> ProxyConnectionState.CONNECTED
+                        ProxyEngineOperation.STOP -> ProxyConnectionState.DISCONNECTED
+                    }
+                if (runtimeResult.connectionState != expectedConnectionState) {
+                    ProxyEngineResult.EngineCrashed(
+                        taskId = request.taskId,
+                        identity = actualIdentity,
+                        fault = ProxyEngineFault.RUNTIME_FAILURE,
+                    )
+                } else {
+                    ProxyEngineResult.Success(
+                        taskId = request.taskId,
+                        identity = actualIdentity,
+                        connectionState = runtimeResult.connectionState,
+                    )
+                }
+            }
 
             is FlClashRuntimeResult.Unavailable ->
                 ProxyEngineResult.Unavailable(

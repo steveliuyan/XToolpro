@@ -3235,6 +3235,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash engine adapter START/STOP completion-state 一致性契约（2026-09-10）
+
+- `docs/architecture/engine-contract-test-plan.md` 的 Proxy success 断言要求启动后进入“已连接”、停止后 core/VPN 退出；但原 adapter 会把 fake runtime 的任意 `Completed(connectionState)` 直接转换为 `Success`，因而可能向 feature 层错误报告 `START→DISCONNECTED` 或 `STOP→CONNECTED`。
+- TDD RED：先加入 `startWithDisconnectedStateMapsToRuntimeFailure` 与 `stopWithConnectedStateMapsToRuntimeFailure`。在未修改 adapter 时执行 `$env:GRADLE_USER_HOME='D:\xtoolpro\.gradle-user-home'; .\gradlew.bat :engine-proxy:testDebugUnitTest --tests com.steveliuyan.xtoolpro.engine.proxy.FlClashProxyEngineAdapterTest --offline --rerun-tasks`，25 个测试中这 2 个按预期以 `AssertionError` 失败，证明不一致状态原先会被包装为 `Success`。
+- GREEN：adapter 现在仅接受 `START→CONNECTED` 与 `STOP→DISCONNECTED`；任一完成状态与请求 operation 不一致时返回脱敏 `EngineCrashed(RUNTIME_FAILURE)`，不暴露 runtime 内容。相同命令复跑通过，Gradle `BUILD SUCCESSFUL`。
+- 局限：这是 fake runtime 的边界一致性校验，不证明完整 FlClash core、TUN、core health、VPN service 退出或真实 crash；它不能替代受签名 native/bridge identity、受限状态探针和五类真实契约 proof。矩阵继续为 `Partial`，Proxy 台账继续为 `Investigating`，gate 数量保持 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`。
+- 本轮未使用 ADB，未引入 FlClash SDK、native artifact、AAR 或配置；未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash engine adapter START/STOP completion-state 一致性契约）
+
+- 本地 focused commit 尚未创建：两次仅写本地 Git 索引的审批均在自动审核截止前超时；2026-09-10 的后续最小范围 `git add -- <四个目标路径>` 已实际执行，但无法创建 `D:/xtoolpro/.git/index.lock`，Git 返回 `fatal: Unable to create 'D:/xtoolpro/.git/index.lock': Permission denied`，故未执行 `git commit`。未备份路径为 `engine-proxy/src/main/kotlin/com/steveliuyan/xtoolpro/engine/proxy/FlClashProxyEngineAdapter.kt`、`engine-proxy/src/test/kotlin/com/steveliuyan/xtoolpro/engine/proxy/FlClashProxyEngineAdapterTest.kt`、`docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
