@@ -2994,6 +2994,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `decc878` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash DoH/DoT/DoQ 证书策略与重试终态静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/dns/doh.go`、`core/Clash.Meta/dns/dot.go`、`core/Clash.Meta/dns/doq.go`、`core/Clash.Meta/dns/client.go`；沿用既有 DNS 静态记录，本轮只补充加密 DNS 证书与重试边界。
+- 固定 DoH 使用 context-bound HTTP 请求、拨号/TLS 握手预算、连接复用和 reset 后有限重建；DoT/DoQ 使用 context-aware 拨号、超时、复用失败重试与显式 Reset/Close。三者接受 `skip-cert-verify`、`name-cert-verify` 等参数。
+- 固定路径未形成 XToolpro-facing 的证书策略白名单、pin/名称绑定、每上游 generation 或证书失败/重试耗尽/取消的稳定分类；连接/拨号错误日志可能携带上游地址、耗时和原始错误。普通 resolver 结果不能区分安全降级、短暂重试、永久证书不匹配和 engine crash。
+- 结论：XToolpro adapter 必须默认强制证书校验，显式隔离受审计例外，限制重试/连接预算并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`EngineCrashed`/`VersionMismatch`；完成证书失败、名称不匹配、重试耗尽、取消和日志脱敏契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未发起 DoH/DoT/DoQ 查询、未建立网络连接、未读取 DNS 配置或日志、未启动 core、未使用 ADB，也未读取节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash DoH/DoT/DoQ 证书策略与重试终态静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
