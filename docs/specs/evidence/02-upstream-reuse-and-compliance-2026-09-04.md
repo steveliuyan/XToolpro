@@ -2935,6 +2935,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash VPN always-on 启动广播重放与持久状态代次静态审计（2026-09-10）
+
+- 固定归档关键路径：`android/service/.../VpnService.kt`、`ServiceBroadcastReceiver.kt`、`android/app/.../ServiceState.kt`、`ServiceController.kt`；沿用已记录的固定提交和文件哈希，本轮只补充系统恢复事件与持久状态代次边界。
+- 固定 `VpnService.onStartCommand()` 发送内部 `VPN_START_REQUESTED` 广播后委托 `super` 返回，接收端再依据持久化 shared state 调用 `quickSetup`/请求启动；未见广播 id/generation、重复投递去重、进程重建后的旧运行意图失效标记或 setup 与当前 profile/config 版本绑定。系统重放、always-on 恢复或旧 service intent 与用户显式 STOP/新 profile 交错时，固定路径不能证明启动意图是否已消费、被取消或仍指向旧配置，也没有稳定 `Cancelled`/`VersionMismatch` 回执。
+- 结论：XToolpro adapter 必须把系统恢复事件建模为带代次的持久任务，消费前校验当前配置与权限，重复广播幂等、旧代次丢弃，并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`。完成 always-on 重放、显式 STOP 竞态、profile 变更和进程重建契约测试前，新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未触发 always-on、未发送系统广播、未启动/停止 VPN service、未读取设备 shared state 或权限内容，未使用 ADB，也未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由、DNS、流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash VPN always-on 启动广播重放与持久状态代次静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
