@@ -3042,6 +3042,18 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `c6a0ddd` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash External-controller Geo freshness 首文件 mtime 启发式与逐资源 stale 语义静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/component/updater/update_geo.go`、`core/Clash.Meta/component/fakeip`、`core/Clash.Meta/hub/route/upgrade.go`；沿用既有 Geo updater 并发/部分失败记录，本轮只补充 freshness 判断边界。
+- 固定 Geo 更新的定时 freshness 判断取多个数据库中首个存在文件的 mtime 作为整体时间基准；MMDB、ASN、GeoIP、GeoSite 的内容 hash、更新时间、来源和 loader 健康没有形成独立 freshness 快照。
+- 因此一个资源较新即可使整体更新被跳过，另一个资源过期、缺失或损坏时，管理面 `status:ok` 不能区分全部新鲜、部分 stale、跳过或需要修复，也没有逐资源下次重试、取消或恢复回执。
+- 结论：XToolpro adapter 必须按资源记录 generation、mtime/hash、来源和 freshness，跳过时返回脱敏原因，过期或缺失资源不得被整体新鲜度掩盖；完成多资源 freshness、部分 stale、缺失/损坏、跳过与恢复契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未触发 Geo 更新、未读取或修改 Geo 文件、未发起网络请求、未启动 core、未使用 ADB，也未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、凭据、Cookie、URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash External-controller Geo freshness 首文件 mtime 启发式与逐资源 stale 语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
