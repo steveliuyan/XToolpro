@@ -2902,6 +2902,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit `f7aff33` 已创建但尚未 push；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash proxy-provider cache 初始化失败与降级语义静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/component/profile/cachefile/{cache,etag,subscriptioninfo}.go`、`core/Clash.Meta/component/profile/cachefile/cache.go`；沿用已记录的固定提交和文件哈希，本轮只补充持久化不可用时的降级边界。
+- 固定缓存组件在 bbolt 打开、读取、反序列化或写入异常时主要记录路径/原始错误或折叠为空值；未见统一的 cache-unavailable 状态、内存与持久化视图的 generation 标记、重试/恢复窗口、只读降级边界或关闭前 flush 确认。调用方无法区分未命中、缓存损坏、权限/空间失败、暂时不可用和已恢复，也无法确认 provider 更新会继续使用旧缓存还是无缓存运行。
+- 结论：XToolpro adapter 必须把缓存存储作为可探测依赖，启动时显式报告权限/空间/格式结果，运行中区分 memory-only、stale 和 unavailable；恢复后再原子回填并返回脱敏 `Success`/`Unavailable`/`Cancelled`/`VersionMismatch`。完成只读文件系统、损坏 DB、空间不足、恢复重试和关闭 flush 契约测试前，新增 parity 行保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮仅基于固定归档记录进行静态审计，未打开或读写 cache DB、未制造权限/空间故障、未触发 provider 更新或恢复，未启动 core、未发起 HTTP 请求、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或设备文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash proxy-provider cache 初始化失败与降级语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
