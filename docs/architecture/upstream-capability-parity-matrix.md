@@ -12,6 +12,8 @@
 
 2026-09-10 acceptance gap triage：当前最短闭环不是继续拆分静态风险，而是补齐四域真实 proof、engine 五类契约测试、逐项 ledger/ADR 决策和许可证/SBOM/NOTICE 证据；在这些前置条件具备前，新增静态条目只会细化 `Partial`，不会改变批准状态。
 
+2026-09-10 受限设备配对复核：在已解析的 dev `QuickActionActivity` 上执行一次 `START`/`STOP`，仅采集授权状态摘要；`START` 后 `VPN marker=1`、`tun0=true`，`STOP` 后 `VPN marker=0`、`tun0=false`，目标进程和 `POST_NOTIFICATION` app-op 均保持不变。该结果与既有显式 TUN 生命周期证据一致，不证明 core health、流量转发、异常恢复或五类 engine 契约，相关能力继续保持 `Partial`。
+
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
 ## FlClash：代理能力

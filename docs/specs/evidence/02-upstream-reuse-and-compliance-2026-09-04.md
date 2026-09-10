@@ -3067,6 +3067,19 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash 受限 START/STOP TUN 生命周期配对复核（2026-09-10）
+
+- 设备：已授权测试设备 `bf353dda`；固定 dev 包 `com.follow.clash.dev`；已解析组件 `com.follow.clash.dev/com.follow.clash.QuickActionActivity`；动作仅为 `com.follow.clash.dev.action.START` 与 `com.follow.clash.dev.action.STOP`。未读取日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、URL、地址、路由、DNS 或流量内容。
+- START 前授权摘要：目标进程存在；`POST_NOTIFICATION` app-op=`allow`；系统 `VPN CONNECTED` marker=`0`；`tun0` 不存在。
+- START 后等待 7 秒：目标进程存在；`POST_NOTIFICATION` app-op=`allow`；系统 `VPN CONNECTED` marker=`1`；`tun0` 存在。
+- STOP 前授权摘要：目标进程存在；`POST_NOTIFICATION` app-op=`allow`；系统 `VPN CONNECTED` marker=`1`；`tun0` 存在。
+- STOP 后等待 7 秒：目标进程存在；`POST_NOTIFICATION` app-op=`allow`；系统 `VPN CONNECTED` marker=`0`；`tun0` 不存在。
+- 结论：本轮复核证明已解析 dev action 可建立并清理一次实际 TUN，且停止动作不结束 UI 进程；结果与既有生命周期证据一致，不新增 core health、流量转发、异常/取消/恢复或版本错配证明，矩阵和四域台账状态不变（仍为 `Partial`/`Investigating`）。本轮未修改设备设置，未使用 root 或绕过安全控制。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash 受限 START/STOP TUN 生命周期配对复核）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物未纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
