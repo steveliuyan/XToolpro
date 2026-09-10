@@ -152,6 +152,30 @@ class FlClashProxyEngineAdapterTest {
     }
 
     @Test
+    fun abiMismatchBlocksRuntimeExecution() {
+        val actualIdentity = pinnedIdentity.copy(abi = "armeabi-v7a")
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity() = actualIdentity
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
+                    error("runtime must not execute with an unpinned ABI")
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result = adapter.execute(request("task-abi-version"))
+
+        assertEquals(
+            ProxyEngineResult.VersionMismatch(
+                taskId = "task-abi-version",
+                expected = pinnedIdentity,
+                actual = actualIdentity,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun artifactManifestMismatchBlocksRuntimeExecution() {
         val actualIdentity =
             pinnedIdentity.copy(
