@@ -3120,6 +3120,19 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本检查点将以只包含 capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash `ProxyEngineIdentity` ABI/artifact manifest 版本握手契约（2026-09-10）
+
+- 依据固定 AAR API/依赖闭包审计，原 identity 只有 `contractVersion`、FlClash commit 与 Clash.Meta commit，不能区分目标 ABI，也不能阻断同一源码 commit 下未经审查或被替换的 artifact bundle。本轮仅收紧平台中立 contract，未引入或加载 FlClash AAR/native。
+- TDD RED：先新增 `artifactManifestMismatchBlocksRuntimeExecution`，有效测试命令在 `artifactManifestSha256` 尚不存在处以 Kotlin 编译错误失败。首次命令因 Gradle 用户目录解析到不可写的 `C:\.gradle` 而未进入编译，未计作 RED；随后使用项目隔离 `GRADLE_USER_HOME` 取得预期失败。
+- GREEN：`ProxyEngineIdentity` 增加必填 `abi` 与 `artifactManifestSha256`。adapter 继续比较完整 data-class identity，因此不同 artifact manifest 在 `runtime.execute()` 前返回 `VersionMismatch`；测试的 runtime execute 分支会主动失败，确保错配时没有执行副作用。
+- 重新执行 `:engine-proxy:testDebugUnitTest --tests com.steveliuyan.xtoolpro.engine.proxy.FlClashProxyEngineAdapterTest --offline`，7 个测试全部通过，Gradle `BUILD SUCCESSFUL in 3m 4s`。Kotlin daemon 因用户临时目录权限不可写多次回退为进程内编译，但 fallback 最终完成编译与测试；未修改全局或仓库 Kotlin/Gradle 配置。
+- 局限：测试中的 artifact manifest hash 是无敏感信息的固定 fixture，不是当前 AAR 的签名或审批声明；真实 runtime 仍须从受签名、覆盖 core/service/common/依赖/manifest/ABI 的 reviewed manifest 取得 actual identity。fake runtime 不能证明真实 `VersionMismatch`、native health 或 VPN/TUN 成功。
+- gate 数量保持 `Verified=3`、`Partial=161`、`Pending=29`、`Unavailable=1`、`Blocked=0`，VPN/engine identity 相关能力保持 `Partial`，Proxy 台账保持 `Investigating`。本轮未使用 ADB，未读取设备日志、配置、通知正文或 extras、节点、请求、数据库、文件、凭据、Cookie、订阅 URL、地址、路由、DNS 或流量内容。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash `ProxyEngineIdentity` ABI/artifact manifest 版本握手契约）
+
+- 本检查点将以只包含 `core-model` contract、`engine-proxy` 单元测试、capability parity matrix 与本 evidence 文件的 focused commit 提交，尚未 push；其他工作树改动和临时产物不纳入。按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。

@@ -18,6 +18,9 @@ class FlClashProxyEngineAdapterTest {
             contractVersion = 1,
             flClashCommit = "62addf738a76b1a492e19af2dbabdb6d572b9e72",
             clashMetaCommit = "0f7f05adff5e2c49775a112dcfe05a6aa36fda0c",
+            abi = "arm64-v8a",
+            artifactManifestSha256 =
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         )
 
     @Test
@@ -143,6 +146,34 @@ class FlClashProxyEngineAdapterTest {
                 taskId = "task-version",
                 expected = pinnedIdentity,
                 actual = pinnedIdentity.copy(contractVersion = 2),
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun artifactManifestMismatchBlocksRuntimeExecution() {
+        val actualIdentity =
+            pinnedIdentity.copy(
+                artifactManifestSha256 =
+                    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            )
+        val runtime =
+            object : FlClashRuntime {
+                override fun identity() = actualIdentity
+
+                override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
+                    error("runtime must not execute with an unpinned artifact manifest")
+            }
+        val adapter = FlClashProxyEngineAdapter(pinnedIdentity, runtime)
+
+        val result = adapter.execute(request("task-artifact-version"))
+
+        assertEquals(
+            ProxyEngineResult.VersionMismatch(
+                taskId = "task-artifact-version",
+                expected = pinnedIdentity,
+                actual = actualIdentity,
             ),
             result,
         )

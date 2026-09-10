@@ -4,6 +4,8 @@ data class ProxyEngineIdentity(
     val contractVersion: Int,
     val flClashCommit: String,
     val clashMetaCommit: String,
+    val abi: String,
+    val artifactManifestSha256: String,
 )
 
 enum class ProxyEngineOperation {
