@@ -2867,6 +2867,17 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash subscription-userinfo 配额数值范围与过期语义静态审计（2026-09-10）
+
+- 固定归档关键路径：`core/Clash.Meta/adapter/provider/subscription_info.go`、`core/Clash.Meta/adapter/provider/provider.go`；沿用已记录的固定提交和文件哈希，仅补充配额字段校验边界。
+- 固定解析 `upload`、`download`、`total`、`expire` 整数并写入 `subscriptionInfo`，但未见负值/溢出/极大值范围校验、expire 单位/时区和过期状态归一化、字段间一致性或未知字段拒绝；解析失败只折叠为普通 warning/error，管理面也未返回可区分的 invalid/stale 状态。
+- 结论：XToolpro adapter 必须限制数值范围并明确单位、过期和撤销语义，仅输出最小化摘要；异常时保留旧值或标记 unknown 并返回脱敏终态。完成边界值、过期、未知字段和损坏 header 契约测试前保持 `Partial`，Proxy 台账保持 `Investigating`。
+- 本轮未读取或构造真实 `subscription-userinfo` 响应头、未发起 HTTP 请求、未启动 core、未使用 ADB，也未读取设备日志、配置、节点、URL、地址、路由、DNS、流量、凭据、Cookie、数据库或文件。
+
+#### 本检查点远端备份状态（2026-09-10，FlClash subscription-userinfo 配额数值范围与过期语义静态审计）
+
+- focused commit 待创建；本检查点只涉及 capability parity matrix 与本 evidence 文件，其他工作树改动和临时产物不纳入；按要求不得自动 push，须先获得用户明确确认。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
