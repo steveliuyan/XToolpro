@@ -18,7 +18,7 @@
 
 ## How To Use A Spec
 
-An agent must read the active spec before planning or coding. Record discovered constraints in an ADR or reuse-ledger row, not only in chat. A phase is complete only when all listed exit criteria have fresh evidence. Do not combine or skip gates because a visual prototype looks complete.
+The active phase is declared in `docs/specs/ACTIVE_PHASE.toml`. An agent must read that phase spec before planning or coding. Record discovered constraints in an ADR or reuse-ledger row, not only in chat. A phase is complete only when all listed exit criteria have fresh evidence. Do not combine or skip gates because a visual prototype looks complete.
 
 ## Common Definition Of Done
 
