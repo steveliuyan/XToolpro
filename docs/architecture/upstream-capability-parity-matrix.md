@@ -14,6 +14,8 @@
 
 2026-09-10 受限设备配对复核：在已解析的 dev `QuickActionActivity` 上执行一次 `START`/`STOP`，仅采集授权状态摘要；`START` 后 `VPN marker=1`、`tun0=true`，`STOP` 后 `VPN marker=0`、`tun0=false`，目标进程和 `POST_NOTIFICATION` app-op 均保持不变。该结果与既有显式 TUN 生命周期证据一致，不证明 core health、流量转发、异常恢复或五类 engine 契约，相关能力继续保持 `Partial`。
 
+2026-09-13 Media runtime gate：授权测试设备为 `arm64-v8a`、API 33，但已安装用户所有的同包名上游 `com.deniscerri.ytdl` `1.8.9.1`。固定提交构建的 `1.8.9.2` arm64 debug APK 已以 SHA-256 和 ABI 复核，却不是 XToolpro 受签名、版本/manifest 固定且 provenance 可验证的 `YtdlnisRuntime` bridge bundle；为避免覆盖或卸载既有应用，未安装或启动该 APK。`engine-media` 的 6 个 fake-runtime 单元测试仅确认结果映射，不能构成真实 capability/health/identity handshake 或五类 runtime proof。Media 全部条目与 Phase 02 继续保持 `Partial / Investigating`，直至具备专用隔离包和真实 bridge。
+
 允许替换的内容只有 XToolpro 品牌、图标、翻译、统一导航、任务/通知壳和 Android 平台适配。上游明确排除的品牌材料、未声明许可的组件、设备不支持的能力或合规禁止的绕过流程，必须记录为 `Blocked` 或 `Unavailable`，不得静默删除。
 
 ## FlClash：代理能力

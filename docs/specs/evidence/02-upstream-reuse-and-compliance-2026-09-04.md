@@ -134,6 +134,14 @@ GitHub CLI 在当前工作站不可用，因此本次只读复核使用官方 RE
 
 以上仅证明固定 ytdlnis/yt-dlp 运行时可以构建并保留原生闭包，不证明 XToolpro 已完成真实解析、Cookie/session、私有/高级格式、下载恢复或设备验证。因此 Media 台账仍保持 `Investigating`/`Pending`，下一道门禁是 `media-engine` 的公开 URL 与用户授权 session 合同测试。
 
+### ytdlnis 真机 bridge bundle 门禁（2026-09-13）
+
+- 已在隔离 proof 工作树重新计算固定提交构建的 `YTDLnis-1.8.9.2-arm64-v8a-debug.apk` SHA-256，结果仍为 `496BE8A73D313C45FE39F2D1B4A72B3B63264F32A02DF358AAD5A26F60D5F6B7`。`aapt dump badging` 确认其包名为 `com.deniscerri.ytdl`、版本为 `1.8.9.2`、native ABI 为 `arm64-v8a`。
+- 经用户授权的测试设备摘要为 `arm64-v8a`、API 33；但设备已存在同包名 `com.deniscerri.ytdl` `1.8.9.1`。为避免覆盖或卸载既有用户应用，本轮未安装、启动、停止、读取应用数据或操作任何媒体内容。
+- 固定构建 APK 是上游 debug 应用，不是 XToolpro 可加载的受签名 bridge bundle；当前没有同时具备 XToolpro 目标签名、固定版本/manifest、可验证 provenance、ABI 匹配和真实 `YtdlnisRuntime` bridge 的隔离 artifact。因此不得把本地 fake-runtime adapter 单元测试或上游 APK 构建视为真实 runtime proof，也不得对设备既有应用执行 capability、health、identity handshake 或五类契约测试。
+- 当前仅可执行的 XToolpro 验证为 `:engine-media:testDebugUnitTest --tests com.steveliuyan.xtoolpro.engine.media.YtdlnisMediaEngineAdapterTest --offline --rerun-tasks --no-daemon`；JUnit XML 记录 `tests=6`、`failures=0`、`errors=0`。该结果仅覆盖 adapter 的 success/unavailable/cancel/crash/version-mismatch 映射，不能升级 Media 为已验证或获批。
+- **Blocker：** 在提供具有独立测试包名或确认可卸载的专用包、受审计签名证书、版本与 SHA-256 manifest、许可证/provenance 记录、arm64-v8a bridge 实现后，才能在隔离环境执行真实 handshake 及五类契约测试。Media 继续保持 `Partial / Investigating`。
+
 | 域 | 真实能力 proof | 当前证据 | 状态 |
 | --- | --- | --- | --- |
 | Proxy | arm64 core/bridge 已完成；设备验证未启动 | 固定源码归档、GPL 文本、Android 模块边界和 Flutter packaging 路径已验证；arm64 Clash.Meta core、JNI bridge 和 Android service AAR 已完成真实构建 | Pending |
