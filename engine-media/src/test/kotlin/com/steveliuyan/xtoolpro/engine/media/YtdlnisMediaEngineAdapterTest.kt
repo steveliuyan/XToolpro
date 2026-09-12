@@ -27,10 +27,11 @@ class YtdlnisMediaEngineAdapterTest {
 
     @Test
     fun readyHandshakeReportsOnlyAdvertisedCapabilities() {
-        val runtime = runtimeFor(
-            MediaEngineCapability.PUBLIC_PARSE,
-            MediaEngineCapability.PUBLIC_DOWNLOAD,
-        )
+        val runtime =
+            runtimeFor(
+                MediaEngineCapability.PUBLIC_PARSE,
+                MediaEngineCapability.PUBLIC_DOWNLOAD,
+            )
 
         val handshake = runtime.handshake()
 
@@ -41,10 +42,11 @@ class YtdlnisMediaEngineAdapterTest {
 
     @Test
     fun completedOperationMapsToSuccessWithoutMediaContent() {
-        val adapter = adapterFor(
-            runtimeResult = YtdlnisRuntimeResult.Completed(producedItemCount = 1),
-            capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
-        )
+        val adapter =
+            adapterFor(
+                runtimeResult = YtdlnisRuntimeResult.Completed(producedItemCount = 1),
+                capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
+            )
 
         val result = adapter.execute(request(MediaEngineOperation.PARSE_PUBLIC, "task-success"))
 
@@ -62,19 +64,20 @@ class YtdlnisMediaEngineAdapterTest {
     @Test
     fun unavailableCapabilityPreventsRuntimeExecution() {
         var executed = false
-        val runtime = object : YtdlnisRuntime {
-            override fun handshake() =
-                YtdlnisRuntimeHandshake(
-                    identity = pinnedIdentity,
-                    health = MediaEngineHealth.READY,
-                    capabilities = emptySet(),
-                )
+        val runtime =
+            object : YtdlnisRuntime {
+                override fun handshake() =
+                    YtdlnisRuntimeHandshake(
+                        identity = pinnedIdentity,
+                        health = MediaEngineHealth.READY,
+                        capabilities = emptySet(),
+                    )
 
-            override fun execute(request: MediaEngineRequest): YtdlnisRuntimeResult {
-                executed = true
-                return YtdlnisRuntimeResult.Completed(producedItemCount = 1)
+                override fun execute(request: MediaEngineRequest): YtdlnisRuntimeResult {
+                    executed = true
+                    return YtdlnisRuntimeResult.Completed(producedItemCount = 1)
+                }
             }
-        }
         val adapter = YtdlnisMediaEngineAdapter(pinnedIdentity, runtime)
 
         val result = adapter.execute(request(MediaEngineOperation.DOWNLOAD_PUBLIC, "task-unavailable"))
@@ -92,13 +95,15 @@ class YtdlnisMediaEngineAdapterTest {
 
     @Test
     fun cancelledOperationKeepsCleanupReceipt() {
-        val adapter = adapterFor(
-            runtimeResult = YtdlnisRuntimeResult.Cancelled(
-                confirmedAtEpochMillis = 1_725_000_000_000,
-                cleanupStatus = MediaCleanupStatus.COMPLETED,
-            ),
-            capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
-        )
+        val adapter =
+            adapterFor(
+                runtimeResult =
+                    YtdlnisRuntimeResult.Cancelled(
+                        confirmedAtEpochMillis = 1_725_000_000_000,
+                        cleanupStatus = MediaCleanupStatus.COMPLETED,
+                    ),
+                capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
+            )
 
         val result = adapter.execute(request(MediaEngineOperation.PARSE_PUBLIC, "task-cancelled"))
 
@@ -114,10 +119,11 @@ class YtdlnisMediaEngineAdapterTest {
 
     @Test
     fun runtimeCrashMapsToSanitizedFault() {
-        val adapter = adapterFor(
-            runtimeResult = YtdlnisRuntimeResult.Crashed(MediaEngineFault.NATIVE_PROCESS_TERMINATED),
-            capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
-        )
+        val adapter =
+            adapterFor(
+                runtimeResult = YtdlnisRuntimeResult.Crashed(MediaEngineFault.NATIVE_PROCESS_TERMINATED),
+                capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
+            )
 
         val result = adapter.execute(request(MediaEngineOperation.PARSE_PUBLIC, "task-crashed"))
 
@@ -135,19 +141,20 @@ class YtdlnisMediaEngineAdapterTest {
     fun identityMismatchStopsBeforeRuntimeExecution() {
         var executed = false
         val actualIdentity = pinnedIdentity.copy(artifactManifestSha256 = "b".repeat(64))
-        val runtime = object : YtdlnisRuntime {
-            override fun handshake() =
-                YtdlnisRuntimeHandshake(
-                    identity = actualIdentity,
-                    health = MediaEngineHealth.READY,
-                    capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
-                )
+        val runtime =
+            object : YtdlnisRuntime {
+                override fun handshake() =
+                    YtdlnisRuntimeHandshake(
+                        identity = actualIdentity,
+                        health = MediaEngineHealth.READY,
+                        capabilities = setOf(MediaEngineCapability.PUBLIC_PARSE),
+                    )
 
-            override fun execute(request: MediaEngineRequest): YtdlnisRuntimeResult {
-                executed = true
-                return YtdlnisRuntimeResult.Completed(producedItemCount = 1)
+                override fun execute(request: MediaEngineRequest): YtdlnisRuntimeResult {
+                    executed = true
+                    return YtdlnisRuntimeResult.Completed(producedItemCount = 1)
+                }
             }
-        }
         val adapter = YtdlnisMediaEngineAdapter(pinnedIdentity, runtime)
 
         val result = adapter.execute(request(MediaEngineOperation.PARSE_PUBLIC, "task-version-mismatch"))
@@ -172,9 +179,8 @@ class YtdlnisMediaEngineAdapterTest {
             runtime = runtimeFor(capabilities, runtimeResult),
         )
 
-    private fun runtimeFor(
-        vararg capabilities: MediaEngineCapability,
-    ): YtdlnisRuntime = runtimeFor(capabilities.toSet(), YtdlnisRuntimeResult.Completed(producedItemCount = 0))
+    private fun runtimeFor(vararg capabilities: MediaEngineCapability): YtdlnisRuntime =
+        runtimeFor(capabilities.toSet(), YtdlnisRuntimeResult.Completed(producedItemCount = 0))
 
     private fun runtimeFor(
         capabilities: Set<MediaEngineCapability>,
@@ -191,6 +197,8 @@ class YtdlnisMediaEngineAdapterTest {
             override fun execute(request: MediaEngineRequest) = result
         }
 
-    private fun request(operation: MediaEngineOperation, taskId: String) =
-        MediaEngineRequest(taskId = taskId, operation = operation)
+    private fun request(
+        operation: MediaEngineOperation,
+        taskId: String,
+    ) = MediaEngineRequest(taskId = taskId, operation = operation)
 }
