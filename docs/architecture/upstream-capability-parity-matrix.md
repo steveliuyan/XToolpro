@@ -191,6 +191,8 @@
 
 **FlClash 固定 AAR 依赖闭包补充（关联同一既有行，不新增能力统计行）：** 对固定 service/core `classes.jar` 执行 `jdeps --ignore-missing-deps -verbose:package/-class -filter:none`，service bytecode 除 Android SDK/JDK 外直接引用 `com.follow.clash.common`、`com.follow.clash.core`、AndroidX Core、Kotlin/coroutines/Flow 与 Gson；当前固定 proof 输出只有 `core-debug.aar` 和 `service-debug.aar`，没有独立 common AAR。service manifest 还会贡献 `VpnService`、`ProxyService` 和导出的 `${applicationId}.files` `FilesProvider`，因此单独复制 service AAR 既不能形成完整运行闭包，也不能在未审查 manifest merge 的情况下作为 XToolpro adapter。真实 bridge proof 必须把 core native/bridge、service、所需 common 边界、传递依赖版本和 manifest 裁剪策略作为同一受签名 bundle 校验；完成闭包、许可证、ABI 与隔离 host 契约测试前保持 `Partial`/`Investigating`。
 
+**FlClash signed bundle/provenance gate 评估（2026-09-12，关联既有代理与 VPN 行，不新增能力统计行）：** CI Android run `34686285005` 已成功；此前固定 adapter 测试的 JUnit XML 已确认 `25 tests`、`0 failures`、`0 errors`。当前候选内容仅存在于未跟踪的临时解包目录 `.tmp-flclash-aar-verify`、`.tmp-flclash-service-aar-verify`、`.tmp-flclash-apk-dex-20260906` 和 `.tmp-flclash-apk-native-20260906`，没有可交付的原始 `.aar`/`.apk` 容器、签名验证结果、attestation/provenance manifest、SBOM、checksum manifest 或源码到 artifact 的绑定。现有候选也没有一份 manifest 将 FlClash commit `62addf738a76b1a492e19af2dbabdb6d572b9e72`、Clash.Meta commit `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`、bridge version、ABI 与二进制 hash 共同固定；AAR 与 APK 提取出的 `libcore.so` hash 不同，不能宣称已配对。固定 AAR 公开 API 也没有 capability、health/readiness 或 version/identity handshake。故当前不存在同时满足签名、版本固定、ABI 匹配和 provenance 可验证条件的 FlClash native/bridge bundle；不执行无效静态审计或真实 bridge 的 capability、health、version/identity 及 success/unavailable/cancel/crash/version-mismatch 五类测试，相关能力继续为 `Partial`，Proxy 台账继续为 `Investigating`。
+
 ## sdmaid-se：设备维护能力
 
 固定提交：`b9b01ee0af648fa6af25d388bb39bacde8d5b7a9`

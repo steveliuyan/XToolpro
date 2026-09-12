@@ -3247,6 +3247,23 @@ Set-Location -LiteralPath 'D:\\xtoolpro\\.p'
 
 - 本地 focused commit 尚未创建：两次仅写本地 Git 索引的审批均在自动审核截止前超时；2026-09-10 的后续最小范围 `git add -- <四个目标路径>` 已实际执行，但无法创建 `D:/xtoolpro/.git/index.lock`，Git 返回 `fatal: Unable to create 'D:/xtoolpro/.git/index.lock': Permission denied`，故未执行 `git commit`。未备份路径为 `engine-proxy/src/main/kotlin/com/steveliuyan/xtoolpro/engine/proxy/FlClashProxyEngineAdapter.kt`、`engine-proxy/src/test/kotlin/com/steveliuyan/xtoolpro/engine/proxy/FlClashProxyEngineAdapterTest.kt`、`docs/architecture/upstream-capability-parity-matrix.md` 与本 evidence 文件；其他工作树改动和临时产物未纳入。按要求不得自动 push，须先获得用户明确确认。
 
+### FlClash signed native/bridge bundle provenance gate（2026-09-12）
+
+- CI Android run `34686285005` 成功；固定 adapter 测试的 JUnit XML 已确认 `25 tests`、`0 failures`、`0 errors`。该结果只覆盖当前 fake/runtime-boundary contract，不等同于真实 FlClash bridge proof。
+- 受评估的候选仅为未跟踪的临时解包目录 `.tmp-flclash-aar-verify`、`.tmp-flclash-service-aar-verify`、`.tmp-flclash-apk-dex-20260906` 和 `.tmp-flclash-apk-native-20260906`；目录中没有原始 `.aar`/`.apk` 分发容器，也没有签名/证书验证结果、attestation/provenance manifest、SBOM、checksum manifest 或源码到 artifact 的可验证绑定。它们不是本检查点的交付物，不纳入暂存或提交。
+- 现有固定提交标识为 FlClash `62addf738a76b1a492e19af2dbabdb6d572b9e72`、Clash.Meta `0f7f05adff5e2c49775a112dcfe05a6aa36fda0c`；当前没有 manifest 将这两个提交、bridge version、ABI 与全部 native/bridge hash 共同固定。已记录的 core/service `classes.jar` hash 为 `D664DEFC1895F189EAE538FF7976DB6C03E4B508C9455EB493F1AD400AC1FD89` / `ABB60E8611AFBC9598535FBF0931F511F54490431415AD19C9EDF86DC15CF88C`；AAR 与 APK 提取的 `libcore.so` hash 分别为 `F6B4B2E89C62802478CFAABFAFD8D44165756974AE4F41EB6C3548A8A2F37935` / `D3520A46D3A8DA72306A1B18F4415B1AAA588FE0C3C6EB5F470D7901F17663FC`，差异阻止配对结论。
+- 固定 AAR 公开面没有 capability 列表、health/readiness 或 version/identity handshake；因此即使同步 `start()`/`stop()` 不抛异常，也不能证明 core/VPN 已健康收敛。当前不存在同时满足签名、版本固定、ABI 匹配和 provenance 可验证条件的 FlClash native/bridge bundle。
+- 按门禁要求，不再继续无效静态审计，也不在未批准 bundle 上执行真实 bridge capability、health、version/identity handshake 或 success/unavailable/cancel/crash/version-mismatch 五类契约测试。相关矩阵能力保持 `Partial`，Proxy 台账保持 `Investigating`，Phase 02 保持 `Partial / Investigating`；真实 proof 延后至获得受签名、依赖闭包完整且可验证的隔离 bundle。
+
+#### 本检查点远端备份状态（2026-09-12，FlClash signed bundle provenance gate blocker）
+
+- 本检查点只包含 capability parity matrix 与本 evidence 文件；其他工作树改动、未跟踪临时解包目录、缓存、构建产物、设备证据和敏感文件均不纳入。用户已明确允许 push，提交后仅推送当前分支，不修改其他远端状态。
+
+#### 本检查点 Git staging blocker（2026-09-12）
+
+- 尝试仅暂存上述两份文档时，命令 `git add -- docs/architecture/upstream-capability-parity-matrix.md docs/specs/evidence/02-upstream-reuse-and-compliance-2026-09-04.md` 失败，精确错误为：`fatal: Unable to create 'D:/xtoolpro/.git/index.lock': Permission denied`。
+- 因索引锁/ACL 失败，本检查点未创建 commit、未 push，也未继续暂存或提交其他工作区路径。
+
 1. 对每个固定提交完成可重复的真实能力 proof，并保存命令、依赖树、native 库与二进制校验和。
 2. 为每个 `engine-*` 定义 success、unavailable、cancel、crash、version mismatch 五类契约测试。
 3. 完成 GPL 源码发布方案、完整 SBOM、NOTICE、上游 fork 与补丁同步审查后，才可将台账行从 `Investigating` 改为 `Approved`。
