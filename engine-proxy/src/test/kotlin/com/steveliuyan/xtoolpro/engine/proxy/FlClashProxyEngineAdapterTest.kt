@@ -213,8 +213,7 @@ class FlClashProxyEngineAdapterTest {
     fun identityRuntimeFailureDoesNotEscapeTheEngineBoundary() {
         val runtime =
             object : FlClashRuntime {
-                override fun identity(): ProxyEngineIdentity =
-                    throw IllegalStateException("sensitive identity runtime detail")
+                override fun identity(): ProxyEngineIdentity = throw IllegalStateException("sensitive identity runtime detail")
 
                 override fun execute(operation: ProxyEngineOperation): FlClashRuntimeResult =
                     error("runtime must not execute when identity negotiation fails")
